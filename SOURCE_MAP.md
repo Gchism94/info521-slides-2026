@@ -20,7 +20,7 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 | 01 | Introduction | Keep-trim | NHANES + preprocessing entry point · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
 | 02 | ML Linear Model | Keep | ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
 | 03 | Scalar Least Squares | Keep | ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
-| 04 | Higher Dimensions | Keep | design matrix, normal equations · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
+| 04 | Higher Dimensions | Keep | design matrix, normal equations · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) + matrix-calc → appendix-matrix-calculus |
 | 05 | Geometry & Nonlinear Response | Keep-compress | projection geometry + basis functions · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
 
 ## M2 · Generalization — Wk2 · supports P1 · activity: bias-variance/ridge
