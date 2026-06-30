@@ -1,0 +1,296 @@
+---
+title: "Linear Models & Least Squares"
+subtitle: "INFO 521 · Module 1 · Lecture B — Normal Equations & Geometry"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+ds   = sh.load_nhanes()
+age  = sh.primary_predictor(ds)
+sbp  = ds["y"]
+age_z = (age - age.mean()) / age.std()
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture B you should be able to:
+
+1. **Derive the normal equations** and solve for $\hat{\mathbf{w}}$ in closed form.
+2. **Interpret least squares as an orthogonal projection** onto the column space
+   of $\mathbf{X}$.
+3. **Extend to basis functions** — fit curves while staying linear in the weights.
+4. **State the uniqueness condition** for $\hat{\mathbf{w}}$.
+
+::: {.notes}
+Speaker note: the closed form, the geometry behind it, and when it is unique —
+the last point is a through-line node into Module 3.
+:::
+
+## Recap (Lecture A)
+
+We have a **model** and a **loss**:
+
+$$
+\hat{y} = \mathbf{w}^{\!\top}\mathbf{x},
+\qquad
+\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}\,\lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2 .
+$$
+
+Now: which $\mathbf{w}$ makes $\mathcal{L}$ smallest?
+
+::: {.notes}
+Speaker note: one line of recap, then straight to optimization. $\mathcal{L}$ is a
+smooth convex bowl in $\mathbf{w}$, so its minimum is where the gradient vanishes.
+:::
+
+# Solve it: set the gradient to zero. {.center}
+
+## The gradient {.smaller}
+
+$\mathcal{L}$ is quadratic in $\mathbf{w}$; differentiate the matrix form:
+
+::: {.fragment}
+$$
+\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}(\mathbf{y} - \mathbf{X}\mathbf{w})^{\!\top}(\mathbf{y} - \mathbf{X}\mathbf{w})
+$$
+:::
+
+::: {.fragment}
+$$
+\nabla_{\mathbf{w}}\mathcal{L} = -\tfrac{2}{N}\,\mathbf{X}^{\!\top}(\mathbf{y} - \mathbf{X}\mathbf{w})
+$$
+:::
+
+::: {.notes}
+Speaker note: the gradient is a vector — one partial per weight. The matrix
+identities behind this step (∂(aᵀw)/∂w, ∂(wᵀAw)/∂w) are the Clay-04 calculus
+primer; state the result here, defer the identities to discussion.
+:::
+
+## The normal equations {.smaller}
+
+Set the gradient to zero. The $-2/N$ drops out, leaving:
+
+$$
+\mathbf{X}^{\!\top}(\mathbf{y} - \mathbf{X}\hat{\mathbf{w}}) = \mathbf{0}
+\qquad\Longrightarrow\qquad
+\mathbf{X}^{\!\top}\mathbf{X}\,\hat{\mathbf{w}} = \mathbf{X}^{\!\top}\mathbf{y} .
+$$
+
+These are the **normal equations** — a $D{\times}D$ linear system for $\hat{\mathbf{w}}$.
+
+::: {.notes}
+Speaker note: this $\nabla\mathcal{L}=0 \Rightarrow \mathbf{X}^{\!\top}\mathbf{X}\hat{\mathbf{w}}=\mathbf{X}^{\!\top}\mathbf{y}$
+step is exactly what the P1-M1 checkpoint asks you to reproduce.
+:::
+
+## The solution {.smaller}
+
+When $\mathbf{X}^{\!\top}\mathbf{X}$ is invertible, solve the system:
+
+$$
+\boxed{\;\hat{\mathbf{w}} = \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y}\;}
+$$
+
+In practice we **solve the linear system** rather than form the inverse —
+`np.linalg.solve(X.T @ X, X.T @ y)` — better conditioned, less work.
+
+::: {.notes}
+Speaker note: one matrix expression gives the global optimum — no iteration. The
+"solve, don't invert" point matters numerically; the inverse is the math, not the
+recipe.
+:::
+
+## Closed-form fit on NHANES
+
+```{python}
+#| label: fig-closed-form
+#| fig-alt: "Scatter of predicted versus actual systolic blood pressure from a six-feature least-squares fit on NHANES, with the dashed identity line; points cluster around the line but with substantial scatter, showing a moderate fit."
+#| fig-cap: "Six-feature closed-form fit: predicted vs. actual systolic BP (dashed = perfect prediction)."
+
+Xb   = np.column_stack([np.ones(len(sbp)), ds["X"]])      # intercept + 6 features
+what = np.linalg.solve(Xb.T @ Xb, Xb.T @ sbp)            # ŵ = (XᵀX)⁻¹Xᵀy
+yhat = Xb @ what
+
+fig, ax = plt.subplots()
+ax.scatter(yhat, sbp, s=10, alpha=0.18, color=sh.OKABE_ITO["blue"], label="patients")
+lim = [sbp.min(), sbp.max()]
+ax.plot(lim, lim, color=sh.OKABE_ITO["vermillion"], linestyle="--", label="perfect prediction")
+ax.set_xlabel("predicted systolic BP (mmHg)")
+ax.set_ylabel("actual systolic BP (mmHg)")
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Predicted versus actual systolic BP for the six-feature least-squares fit, with the identity line.")
+plt.show()
+```
+
+# What least squares is doing: geometry. {.center}
+
+## Least squares is a projection {.smaller}
+
+Think in $\mathbb{R}^{N}$ (one axis per patient): $\mathbf{y}$ is a point, and
+every $\mathbf{X}\mathbf{w}$ lies in $\mathrm{col}(\mathbf{X})$ — the span of the
+feature columns.
+
+```{=html}
+<svg viewBox="0 0 900 380" width="100%" style="max-height:52vh; color: var(--text); font-family: inherit;"
+     role="img" aria-label="Schematic: the target vector y sits off the column space of X; its least-squares prediction y-hat is the orthogonal projection onto that plane, and the residual r = y minus y-hat is perpendicular to the plane, so X-transpose times r is zero.">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="currentColor"/></marker>
+    <marker id="ahA" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" style="fill: var(--accent);"/></marker>
+  </defs>
+
+  <!-- Stage 1: the column-space plane -->
+  <g class="fragment">
+    <polygon points="120,330 560,330 700,250 260,250" fill="currentColor" fill-opacity="0.06"
+             stroke="currentColor" stroke-width="1.4"/>
+    <text x="650" y="318" fill="currentColor" stroke="none" font-size="17" font-style="italic">col(X)</text>
+    <circle cx="300" cy="300" r="3.5" fill="currentColor"/>
+    <text x="286" y="320" fill="currentColor" stroke="none" font-size="14">0</text>
+  </g>
+
+  <!-- Stage 2: y off the plane -->
+  <g class="fragment">
+    <line x1="300" y1="300" x2="470" y2="90" stroke="currentColor" stroke-width="2.2" marker-end="url(#ah)"/>
+    <text x="476" y="86" fill="currentColor" stroke="none" font-size="19">y</text>
+  </g>
+
+  <!-- Stage 3: projection y-hat in the plane -->
+  <g class="fragment">
+    <line x1="300" y1="300" x2="470" y2="285" stroke="currentColor" stroke-width="2.2" marker-end="url(#ah)"/>
+    <text x="380" y="312" fill="currentColor" stroke="none" font-size="17" text-anchor="middle">ŷ = X&#373;</text>
+  </g>
+
+  <!-- Stage 4: residual ⟂ plane (Xᵀr = 0) -->
+  <g class="fragment">
+    <line x1="470" y1="285" x2="470" y2="90" style="stroke: var(--accent);" stroke-width="2.4"
+          stroke-dasharray="7 5" marker-end="url(#ahA)"/>
+    <rect x="470" y="269" width="16" height="16" fill="none" style="stroke: var(--accent);" stroke-width="1.6"/>
+    <text x="486" y="200" style="fill: var(--accent);" stroke="none" font-size="17" font-weight="650">r = y − ŷ</text>
+    <text x="486" y="222" style="fill: var(--accent);" stroke="none" font-size="14">r ⟂ col(X)  ⇒  Xᵀr = 0</text>
+  </g>
+</svg>
+```
+
+::: {.notes}
+Speaker note: (cross-checked against Clay 05, redrawn). $\hat{\mathbf{y}}=\mathbf{X}\hat{\mathbf{w}}$
+is the closest point in $\mathrm{col}(\mathbf{X})$ to $\mathbf{y}$ — the foot of
+the perpendicular. The residual is orthogonal to every column.
+:::
+
+## Algebra ⇔ geometry {.smaller}
+
+The orthogonality condition **is** the normal equations:
+
+$$
+\mathbf{X}^{\!\top}\mathbf{r} = \mathbf{0}
+\;\Longleftrightarrow\;
+\mathbf{X}^{\!\top}(\mathbf{y} - \mathbf{X}\hat{\mathbf{w}}) = \mathbf{0}
+\;\Longleftrightarrow\;
+\mathbf{X}^{\!\top}\mathbf{X}\,\hat{\mathbf{w}} = \mathbf{X}^{\!\top}\mathbf{y} .
+$$
+
+"Residual perpendicular to every feature column" and "set the gradient to zero"
+are the **same statement**.
+
+::: {.notes}
+Speaker note: this equivalence is the payoff — the algebra you cranked through and
+the projection picture are one object. Each column of X dotted with r is zero.
+:::
+
+## Beyond straight lines: basis functions {.smaller}
+
+Replace each input $\mathbf{x}$ with **features of it**, $\boldsymbol{\phi}(\mathbf{x})$
+(e.g. $[1, x, x^2, \dots]$). The model is still **linear in the weights**:
+
+$$
+\hat{y} = \mathbf{w}^{\!\top}\boldsymbol{\phi}(\mathbf{x}),
+\qquad
+\hat{\mathbf{w}} = \left(\boldsymbol{\Phi}^{\!\top}\boldsymbol{\Phi}\right)^{-1}\boldsymbol{\Phi}^{\!\top}\mathbf{y}
+\quad(\boldsymbol{\Phi}\ \text{= design matrix of } \boldsymbol{\phi}).
+$$
+
+Same solution — just swap $\mathbf{X}\to\boldsymbol{\Phi}$.
+
+[More flexibility → overfitting risk. That trade-off is **Module 2**.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 05). "Linear model" means linear in $\mathbf{w}$, not in $x$ —
+curves are fine. The overfitting hook sets up bias-variance next module.
+:::
+
+## Polynomial basis: under- vs over-fit
+
+```{python}
+#| label: fig-poly
+#| fig-alt: "Scatter of about 30 NHANES patients (standardized age vs systolic BP) with two fits: a straight degree-1 line that misses local structure, and a wiggly degree-9 polynomial that chases individual points — visually under- versus over-fitting."
+#| fig-cap: "Same data, two bases: a degree-1 line vs. a degree-9 polynomial (over-fit)."
+
+rng = np.random.default_rng(521)
+idx = rng.choice(len(sbp), 30, replace=False)        # small sample so over-fit shows
+zz, yy = age_z[idx], sbp[idx]
+grid = np.linspace(zz.min(), zz.max(), 300)
+
+def poly_design(z, deg): return np.column_stack([z ** k for k in range(deg + 1)])
+
+fig, ax = plt.subplots()
+ax.scatter(zz, yy, s=28, alpha=0.7, color=sh.OKABE_ITO["blue"], label="sample (N = 30)")
+for deg, col, ls in [(1, sh.OKABE_ITO["vermillion"], "-"), (9, sh.OKABE_ITO["green"], "--")]:
+    wd = np.linalg.solve(poly_design(zz, deg).T @ poly_design(zz, deg),
+                         poly_design(zz, deg).T @ yy)
+    ax.plot(grid, poly_design(grid, deg) @ wd, color=col, linestyle=ls, label=f"degree {deg}")
+ax.set_xlabel("standardized age (z)")
+ax.set_ylabel("systolic BP (mmHg)")
+ax.set_ylim(yy.min() - 15, yy.max() + 15)
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="A degree-1 line versus a wiggly degree-9 polynomial fit to 30 NHANES points.")
+plt.show()
+```
+
+## When is $\hat{\mathbf{w}}$ unique? {.smaller}
+
+$\hat{\mathbf{w}}$ is unique **iff** $\mathbf{X}^{\!\top}\mathbf{X}$ is invertible
+**iff** $\mathbf{X}$ has **full column rank**:
+
+- no feature is a linear combination of the others (**no collinearity**), and
+- at least as many patients as features ($N \ge D$).
+
+Otherwise infinitely many $\hat{\mathbf{w}}$ tie — the bowl has a flat direction.
+
+[This exact condition returns in **Module 3** as the **negative-definite Hessian**:
+uniqueness becomes curvature.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: full column rank ⇔ invertible Gram matrix ⇔ unique minimizer. The
+M3 callback (accent) is the through-line — same $\mathbf{X}^{\!\top}\mathbf{X}$,
+now as $-\tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}$.
+:::
+
+## Recap & checkpoint preview {.smaller}
+
+Least squares, closed form:
+
+1. **Normal equations** — $\mathbf{X}^{\!\top}\mathbf{X}\hat{\mathbf{w}} = \mathbf{X}^{\!\top}\mathbf{y}$ from $\nabla\mathcal{L}=0$.
+2. **Projection** — $\hat{\mathbf{y}}$ is the orthogonal projection of $\mathbf{y}$ onto $\mathrm{col}(\mathbf{X})$; $\mathbf{X}^{\!\top}\mathbf{r}=\mathbf{0}$.
+3. **Uniqueness** — full column rank ⇔ invertible $\mathbf{X}^{\!\top}\mathbf{X}$.
+
+The **P1-M1 closed-book checkpoint** gates on reproducing the
+$\nabla\mathcal{L}=0 \Rightarrow \hat{\mathbf{w}}$ derivation.
+
+::: {.notes}
+Speaker note: bridge to the checkpoint and to Module 2 (basis functions →
+over-fitting → bias-variance). Students should derive ŵ unaided.
+:::
