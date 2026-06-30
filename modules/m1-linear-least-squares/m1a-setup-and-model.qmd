@@ -78,16 +78,32 @@ you see across modules are about the *method*, not a new domain each week.
 
 ## Supervised regression {.smaller}
 
-Given **labeled** examples $(\mathbf{x}_n, y_n)$, learn a function $f$ so that
-$\hat{y} = f(\mathbf{x}) \approx y$ on **new** inputs $\mathbf{x}$.
+Three kinds of machine learning:
 
-- **Regression** — the target $y$ is **continuous** (here: systolic BP in mmHg).
-- *Classification* (continuous → discrete labels) and *unsupervised* discovery
-  come later in the term.
+::: {.fragment}
+- **Supervised** — learn from **labeled** examples $(\mathbf{x}_n, y_n)$.
+  *Regression* = continuous target; *classification* = discrete labels.
+:::
+
+::: {.fragment}
+- **Unsupervised** — find structure with **no** labels (clustering, PCA) — the
+  term's back half.
+:::
+
+::: {.fragment}
+- **Reinforcement** — learn from a **reward** signal; out of scope here.
+:::
+
+::: {.fragment}
+[**Regression is supervised learning with a continuous target.**]{style="color: var(--accent)"}
+Given $(\mathbf{x}_n, y_n)$, learn $f$ so $\hat{y}=f(\mathbf{x})\approx y$ on new
+$\mathbf{x}$ — here, systolic BP in mmHg.
+:::
 
 ::: {.notes}
-Speaker note: (Clay 02). Supervised = we have the answers $y_n$ at training time;
-regression = continuous target. Contrast with the discovery modules later.
+Speaker note: (Clay 02). The three-way split orients students; we live in the
+top-left box all of Module 1. Supervised = answers $y_n$ at training time;
+regression = continuous target.
 :::
 
 ## Notation & data structures {.smaller}
