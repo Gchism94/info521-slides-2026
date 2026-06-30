@@ -40,39 +40,56 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "html" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 3. PDF. revealjs does NOT emit a PDF itself — `?print-pdf` is a browser print
-#    mode. We drive headless Chrome's --print-to-pdf over each rendered deck's
-#    `index.html?print-pdf` URL; the deck's @media print rules force the light
-#    theme on white. Output (index.pdf) sits beside the HTML under docs/.
+# 3. PDF. revealjs does NOT emit a PDF itself. We use decktape, which drives the
+#    deck slide-by-slide and is deterministic — unlike Chrome's `?print-pdf`
+#    --print-to-pdf, which races on this machine (orientation flips
+#    portrait/landscape and pagination yields 1 vs N pages run-to-run).
+#
+#    decktape captures SCREEN media, so @media print does NOT apply. To still
+#    ship a forced-light PDF, we decktape a temp copy of each deck with the light
+#    theme forced (data-theme=light) on a pure-white background. Output
+#    (<deck>.pdf) sits beside the HTML under docs/. One landscape page per slide.
 #
 #    Notes:
-#    * --headless=new + --run-all-compositor-stages-before-draw is what makes
-#      reveal finish paginating before capture; plain --headless yields blanks.
-#    * Pagination occasionally races and yields a 1-page/near-empty PDF — we
-#      retry up to 3x and keep the largest result.
-#    * Fallback if Chrome misbehaves: decktape (npx decktape reveal IN OUT).
+#    * decktape's bundled Chromium download is unreliable here, so we point it at
+#      the system Chrome via --chrome-path. First `npx decktape` run fetches the
+#      decktape package (cached afterward).
+#    * Fallback if decktape/npx are unavailable: open <deck>.html?print-pdf in
+#      Chrome and "Save as PDF" (landscape) — the @media print rules force light.
 # ---------------------------------------------------------------------------
 if [ "$MODE" = "all" ] || [ "$MODE" = "pdf" ]; then
   CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
   if [ ! -x "$CHROME" ]; then
-    echo "[render] Chrome not found at \$CHROME; skipping PDF. Set CHROME=... or use decktape." >&2
+    echo "[render] Chrome not found at \$CHROME; skipping PDF. Set CHROME=... ." >&2
+  elif ! command -v npx >/dev/null 2>&1; then
+    echo "[render] npx not found; skipping PDF (decktape needs it). See header for the manual fallback." >&2
   else
-    echo "[render] PDF (headless Chrome print-to-pdf) ..."
+    echo "[render] PDF (decktape, forced-light) ..."
     while IFS= read -r html; do
       pdf="${html%.html}.pdf"
-      best=0
-      for attempt in 1 2 3; do
-        "$CHROME" --headless=new --disable-gpu --no-pdf-header-footer \
-          --run-all-compositor-stages-before-draw --virtual-time-budget=20000 \
-          --window-size=1600,1200 \
-          --print-to-pdf="$pdf.try" "file://$ROOT/$html?print-pdf" >/dev/null 2>&1 || true
-        sz=$( [ -f "$pdf.try" ] && wc -c < "$pdf.try" || echo 0 )
-        if [ "$sz" -gt "$best" ]; then best=$sz; mv -f "$pdf.try" "$pdf"; else rm -f "$pdf.try"; fi
-        # ~50KB+ means real multi-slide pagination landed; good enough to stop.
-        [ "$best" -gt 50000 ] && break
-      done
-      echo "  - $pdf  (${best} bytes)"
-    done < <(cd "$ROOT" && find docs -name index.html)
+      tmp="${html%.html}.pdf-light.html"
+      # Forced-light temp copy: light tokens + pure-white bg, toggle hidden.
+      python - "$ROOT/$html" "$ROOT/$tmp" <<'PY'
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+h = open(src, encoding="utf-8").read()
+inject = (
+    '<style id="pdf-force-light">'
+    'html,body,.reveal-viewport,.reveal,.reveal .slides section'
+    '{background:#fff !important;background-color:#fff !important;}'
+    '#info521-theme-toggle{display:none !important;}'
+    '</style>'
+    '<script>document.documentElement.setAttribute("data-theme","light");</script>'
+)
+i = h.rfind("</body>")
+open(dst, "w", encoding="utf-8").write(h[:i] + inject + h[i:])
+PY
+      npx -y decktape@3 reveal --chrome-path "$CHROME" \
+        "file://$ROOT/$tmp" "$ROOT/$pdf" 2>&1 | grep -E "Printed [0-9]+ slides" || true
+      rm -f "$ROOT/$tmp"
+      sz=$( [ -f "$ROOT/$pdf" ] && wc -c < "$ROOT/$pdf" || echo 0 )
+      echo "  - $pdf  (${sz} bytes)"
+    done < <(cd "$ROOT" && find docs -name '*.html')   # every deck (index + appendices)
   fi
 fi
 
