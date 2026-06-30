@@ -29,9 +29,10 @@ age_z = (age - age.mean()) / age.std()
 
 By the end of Lecture B you should be able to:
 
-1. **Derive the normal equations** and solve for $\hat{\mathbf{w}}$ in closed form.
-2. **Interpret least squares as an orthogonal projection** onto the column space
-   of $\mathbf{X}$.
+1. **Derive the closed form** — scalar first, then the matrix normal equations
+   for $\hat{\mathbf{w}}$.
+2. **Interpret least squares as an orthogonal projection** onto $\mathrm{col}(\mathbf{X})$,
+   and identify the **hat matrix** $\mathbf{P}$.
 3. **Extend to basis functions** — fit curves while staying linear in the weights.
 4. **State the uniqueness condition** for $\hat{\mathbf{w}}$.
 
@@ -134,7 +135,8 @@ covariance over variance. The matrix form next generalizes this to D features.
 
 ## The gradient {.smaller}
 
-$\mathcal{L}$ is quadratic in $\mathbf{w}$; differentiate the matrix form:
+Now **scale to all $D$ features at once** — the scalar result becomes one matrix
+equation. $\mathcal{L}$ is quadratic in $\mathbf{w}$; differentiate the matrix form:
 
 ::: {.fragment}
 $$
@@ -181,6 +183,11 @@ $$
 
 In practice we **solve the linear system** rather than form the inverse —
 `np.linalg.solve(X.T @ X, X.T @ y)` — better conditioned, less work.
+
+::: {.fragment}
+The scalar formulas (intercept + slope) are exactly the $D=1$ case of this. Full
+vector-calculus derivation → [appendix-matrix-calculus.html](appendix-matrix-calculus.html).
+:::
 
 ::: {.notes}
 Speaker note: one matrix expression gives the global optimum — no iteration. The
@@ -257,6 +264,11 @@ feature columns.
   </g>
 </svg>
 ```
+
+In matrix form $\hat{\mathbf{y}} = \mathbf{P}\mathbf{y}$, with the **hat matrix**
+$\mathbf{P} = \mathbf{X}(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$ —
+symmetric and idempotent ($\mathbf{P}^2=\mathbf{P}$): it projects $\mathbf{y}$ onto
+$\mathrm{col}(\mathbf{X})$.
 
 ::: {.notes}
 Speaker note: (cross-checked against Clay 05, redrawn). $\hat{\mathbf{y}}=\mathbf{X}\hat{\mathbf{w}}$
