@@ -59,6 +59,79 @@ smooth convex bowl in $\mathbf{w}$, so its minimum is where the gradient vanishe
 
 # Solve it: set the gradient to zero. {.center}
 
+<!-- ADDED: not in Clay source -->
+<!-- CUTTABLE: loss-surface figure — drop first with basis-functions if the deck runs long. -->
+## The loss surface {.smaller}
+
+```{python}
+#| label: fig-loss-surface
+#| fig-alt: "Filled contour plot of the mean-squared-error loss over the intercept (w0) and slope (w1) plane for fitting systolic BP on standardized age, in a sequential cividis colormap. There is a single convex basin; its minimum, the closed-form least-squares solution, is marked with a vermillion X."
+#| fig-cap: "Loss surface L(w₀, w₁) for SBP on standardized age — a single convex basin."
+
+# Closed-form minimum (the ŵ we will derive).
+Xs   = np.column_stack([np.ones_like(age_z), age_z])
+what = np.linalg.solve(Xs.T @ Xs, Xs.T @ sbp)
+N    = len(sbp)
+Sy, Sx, Sxy, Sxx, Syy = sbp.sum(), age_z.sum(), (age_z*sbp).sum(), (age_z**2).sum(), (sbp**2).sum()
+
+w0g = np.linspace(what[0] - 8, what[0] + 8, 160)
+w1g = np.linspace(what[1] - 8, what[1] + 8, 160)
+W0, W1 = np.meshgrid(w0g, w1g)
+# L(w0,w1) = (1/N) Σ (y − w0 − w1 x)², expanded via precomputed sums (vectorized).
+L = (Syy - 2*W0*Sy - 2*W1*Sxy + N*W0**2 + 2*W0*W1*Sx + W1**2*Sxx) / N
+
+fig, ax = plt.subplots()
+cf = ax.contourf(W0, W1, L, levels=24, cmap="cividis")          # sequential, colorblind-safe
+cb = fig.colorbar(cf, ax=ax); cb.set_label("loss  L  (mmHg²)")
+ax.plot(what[0], what[1], marker="X", markersize=13,
+        color=sh.OKABE_ITO["vermillion"], markeredgecolor="white")
+ax.annotate(r"minimum  $\hat{\mathbf{w}}$", xy=(what[0], what[1]),
+            xytext=(what[0] + 1.4, what[1] + 3.4), color="white", fontsize=12,
+            arrowprops=dict(arrowstyle="->", color="white", lw=1.4))
+ax.set_xlabel(r"intercept  $w_0$")
+ax.set_ylabel(r"slope  $w_1$")
+sh.finalize(fig, alt="Filled contour of the least-squares loss over (w0, w1) with a single convex basin and the minimum marked.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: one basin ⇒ one minimum ⇒ we can solve by setting the gradient to
+zero — and it is THE minimum, foreshadowing M3's curvature/uniqueness. (The
+surface is continuous, so a sequential colormap, not the categorical palette.)
+:::
+
+## Scalar least squares: the closed form {.smaller}
+
+Start in 1-D — model $\hat{y}_n = w_0 + w_1 x_n$ — and set both partials of
+$\mathcal{L}=\tfrac{1}{N}\sum_n (y_n - w_0 - w_1 x_n)^2$ to zero.
+
+::: {.fragment}
+$$
+\frac{\partial \mathcal{L}}{\partial w_0} = 0
+\qquad\Longrightarrow\qquad
+w_0 = \bar{y} - w_1 \bar{x}
+$$
+:::
+
+::: {.fragment}
+$$
+\frac{\partial \mathcal{L}}{\partial w_1} = 0
+\qquad\Longrightarrow\qquad
+w_1 = \frac{\sum_n (x_n - \bar{x})(y_n - \bar{y})}{\sum_n (x_n - \bar{x})^2}
+$$
+:::
+
+::: {.fragment}
+[That is $w_1 = \dfrac{\widehat{\mathrm{cov}}(x,y)}{\widehat{\mathrm{var}}(x)}$ —
+exactly the line you fit in Lecture A.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: (Clay 03, scalar-first). Solve the two equations: $\partial_{w_0}$
+gives the intercept through $(\bar{x},\bar{y})$; substitute to get the slope as
+covariance over variance. The matrix form next generalizes this to D features.
+:::
+
 ## The gradient {.smaller}
 
 $\mathcal{L}$ is quadratic in $\mathbf{w}$; differentiate the matrix form:
