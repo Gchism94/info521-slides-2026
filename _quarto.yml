@@ -3,6 +3,9 @@ project:
   # _site/ is never used; everything is self-contained per-deck HTML for D2L.
   type: default
   output-dir: docs
+  # Run every {python} cell from the project root so decks at any depth can
+  # `sys.path.insert(0, "shared")` + `import slide_helpers` identically.
+  execute-dir: project
   render:
     - modules/**/*.qmd
 
