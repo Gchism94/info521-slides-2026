@@ -14,3 +14,6 @@ __pycache__/
 .ipynb_checkpoints/
 
 # NOTE: docs/ is intentionally TRACKED (rendered decks for GitHub Pages).
+
+/.quarto/
+**/*.quarto_ipynb

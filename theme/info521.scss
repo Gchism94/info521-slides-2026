@@ -1,6 +1,23 @@
 /*-- scss:defaults --*/
-// INFO 521 reveal theme — UA chrome + Okabe-Ito data palette, dark default.
-// STUB: full theme (CSS custom properties, dark/light, print, toggle) lands in
-// Step 2. This placeholder keeps `quarto render` valid for the Step 1 skeleton.
+// =============================================================================
+// INFO 521 reveal theme — Sass-level (compile-time) layer ONLY.
+//
+// All COLOR theming lives in theme/info521-head.html as a raw <style> injected
+// via include-in-header. That indirection is deliberate: Quarto's SCSS pipeline
+// runs a CSS minifier that inlines custom properties (var(--bg) -> #1a1a1a) and
+// drops the [data-theme="light"] overrides — which would destroy the runtime
+// dark/light toggle. Raw head CSS is passed through verbatim, so the custom
+// properties and the light/print overrides survive intact.
+//
+// Keep this file to things that genuinely must be compile-time reveal Sass vars.
+// =============================================================================
+
+$font-family-sans-serif: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$presentation-font-size-root: 34px;
+$presentation-heading-font: $font-family-sans-serif;
+$presentation-heading-text-transform: none;   // reveal defaults to uppercase
+$code-block-font-size: 0.72em;
+
 
 /*-- scss:rules --*/
+// Intentionally empty — see theme/info521-head.html for the color system.

@@ -1,0 +1,28 @@
+<!--
+  INFO 521 dark/light toggle. Classic inline script (NO ES module) so decks work
+  via file:// and on Pages. Flips data-theme on the document root; the theme SCSS
+  recolors everything from CSS custom properties. In-session only — deliberately
+  NO localStorage. Default is dark (no attribute).
+-->
+<button id="info521-theme-toggle" type="button"
+        aria-label="Toggle light and dark theme" aria-pressed="false"
+        title="Toggle light / dark (default: dark)">&#9788;</button>
+<script>
+  (function () {
+    var btn = document.getElementById("info521-theme-toggle");
+    if (!btn) return;
+    var root = document.documentElement;
+    var SUN = "☀";   // ☀ shown in dark mode (click -> go light)
+    var MOON = "☾";  // ☾ shown in light mode (click -> go dark)
+    function apply(theme) {
+      var light = theme === "light";
+      root.setAttribute("data-theme", light ? "light" : "dark");
+      btn.setAttribute("aria-pressed", light ? "true" : "false");
+      btn.innerHTML = light ? MOON : SUN;
+    }
+    apply("dark"); // default
+    btn.addEventListener("click", function () {
+      apply(root.getAttribute("data-theme") === "light" ? "dark" : "light");
+    });
+  })();
+</script>
