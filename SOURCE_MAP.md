@@ -17,11 +17,11 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M1 · Linear models & least squares — Wk1 · P1-M1 · activity: LS explorer
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| 01 | Introduction | Keep-trim | NHANES + preprocessing entry point |
-| 02 | ML Linear Model | Keep | |
-| 03 | Scalar Least Squares | Keep | |
-| 04 | Higher Dimensions | Keep | design matrix, normal equations |
-| 05 | Geometry & Nonlinear Response | Keep-compress | projection geometry + basis functions |
+| 01 | Introduction | Keep-trim | NHANES + preprocessing entry point · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
+| 02 | ML Linear Model | Keep | ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
+| 03 | Scalar Least Squares | Keep | ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
+| 04 | Higher Dimensions | Keep | design matrix, normal equations · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
+| 05 | Geometry & Nonlinear Response | Keep-compress | projection geometry + basis functions · ✓ converted → modules/m1-linear-least-squares/ (m1a/m1b) |
 
 ## M2 · Generalization — Wk2 · supports P1 · activity: bias-variance/ridge
 | Clay | Title | Disposition | Notes |
