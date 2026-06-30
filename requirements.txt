@@ -1,0 +1,25 @@
+# INFO 521 slides — Python figure pipeline dependencies.
+#
+# Python MUST be >=3.11,<3.14. numpy 2.1.x ships no cp314 wheel, so the system
+# python3 (3.14) cannot satisfy these pins. Build the project .venv against
+# Python 3.11 (see render.sh):
+#
+#     uv venv --python 3.11 .venv
+#     . .venv/bin/activate
+#     uv pip install -r requirements.txt
+#
+# numpy pin mirrors info521-homeworks-2026 / info521-projects-2026 (2.1 ABI is
+# the pinned surface; 2.1.3 + py3.14 is the ABI bug we avoid by capping Python).
+numpy==2.1.*
+
+# Plotting. info521 requires matplotlib>=3.8; leave the patch line to the resolver.
+matplotlib>=3.8
+
+# Quarto's Python engine renders {python} cells through Jupyter.
+jupyter
+
+# NHANES loader + plotting/self-check plumbing. EDITABLE install so the package
+# keeps living in its source tree and its data files (data/nhanes_2021_2022.csv)
+# resolve relative to __file__. Pulls numpy>=2.1,<2.3 / scipy / matplotlib.
+# DO NOT vendor a copy — this is the single source of truth.
+-e ../info521-projects-2026

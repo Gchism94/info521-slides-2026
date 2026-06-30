@@ -1,0 +1,10 @@
+---
+title: "Module 1 — Linear Least Squares"
+subtitle: "INFO 521 · Reference deck"
+---
+
+## Skeleton placeholder {.center}
+
+The full Module 1 reference deck (title, learning outcomes, KaTeX math, a
+`{python}` NHANES figure, live-demo iframe, speaker notes, checkpoint) lands in
+Step 4. This single slide keeps `quarto render` valid for the Step 1 skeleton.

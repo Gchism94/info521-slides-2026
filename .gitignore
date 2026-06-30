@@ -1,0 +1,16 @@
+.DS_Store
+*.log
+
+# Quarto build artifacts
+_site/
+.quarto/
+*_files/
+/.jupyter_cache/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# NOTE: docs/ is intentionally TRACKED (rendered decks for GitHub Pages).

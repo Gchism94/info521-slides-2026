@@ -1,0 +1,48 @@
+project:
+  # Render output lands in docs/ (GitHub Pages convention) and IS tracked.
+  # _site/ is never used; everything is self-contained per-deck HTML for D2L.
+  type: default
+  output-dir: docs
+  render:
+    - modules/**/*.qmd
+
+# ---------------------------------------------------------------------------
+# Shared revealjs format for every deck. Per-deck index.qmd files inherit this
+# and override only their own title/subtitle. Get the shared layer right here.
+# ---------------------------------------------------------------------------
+format:
+  revealjs:
+    # Course theme is layered on top of reveal's `default` (dark/light driven by
+    # CSS custom properties + a JS data-theme toggle inside the SCSS rules).
+    theme: [default, theme/info521.scss]
+
+    # One portable, self-contained .html per deck for upload to D2L. Figures,
+    # CSS, and JS are inlined. (KaTeX is the one deliberate CDN dependency —
+    # see html-math-method below — matching the info521-activities-2026 repo.)
+    embed-resources: true
+
+    # Math: pin KaTeX to 0.16.9 from jsdelivr, identical to the activities repo.
+    # Quarto 1.9.37 bundles katex@0.16.22; this `url` override points reveal's
+    # math plugin at the 0.16.9 dist instead so notation matches across repos.
+    html-math-method:
+      method: katex
+      url: "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/"
+
+    slide-number: true
+    slide-level: 2
+    fig-format: svg
+    fig-align: center
+    fig-responsive: true
+    incremental: false
+    # Keep speaker notes available (press `s` in reveal).
+    chalkboard: false
+
+# Python figure pipeline. Cells run under the project .venv (Python 3.11 +
+# numpy 2.1.x + matplotlib + the editable info521 loader). See requirements.txt
+# and render.sh; the system python3 (3.14) cannot install numpy 2.1.x.
+engine: jupyter
+
+execute:
+  freeze: auto    # cache cell output; re-run only when a .qmd changes
+  echo: false     # slides show figures, not code, by default (override per cell)
+  warning: false
