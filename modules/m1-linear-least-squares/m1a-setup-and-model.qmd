@@ -1,0 +1,313 @@
+---
+title: "Linear Models & Least Squares"
+subtitle: "INFO 521 · Module 1 · Lecture A — Setup, Data, and the Linear Model"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+# Load once; shared across this deck's figure cells (jupyter kernel state).
+ds   = sh.load_nhanes()
+age  = sh.primary_predictor(ds)                 # 'age' (years), the Project-1 predictor
+sbp  = ds["y"]                                   # systolic BP (mmHg), the target
+age_mean, age_sd = float(age.mean()), float(age.std())
+age_z = (age - age_mean) / age_sd                # standardized age
+
+# Scalar least-squares fit of SBP on standardized age (used on slides 8/12/13/14).
+X    = np.column_stack([np.ones_like(age_z), age_z])
+w    = np.linalg.solve(X.T @ X, X.T @ sbp)       # ŵ = (XᵀX)⁻¹Xᵀy
+w0, w1 = float(w[0]), float(w[1])
+w1_per_year = w1 / age_sd                         # convert slope to mmHg per year
+
+# >>> PLACEHOLDER — replace with the deployed week01 LS-explorer Pages URL. <<<
+# → fill with week01 LS-explorer Pages URL after publish.
+PLACEHOLDER_URL = "https://example.org/REPLACE-ME-week01-least-squares-explorer"
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **Frame supervised regression** in PML notation — inputs, target, and what we
+   are learning.
+2. **Load and preprocess** the NHANES data and **state the leakage rule** for
+   choosing features.
+3. **Define** the linear model $\hat{y} = \mathbf{w}^{\!\top}\mathbf{x}$ and the
+   mean-squared-error loss, and **compute $\mathcal{L}$ by hand**.
+4. **Fit and interpret** a scalar least-squares line in clinical units.
+
+::: {.notes}
+Speaker note: four outcomes = the arc of this lecture. The closed-form solution
+and geometry are Lecture B; today is model + loss + data.
+:::
+
+## The course spine {.smaller}
+
+One clinical outcome — **systolic blood pressure** — seen through **four lenses**
+this term:
+
+- **Least squares** (Module 1) — fit a line by minimizing squared error.
+- **Maximum likelihood** (Module 3) — the same fit, now from a noise model.
+- **Bayesian** (later) — carry uncertainty, not just a point estimate.
+- **Discovery** (later) — structure and labels we did *not* hand the model.
+
+[NHANES recurs in every module so the *methods* change, not the data — you build
+intuition on one clinical problem.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 01, trimmed). The point of one dataset all term: differences
+you see across modules are about the *method*, not a new domain each week.
+:::
+
+## Supervised regression {.smaller}
+
+Given **labeled** examples $(\mathbf{x}_n, y_n)$, learn a function $f$ so that
+$\hat{y} = f(\mathbf{x}) \approx y$ on **new** inputs $\mathbf{x}$.
+
+- **Regression** — the target $y$ is **continuous** (here: systolic BP in mmHg).
+- *Classification* (continuous → discrete labels) and *unsupervised* discovery
+  come later in the term.
+
+::: {.notes}
+Speaker note: (Clay 02). Supervised = we have the answers $y_n$ at training time;
+regression = continuous target. Contrast with the discovery modules later.
+:::
+
+## Notation & data structures {.smaller}
+
+One example is a vector $\mathbf{x}_n \in \mathbb{R}^{D}$ → one prediction
+$\hat{y}_n = \mathbf{w}^{\!\top}\mathbf{x}_n$. Stack the dataset:
+
+$$
+\mathbf{X} = \begin{bmatrix} \text{—}\ \mathbf{x}_1^{\!\top}\ \text{—} \\ \vdots \\ \text{—}\ \mathbf{x}_N^{\!\top}\ \text{—} \end{bmatrix} \in \mathbb{R}^{N \times D},
+\qquad
+\mathbf{y} = \begin{bmatrix} y_1 \\ \vdots \\ y_N \end{bmatrix} \in \mathbb{R}^{N}.
+$$
+
+Rows of the **design matrix** $\mathbf{X}$ are patients; $\mathbf{y}$ is the
+**target vector**. (We write targets $y$ — not $t$.)
+
+::: {.notes}
+Speaker note: this notation is the spine for the whole term — N rows = patients,
+D columns = features. Bishop's $t$ is our $y$.
+:::
+
+## The data — NHANES 2021–2022 {.smaller}
+
+- **$N \approx 5{,}102$** U.S. adults; **target** = systolic blood pressure (mmHg).
+- **Six leakage-safe features** (the Project-1 design):
+
+| feature | meaning |
+|---|---|
+| `age` | age (years) — the Project-1 primary predictor |
+| `bmi` | body-mass index |
+| `waist` | waist circumference |
+| `chol` | total cholesterol |
+| `hdl` | HDL cholesterol |
+| `hba1c` | glycated hemoglobin (HbA1c) |
+
+::: {.notes}
+Speaker note: feature names are the loader's contract — `ds['features']` — not
+invented. Diastolic BP is deliberately held out (next slide).
+:::
+
+## The leakage rule {.smaller}
+
+**Exclude any predictor that is itself a blood-pressure measurement** — or that
+would trivially determine the label.
+
+- Diastolic BP (`dbp`) is **reserved**, never a feature: it co-measures the same
+  physiology as the target.
+- This is a **by-design** modeling choice, made *before* fitting — not something
+  the algorithm discovers.
+
+::: {.notes}
+Speaker note: leakage = letting the answer sneak into the inputs. This exact
+choice returns in Project 2's cluster-vs-label reveal — flag it now.
+:::
+
+## A first look at the data
+
+```{python}
+#| label: fig-data-peek
+#| fig-alt: "Two panels. Left: a histogram of systolic blood pressure for about 5100 NHANES adults, right-skewed and centered near 120 mmHg. Right: a scatter of standardized age versus systolic BP, showing a weak upward trend."
+#| fig-cap: "NHANES systolic BP: marginal distribution (left) and vs. standardized age (right)."
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+axL.hist(sbp, bins=40, color=sh.OKABE_ITO["blue"], alpha=0.85)
+axL.set_xlabel("systolic BP (mmHg)")
+axL.set_ylabel("count")
+axL.set_title("distribution of the target")
+
+axR.scatter(age_z, sbp, s=10, alpha=0.18, color=sh.OKABE_ITO["blue"])
+axR.set_xlabel("standardized age (z)")
+axR.set_ylabel("systolic BP (mmHg)")
+axR.set_title("target vs. a predictor")
+sh.finalize(fig, alt="Histogram of systolic BP and a scatter of standardized age versus systolic BP.")
+plt.show()
+```
+
+## The linear model {.smaller}
+
+Predict the target as a weighted sum of the features (with an intercept):
+
+$$
+\hat{y} \;=\; \mathbf{w}^{\!\top}\mathbf{x} \;=\; w_0 + w_1 x_1 + \cdots + w_D x_D .
+$$
+
+- $w_0$ — the **intercept** (prediction when all features are 0).
+- $w_j$ — the **per-unit effect** of feature $j$: how $\hat{y}$ changes when $x_j$
+  rises by one unit, holding the rest fixed.
+
+::: {.notes}
+Speaker note: (Clay 02/03). The intercept rides along as a constant "1" feature
+in $\mathbf{x}$, so $\mathbf{w}^{\!\top}\mathbf{x}$ covers it.
+:::
+
+## The loss: mean squared error {.smaller}
+
+Measure fit by the average squared miss:
+
+$$
+\mathcal{L}(\mathbf{w}) \;=\; \tfrac{1}{N}\sum_{n=1}^{N}\bigl(y_n - \mathbf{w}^{\!\top}\mathbf{x}_n\bigr)^2 \;=\; \tfrac{1}{N}\,\lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2 .
+$$
+
+Why **squared** error? It is **smooth** (differentiable — we'll set its gradient
+to zero), and it **penalizes large misses** disproportionately.
+
+[A squared loss is also exactly what a Gaussian-noise model gives you — that tie
+is Module 3.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: smooth + convex (Lecture B) is what makes the closed form possible.
+The Gaussian connection (slide accent) is the M3 hook — plant it.
+:::
+
+## Worked: compute $\mathcal{L}$ by hand {.smaller}
+
+Toy data $(x_n, y_n)$: $(0,1),\ (1,1),\ (2,3)$, with a guess $\hat{y}=0.5 + x$.
+
+::: {.fragment}
+**Predictions** $\hat{y}_n$: $\;0.5,\ 1.5,\ 2.5$.
+:::
+
+::: {.fragment}
+**Residuals** $y_n-\hat{y}_n$: $\;0.5,\ -0.5,\ 0.5$.
+:::
+
+::: {.fragment}
+**Square & average:**
+$\mathcal{L} = \tfrac{1}{3}\bigl(0.5^2 + (-0.5)^2 + 0.5^2\bigr) = \tfrac{1}{3}(0.75) = 0.25.$
+:::
+
+::: {.notes}
+Speaker note: walk each fragment. This is the mechanic the closed form will
+minimize in Lecture B — and a checkpoint-style hand computation.
+:::
+
+## A scalar least-squares fit
+
+```{python}
+#| label: fig-scalar-fit
+#| fig-alt: "Scatter of standardized age versus systolic blood pressure for NHANES adults in blue, with an upward-sloping vermillion least-squares fit line."
+#| fig-cap: "Least-squares fit of systolic BP on standardized age."
+
+grid = np.linspace(age_z.min(), age_z.max(), 200)
+fig, ax = plt.subplots()
+ax.scatter(age_z, sbp, s=10, alpha=0.18, color=sh.OKABE_ITO["blue"], label="NHANES adults")
+ax.plot(grid, w0 + w1 * grid, color=sh.OKABE_ITO["vermillion"], linestyle="-",
+        label=fr"$\hat y = {w0:.1f} + {w1:.2f}\,z$")
+ax.set_xlabel("standardized age (z)")
+ax.set_ylabel("systolic BP (mmHg)")
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Least-squares fit line of systolic BP on standardized age over the NHANES scatter.")
+plt.show()
+```
+
+## Interpreting the fit {.smaller}
+
+The fitted line is $\hat{y} = w_0 + w_1 z$ with $w_0 \approx 121.5$,
+$w_1 \approx 6.5$ (mmHg per **standard deviation** of age).
+
+- **Intercept** $w_0$: predicted SBP at *average* age (where $z=0$) — about
+  **121.5 mmHg**, a clinically sensible central value.
+- **Slope** $w_1$: $+1$ SD of age ($\approx 17$ years) adds $\approx 6.5$ mmHg, i.e.
+  **$\approx 0.38$ mmHg per year**.
+- **Sanity check** — sign is positive (BP rises with age) and the magnitude is
+  modest and plausible. Always translate weights back to units.
+
+::: {.notes}
+Speaker note: the standardize-then-interpret two-step. Students must report slope
+in clinical units (per year), not per-SD, when communicating.
+:::
+
+## Live demo: the least-squares explorer
+
+```{python}
+#| label: live-iframe
+#| echo: false
+from IPython.display import HTML
+HTML(
+    f'<iframe src="{PLACEHOLDER_URL}" title="Week 1 least-squares explorer" '
+    'width="100%" height="430" loading="lazy" '
+    'style="border:1px solid var(--border); border-radius:8px; background:var(--surface);">'
+    '</iframe>'
+)
+```
+
+::: {.notes}
+Speaker note: the week01 LS explorer — drag the line, watch the loss respond.
+Swap `PLACEHOLDER_URL` (top of deck) with the published Pages URL.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive explorer: the same standardized-age-versus-systolic-BP scatter with the least-squares fit line, captioned as a fallback for print and PDF."
+#| fig-cap: "Static fallback snapshot of the week01 least-squares explorer."
+
+fig, ax = plt.subplots()
+ax.scatter(age_z, sbp, s=10, alpha=0.18, color=sh.OKABE_ITO["blue"], label="NHANES adults")
+ax.plot(grid, w0 + w1 * grid, color=sh.OKABE_ITO["vermillion"], label="least-squares fit")
+ax.set_xlabel("standardized age (z)")
+ax.set_ylabel("systolic BP (mmHg)")
+ax.set_title("week01 explorer snapshot (placeholder)")
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Static fallback snapshot of the least-squares explorer.")
+plt.show()
+```
+
+## Recap & bridge {.smaller}
+
+We now have the two ingredients of least squares:
+
+- a **model** — $\hat{y} = \mathbf{w}^{\!\top}\mathbf{x}$, and
+- a **loss** — $\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}\lVert\mathbf{y}-\mathbf{X}\mathbf{w}\rVert_2^2$.
+
+[**Next (Lecture B):** solve for the best $\mathbf{w}$ in closed form — set the
+gradient to zero — and see the geometry behind it.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: model + loss → optimization. Lecture B derives ŵ=(XᵀX)⁻¹Xᵀy and
+shows it as an orthogonal projection.
+:::
