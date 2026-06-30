@@ -1,0 +1,95 @@
+---
+title: "Appendix: Matrix Calculus for the Normal Equations"
+subtitle: "INFO 521 · Module 1 · Lecture B — supplement"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+## Where we are {.smaller}
+
+Lecture B stated the gradient of the least-squares loss directly:
+
+$$
+\nabla_{\mathbf{w}}\mathcal{L} = -\tfrac{2}{N}\,\mathbf{X}^{\!\top}(\mathbf{y} - \mathbf{X}\mathbf{w}).
+$$
+
+This appendix fills in the two vector-calculus identities behind it and turns the
+crank to $\hat{\mathbf{w}} = (\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$.
+
+::: {.notes}
+Speaker note: optional depth for students who want the derivative mechanics. Two
+identities, one expansion, one differentiation — that is the whole story.
+:::
+
+## Two identities {.smaller}
+
+For a constant vector $\mathbf{a}$ and constant matrix $\mathbf{A}$:
+
+::: {.fragment}
+$$
+\frac{\partial\,(\mathbf{a}^{\!\top}\mathbf{w})}{\partial \mathbf{w}} = \mathbf{a}
+$$
+:::
+
+::: {.fragment}
+$$
+\frac{\partial\,(\mathbf{w}^{\!\top}\mathbf{A}\mathbf{w})}{\partial \mathbf{w}} = (\mathbf{A} + \mathbf{A}^{\!\top})\,\mathbf{w}
+\;=\; 2\mathbf{A}\mathbf{w} \quad(\mathbf{A}\ \text{symmetric}).
+$$
+:::
+
+::: {.notes}
+Speaker note: the linear term differentiates to its coefficient vector; the
+quadratic form to $(\mathbf{A}+\mathbf{A}^{\!\top})\mathbf{w}$. $\mathbf{X}^{\!\top}\mathbf{X}$
+is symmetric, so its quadratic form gives the clean $2\mathbf{X}^{\!\top}\mathbf{X}\mathbf{w}$.
+:::
+
+## Expand the loss {.smaller}
+
+Write the loss as a quadratic in $\mathbf{w}$:
+
+$$
+\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}(\mathbf{y} - \mathbf{X}\mathbf{w})^{\!\top}(\mathbf{y} - \mathbf{X}\mathbf{w})
+$$
+
+::: {.fragment}
+Multiply out — the two cross terms are equal scalars ($\mathbf{y}^{\!\top}\mathbf{X}\mathbf{w} = \mathbf{w}^{\!\top}\mathbf{X}^{\!\top}\mathbf{y}$):
+
+$$
+\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}\bigl(\mathbf{y}^{\!\top}\mathbf{y} - 2\,\mathbf{w}^{\!\top}\mathbf{X}^{\!\top}\mathbf{y} + \mathbf{w}^{\!\top}\mathbf{X}^{\!\top}\mathbf{X}\mathbf{w}\bigr)
+$$
+:::
+
+::: {.notes}
+Speaker note: a constant, a linear term, and a quadratic term — exactly the two
+shapes the identities handle.
+:::
+
+## Differentiate & solve {.smaller}
+
+Apply the two identities term by term ($\mathbf{a} = \mathbf{X}^{\!\top}\mathbf{y}$,
+$\mathbf{A} = \mathbf{X}^{\!\top}\mathbf{X}$ symmetric):
+
+::: {.fragment}
+$$
+\nabla_{\mathbf{w}}\mathcal{L} = \tfrac{1}{N}\bigl(-2\,\mathbf{X}^{\!\top}\mathbf{y} + 2\,\mathbf{X}^{\!\top}\mathbf{X}\mathbf{w}\bigr)
+= -\tfrac{2}{N}\,\mathbf{X}^{\!\top}(\mathbf{y} - \mathbf{X}\mathbf{w})
+$$
+:::
+
+::: {.fragment}
+Set it to zero — the $-2/N$ drops out:
+
+$$
+\mathbf{X}^{\!\top}\mathbf{X}\,\hat{\mathbf{w}} = \mathbf{X}^{\!\top}\mathbf{y}
+\qquad\Longrightarrow\qquad
+\boxed{\;\hat{\mathbf{w}} = \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y}\;}
+$$
+:::
+
+::: {.notes}
+Speaker note: this is the gradient Lecture B used, now earned. The "$\nabla=0 \Rightarrow$
+normal equations" step is the P1-M1 checkpoint target.
+:::
