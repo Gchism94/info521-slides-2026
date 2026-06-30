@@ -150,9 +150,14 @@
     .reveal-viewport, #info521-theme-toggle { transition: none; }
   }
 
-  /* ---- Print: force LIGHT on white, hide the toggle ------------------- */
+  /* ---- Print: force LIGHT on white, hide the toggle -------------------
+     Covers BOTH paths: the plain print stylesheet (html:not(.print-pdf)) and
+     reveal's PDF-export mode (?print-pdf -> html.print-pdf), where reveal gates
+     its own white background off and the dark theme bg shows through. We whiten
+     every reveal background layer and force dark ink, so the deck prints light
+     regardless of the live toggle. */
   @media print {
-    :root {
+    :root, :root[data-theme="light"], :root[data-theme="dark"] {
       --bg:      #ffffff;
       --surface: #ffffff;
       --text:    #1a1a1a;
@@ -164,8 +169,28 @@
       --code-bg: #f4f3ee;
       --grid:    rgba(0, 0, 0, 0.10);
     }
-    .reveal-viewport, body, html { background: #ffffff !important; }
-    .reveal, .reveal .slides section { color: #1a1a1a !important; }
+    html, body,
+    .reveal-viewport,
+    .reveal,
+    .reveal .slides,
+    .reveal .slides > section,
+    .reveal .slides section,
+    .reveal .backgrounds,
+    .reveal .slide-background,
+    .reveal .slide-background-content,
+    .reveal .pdf-page {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .reveal, .reveal .slides section,
+    .reveal p, .reveal li, .reveal td, .reveal th,
+    .reveal .katex { color: #1a1a1a !important; }
+    .reveal h1, .reveal h2, .reveal h3,
+    .reveal h4, .reveal h5, .reveal h6 { color: var(--ua-navy) !important; }
+    .reveal a { color: var(--ua-navy) !important; }
     #info521-theme-toggle { display: none !important; }
   }
 </style>

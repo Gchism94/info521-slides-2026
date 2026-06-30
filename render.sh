@@ -40,18 +40,40 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "html" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 3. PDF. revealjs PDF export is per-deck via `-M print-pdf` (needs Chrome;
-#    `quarto check` reports Chrome found on this machine). Output sits beside
-#    the deck's HTML under docs/.
+# 3. PDF. revealjs does NOT emit a PDF itself — `?print-pdf` is a browser print
+#    mode. We drive headless Chrome's --print-to-pdf over each rendered deck's
+#    `index.html?print-pdf` URL; the deck's @media print rules force the light
+#    theme on white. Output (index.pdf) sits beside the HTML under docs/.
+#
+#    Notes:
+#    * --headless=new + --run-all-compositor-stages-before-draw is what makes
+#      reveal finish paginating before capture; plain --headless yields blanks.
+#    * Pagination occasionally races and yields a 1-page/near-empty PDF — we
+#      retry up to 3x and keep the largest result.
+#    * Fallback if Chrome misbehaves: decktape (npx decktape reveal IN OUT).
 # ---------------------------------------------------------------------------
 if [ "$MODE" = "all" ] || [ "$MODE" = "pdf" ]; then
-  echo "[render] PDF (print-pdf) ..."
-  while IFS= read -r qmd; do
-    echo "  - $qmd"
-    quarto render "$qmd" -M print-pdf
-  done < <(find modules -name index.qmd)
-  # Fallback if print-pdf is unavailable: decktape (npm i -g decktape), e.g.
-  #   decktape reveal docs/modules/m1-linear-least-squares/index.html out.pdf
+  CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
+  if [ ! -x "$CHROME" ]; then
+    echo "[render] Chrome not found at \$CHROME; skipping PDF. Set CHROME=... or use decktape." >&2
+  else
+    echo "[render] PDF (headless Chrome print-to-pdf) ..."
+    while IFS= read -r html; do
+      pdf="${html%.html}.pdf"
+      best=0
+      for attempt in 1 2 3; do
+        "$CHROME" --headless=new --disable-gpu --no-pdf-header-footer \
+          --run-all-compositor-stages-before-draw --virtual-time-budget=20000 \
+          --window-size=1600,1200 \
+          --print-to-pdf="$pdf.try" "file://$ROOT/$html?print-pdf" >/dev/null 2>&1 || true
+        sz=$( [ -f "$pdf.try" ] && wc -c < "$pdf.try" || echo 0 )
+        if [ "$sz" -gt "$best" ]; then best=$sz; mv -f "$pdf.try" "$pdf"; else rm -f "$pdf.try"; fi
+        # ~50KB+ means real multi-slide pagination landed; good enough to stop.
+        [ "$best" -gt 50000 ] && break
+      done
+      echo "  - $pdf  (${best} bytes)"
+    done < <(cd "$ROOT" && find docs -name index.html)
+  fi
 fi
 
 echo "[render] done. Review docs/ — publishing is a manual step (not done here)."
