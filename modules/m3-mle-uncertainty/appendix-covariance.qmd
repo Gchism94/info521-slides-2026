@@ -1,0 +1,85 @@
+---
+title: "Appendix: Full cov{ŵ} derivation"
+subtitle: "INFO 521 · Module 3 — supplement"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+## Where we are {.smaller}
+
+From the main deck: $\hat{\mathbf{w}}$ is unbiased ($\mathbb{E}[\hat{\mathbf{w}}] = \mathbf{w}$),
+and the parameter covariance is
+
+$$
+\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}.
+$$
+
+This appendix derives that result in full. Only $\mathbf{y}$ is random;
+$\mathbf{X}$ and $\mathbf{w}$ are fixed, and $\mathbb{E}[\mathbf{y}] = \mathbf{X}\mathbf{w}$,
+$\;\mathrm{cov}\{\mathbf{y}\} = \sigma^2\mathbf{I}$.
+
+::: {.notes}
+Speaker note: this is the slide-10 promise paid off. Each step reveals on a
+fragment — walk it line by line; the whole thing collapses through
+$(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{X} = \mathbf{I}$.
+:::
+
+## Set up the second moment {.smaller}
+
+Start from the covariance definition, using $\mathbb{E}[\hat{\mathbf{w}}] = \mathbf{w}$:
+
+$$
+\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \mathbb{E}\!\left[\hat{\mathbf{w}}\hat{\mathbf{w}}^{\!\top}\right] - \mathbf{w}\mathbf{w}^{\!\top}
+$$
+
+::: {.fragment}
+Substitute $\hat{\mathbf{w}} = (\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$
+and pull the constants out of the expectation:
+
+$$
+\mathbb{E}\!\left[\hat{\mathbf{w}}\hat{\mathbf{w}}^{\!\top}\right]
+= \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\,
+  \mathbb{E}\!\left[\mathbf{y}\mathbf{y}^{\!\top}\right]\,
+  \mathbf{X}\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}
+$$
+:::
+
+::: {.fragment}
+The data second moment, from $\mathrm{cov}\{\mathbf{y}\} = \mathbb{E}[\mathbf{y}\mathbf{y}^{\!\top}] - \mathbb{E}[\mathbf{y}]\mathbb{E}[\mathbf{y}]^{\!\top}$:
+
+$$
+\mathbb{E}\!\left[\mathbf{y}\mathbf{y}^{\!\top}\right]
+= \mathbf{X}\mathbf{w}\mathbf{w}^{\!\top}\mathbf{X}^{\!\top} + \sigma^2\mathbf{I}
+$$
+:::
+
+## Collect the terms {.smaller}
+
+Substitute and use $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{X} = \mathbf{I}$ on each piece:
+
+$$
+\mathbb{E}\!\left[\hat{\mathbf{w}}\hat{\mathbf{w}}^{\!\top}\right]
+= \mathbf{w}\mathbf{w}^{\!\top} + \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}
+$$
+
+::: {.fragment}
+The $\mathbf{w}\mathbf{w}^{\!\top}$ cancels against the $-\mathbf{w}\mathbf{w}^{\!\top}$ from the definition:
+
+$$
+\boxed{\;\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\;}
+$$
+:::
+
+::: {.fragment}
+[And this is exactly the inverse Fisher information: from
+$-\dfrac{\partial^2 \log\mathcal{L}}{\partial\mathbf{w}\,\partial\mathbf{w}^{\!\top}} = \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X} = \mathcal{I}$,
+we get $\mathrm{cov}\{\hat{\mathbf{w}}\} = \mathcal{I}^{-1}$.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: the cancellation is the satisfying step — the bias-free part
+($\mathbf{w}\mathbf{w}^{\!\top}$) drops out, leaving pure noise scaled by the
+inverse Gram matrix. Close by tying back to Fisher info (main deck slide 11).
+:::
