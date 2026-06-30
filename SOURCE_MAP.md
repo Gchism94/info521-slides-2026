@@ -38,7 +38,7 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 | 09b | Continuous Probability / Gaussian | Keep-compress | keep the Gaussian; rest async |
 | 10 | Linear Gaussian Noise & ML | Keep | likelihood; MLE = least squares |
 | 11 | Maximum Likelihood | Keep | |
-| 12 | Properties of Linear Gaussian Model 01 | Keep-compress | keep spine; full cov derivation → appendix deck |
+| 12 | Properties of Linear Gaussian Model 01 | Keep-compress | ✓ converted → modules/m3-mle-uncertainty/ (+ appendix-covariance) |
 | 13 | Properties of Linear Gaussian Model 02 | Keep-compress | Fisher info + worked example |
 
 ## M4 · Bayesian inference — Wk4 · P1-M3 · activity: Beta-Binomial
