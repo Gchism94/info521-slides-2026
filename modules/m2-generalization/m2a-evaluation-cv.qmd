@@ -1,0 +1,323 @@
+---
+title: "Generalization"
+subtitle: "INFO 521 · Module 2 · Lecture A — Evaluation & Cross-Validation"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+ds    = sh.load_nhanes()
+age   = sh.primary_predictor(ds)
+sbp   = ds["y"]
+age_z = (age - age.mean()) / age.std()
+rng   = np.random.default_rng(521)          # fixed seed → reproducible figures
+
+def mse(y, yhat):
+    return float(np.mean((y - yhat) ** 2))
+
+# --- Illustrative teaching signal -------------------------------------------
+# Real NHANES SBP is ~linear in age, so it has no underfitting region and cannot
+# exhibit the full bias-variance U. For the *complexity* demonstrations we use a
+# controlled signal with genuine curvature, evaluated on the REAL NHANES age grid
+# (marked ADDED on each such slide). Real SBP remains the applied context.
+def true_g(z):
+    return 120.0 + 2.0 * z + 15.0 * np.sin(1.3 * z)     # nonlinear ground truth
+y_ill = true_g(age_z) + rng.normal(0.0, 9.0, size=len(age_z))    # + Gaussian noise
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **Distinguish training error from generalization error.**
+2. **Diagnose overfitting** from the gap between them.
+3. **Run $k$-fold cross-validation.**
+4. **Select a model or hyperparameter** by cross-validation.
+
+::: {.notes}
+Speaker note: the whole lecture is "how well will this do on data it hasn't
+seen?" — and how to estimate that honestly.
+:::
+
+## Bridge from Module 1 {.smaller}
+
+In Lecture 1B we saw **basis functions** let us make the model *arbitrarily
+flexible* — swap $\mathbf{x}\to\boldsymbol{\phi}(\mathbf{x})$, raise the degree.
+
+- Flexibility **buys fit**: a high-degree curve can pass through every point.
+- It also risks **memorizing** the sample instead of learning the pattern.
+
+[How much flexibility is *right*? That question is this whole module.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: pick up the explicit 1B hook — the degree-9 wiggle. Today we make
+"too flexible" measurable.
+:::
+
+## Overfitting, made visible
+
+<!-- ADDED: not in Clay source — illustrative nonlinear signal (see setup), since
+     real SBP–age is near-linear and shows no underfitting region. -->
+
+```{python}
+#| label: fig-overfit
+#| fig-alt: "Scatter of about 30 points from an illustrative nonlinear signal on the NHANES age grid, with three polynomial fits: a degree-1 line that misses the curvature (underfit), a degree-3 curve that tracks it, and a wiggly degree-9 curve that chases individual points (overfit)."
+#| fig-cap: "Illustrative signal, 30 points, three complexities: degree 1 (underfit), 3, 9 (overfit)."
+
+idx = rng.choice(len(age_z), 30, replace=False)
+zz, yy = age_z[idx], y_ill[idx]
+grid = np.linspace(zz.min(), zz.max(), 300)
+
+fig, ax = plt.subplots()
+ax.scatter(zz, yy, s=28, alpha=0.7, color=sh.OKABE_ITO["blue"], label="sample")
+for deg, col, ls in [(1, sh.OKABE_ITO["vermillion"], "-"),
+                     (3, sh.OKABE_ITO["orange"], "-."),
+                     (9, sh.OKABE_ITO["green"], "--")]:
+    c = np.polyfit(zz, yy, deg)
+    ax.plot(grid, np.polyval(c, grid), color=col, linestyle=ls, label=f"degree {deg}")
+ax.set_xlabel("standardized age (z)")
+ax.set_ylabel("response (illustrative)")
+ax.set_ylim(yy.min() - 15, yy.max() + 15)
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Degree 1, 3, and 9 polynomial fits to 30 points of an illustrative signal, from under- to over-fitting.")
+plt.show()
+```
+
+## The trap: training error always drops {.smaller}
+
+Make the model more flexible and the **training error only ever goes down** — a
+degree-$N$ polynomial can interpolate $N{+}1$ points *exactly* ($\mathcal{L}=0$).
+
+- Low training error is **easy to buy** with complexity.
+- It says nothing about new patients.
+
+[**Training error is not generalization error.**]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: this is the core misconception to break. Zero training loss can mean
+a perfect model or a memorized one — training error can't tell you which.
+:::
+
+## Hold out a test set {.smaller}
+
+Estimate generalization by scoring on data the model **never saw during fitting**:
+
+- **Split** the patients into a **training** set (fit $\hat{\mathbf{w}}$) and a
+  **test** set (score only).
+- Test error is an honest estimate of error on *new* patients.
+
+When we also tune a knob, a third **validation** ("dev") set does the tuning, so
+the test set stays untouched until the very end.
+
+::: {.notes}
+Speaker note: (Clay 06/07 — the dev-set slide). The test set is sacred: touch it
+once, at the end. Tuning on it silently overfits the estimate.
+:::
+
+## Training vs. test vs. complexity
+
+<!-- ADDED: not in Clay source — illustrative nonlinear signal (see setup), so the
+     full bias-variance U is visible; real SBP–age is near-linear. -->
+
+```{python}
+#| label: fig-train-test
+#| fig-alt: "Training and test mean-squared error versus polynomial degree for the illustrative signal. Training error (blue circles) falls monotonically as degree rises; test error (vermillion squares) is U-shaped — high at low degree (underfit), lowest in the middle, rising again at high degree (overfit)."
+#| fig-cap: "The central picture (illustrative signal, median over 30 training resamples): training error ↓; test error U-shaped."
+
+# Expected train/test error: median over many small-train resamples (smooth, and
+# robust to the occasional high-degree blow-up on tiny samples).
+degs = list(range(1, 10))
+reps = 30
+TR = np.zeros((reps, len(degs)))
+TE = np.zeros((reps, len(degs)))
+for r in range(reps):
+    perm = rng.permutation(len(age_z))
+    tr, te = perm[:45], perm[45:445]          # small train → overfitting shows
+    for i, d in enumerate(degs):
+        c = np.polyfit(age_z[tr], y_ill[tr], d)
+        TR[r, i] = mse(y_ill[tr], np.polyval(c, age_z[tr]))
+        TE[r, i] = mse(y_ill[te], np.polyval(c, age_z[te]))
+train_err, test_err = np.median(TR, axis=0), np.median(TE, axis=0)
+
+fig, ax = plt.subplots()
+ax.plot(degs, train_err, color=sh.OKABE_ITO["blue"], linestyle="-",
+        marker="o", label="training error")
+ax.plot(degs, test_err, color=sh.OKABE_ITO["vermillion"], linestyle="--",
+        marker="s", label="test error")
+ax.set_xlabel("polynomial degree (complexity)")
+ax.set_ylabel("mean squared error")
+ax.legend(loc="upper center", frameon=False)
+sh.finalize(fig, alt="Training error falling and test error U-shaped as polynomial degree increases.")
+plt.show()
+```
+
+## The generalization gap {.smaller}
+
+The distance between the two curves diagnoses the model:
+
+- **Overfit** — low training error, high test error (the gap is wide, right side).
+- **Underfit** — both high (left side); the model is too rigid to fit the signal.
+- **Just right** — the bottom of the test-error U.
+
+::: {.notes}
+Speaker note: name the regions on the previous figure. The generalization gap =
+test − train; it widens as complexity outruns the data.
+:::
+
+## Why cross-validation? {.smaller}
+
+A single train/test split has two problems, sharper at this sample size:
+
+- it **wastes data** — every held-out patient is one you didn't train on;
+- it is **high-variance** — a different split gives a different test error.
+
+**Cross-validation** reuses every patient for both roles, in turn.
+
+::: {.notes}
+Speaker note: (Clay 06). Motivate the reuse: we want a stable estimate and can't
+afford to sacrifice a big test set.
+:::
+
+## $k$-fold cross-validation {.smaller}
+
+Partition into $k$ folds; each fold takes a turn as the **validation** set while
+the other $k{-}1$ **train**; average the $k$ scores.
+
+```{=html}
+<svg viewBox="0 0 820 250" width="100%" style="max-height:40vh; color: var(--text); font-family: inherit;"
+     role="img" aria-label="Five-fold cross-validation schematic: five rows, each partitioned into five equal blocks. In row i the i-th block is the validation fold (accent color) and the other four are training blocks; the validation block rotates down the diagonal across rows.">
+  <text x="10" y="20" fill="currentColor" stroke="none" font-size="13">5-fold: the validation block (accent) rotates across rounds</text>
+  <!-- rows -->
+  <g font-size="12">
+    <!-- generated: 5 rows × 5 cells -->
+    <!-- row template drawn below -->
+  </g>
+  <g stroke="var(--surface)" stroke-width="2">
+    <!-- Row 0 --> <g transform="translate(60,40)">
+      <rect x="0"   y="0" width="140" height="28" style="fill: var(--accent);"/><rect x="140" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="280" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="420" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="560" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/>
+      <text x="720" y="19" fill="currentColor" stroke="none">round 1</text></g>
+    <!-- Row 1 --> <g transform="translate(60,74)">
+      <rect x="0"   y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="140" y="0" width="140" height="28" style="fill: var(--accent);"/><rect x="280" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="420" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="560" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/>
+      <text x="720" y="19" fill="currentColor" stroke="none">round 2</text></g>
+    <!-- Row 2 --> <g transform="translate(60,108)">
+      <rect x="0"   y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="140" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="280" y="0" width="140" height="28" style="fill: var(--accent);"/><rect x="420" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="560" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/>
+      <text x="720" y="19" fill="currentColor" stroke="none">round 3</text></g>
+    <!-- Row 3 --> <g transform="translate(60,142)">
+      <rect x="0"   y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="140" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="280" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="420" y="0" width="140" height="28" style="fill: var(--accent);"/><rect x="560" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/>
+      <text x="720" y="19" fill="currentColor" stroke="none">round 4</text></g>
+    <!-- Row 4 --> <g transform="translate(60,176)">
+      <rect x="0"   y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="140" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="280" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="420" y="0" width="140" height="28" fill="currentColor" fill-opacity="0.12"/><rect x="560" y="0" width="140" height="28" style="fill: var(--accent);"/>
+      <text x="720" y="19" fill="currentColor" stroke="none">round 5</text></g>
+  </g>
+  <!-- legend -->
+  <g transform="translate(60,214)" font-size="12">
+    <rect x="0" y="0" width="20" height="14" style="fill: var(--accent);"/>
+    <text x="26" y="12" fill="currentColor" stroke="none">validation fold</text>
+    <rect x="150" y="0" width="20" height="14" fill="currentColor" fill-opacity="0.12"/>
+    <text x="176" y="12" fill="currentColor" stroke="none">training folds</text>
+  </g>
+</svg>
+```
+
+::: {.notes}
+Speaker note: every patient validates exactly once and trains $k{-}1$ times. The
+CV error is the average of the five round scores.
+:::
+
+## Cross-validation error curve
+
+<!-- ADDED: not in Clay source — illustrative nonlinear signal (see setup). -->
+
+```{python}
+#| label: fig-cv
+#| fig-alt: "Five-fold cross-validation error versus polynomial degree for the illustrative signal, drawn as a green line with a shaded band showing the spread across folds. The curve is U-shaped with its minimum at a low-to-moderate degree; the band reflects fold-to-fold variability."
+#| fig-cap: "5-fold CV error vs. degree (illustrative signal; band = ±1 SD across folds); minimum marks the CV choice."
+
+n_cv = 150
+cvidx = rng.permutation(len(age_z))[:n_cv]
+zc, yc = age_z[cvidx], y_ill[cvidx]
+k = 5
+folds = np.array_split(np.arange(n_cv), k)
+degs = list(range(1, 10))
+cv_mean, cv_sd = [], []
+for d in degs:
+    errs = []
+    for f in range(k):
+        val = folds[f]
+        trn = np.concatenate([folds[j] for j in range(k) if j != f])
+        c = np.polyfit(zc[trn], yc[trn], d)
+        errs.append(mse(yc[val], np.polyval(c, zc[val])))
+    cv_mean.append(np.mean(errs)); cv_sd.append(np.std(errs))
+cv_mean, cv_sd = np.array(cv_mean), np.array(cv_sd)
+best = degs[int(np.argmin(cv_mean))]
+
+fig, ax = plt.subplots()
+ax.fill_between(degs, cv_mean - cv_sd, cv_mean + cv_sd, alpha=0.20,
+                color=sh.OKABE_ITO["green"], label="±1 SD across folds")
+ax.plot(degs, cv_mean, color=sh.OKABE_ITO["green"], linestyle="-",
+        marker="o", label="CV error")
+ax.axvline(best, color=sh.OKABE_ITO["vermillion"], linestyle=":", label=f"CV choice (degree {best})")
+ax.set_xlabel("polynomial degree")
+ax.set_ylabel("cross-validation MSE")
+ax.legend(loc="upper center", frameon=False)
+sh.finalize(fig, alt="5-fold CV error versus degree with a fold-spread band and the minimum marked.")
+plt.show()
+```
+
+## Model selection by CV {.smaller}
+
+**Pick the complexity that minimizes CV error.** Then refit that model on *all* the
+training data and report on the held-out test set.
+
+- CV is a *selection* tool — it chooses the knob.
+- The final, untouched test set is what you *report*.
+
+::: {.notes}
+Speaker note: selection vs reporting. CV picks the degree/λ; the test set gives the
+number you trust. Don't let them be the same data.
+:::
+
+## The pitfall: leakage {.smaller}
+
+Cross-validation only tells the truth if the folds are **honestly separated**:
+
+- **Preprocess inside each fold.** Standardize (center/scale) using the *training*
+  fold's statistics, then apply to the validation fold — never on the pooled data.
+- **Never tune on the test set.** Every peek leaks information and inflates the
+  estimate.
+
+[Same discipline as the Module 1 feature-leakage rule — the answer must not sneak
+into the inputs.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 07 — leakage is a major theme there). Fitting the scaler on
+all data before CV is the classic silent leak; it makes CV look better than it is.
+:::
+
+## Recap & bridge {.smaller}
+
+- **Training error** falls with complexity; **test/CV error** is U-shaped.
+- **$k$-fold CV** gives a stable estimate and picks the knob.
+- **Leakage** breaks the estimate — separate folds honestly.
+
+[CV tells us **where** we are on the U. Next (Lecture B): **why** the U exists —
+the bias-variance decomposition — and how to **move along it** with
+regularization.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: 2A is diagnosis; 2B is mechanism + control. The U-curve is the hinge
+between them.
+:::
