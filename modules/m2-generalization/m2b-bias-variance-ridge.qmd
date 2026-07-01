@@ -1,0 +1,360 @@
+---
+title: "Generalization"
+subtitle: "INFO 521 · Module 2 · Lecture B — Bias-Variance & Regularization"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+ds    = sh.load_nhanes()
+age   = sh.primary_predictor(ds)
+sbp   = ds["y"]
+age_z = (age - age.mean()) / age.std()
+rng   = np.random.default_rng(521)
+
+def mse(a, b):
+    return float(np.mean((a - b) ** 2))
+
+# Illustrative teaching signal (same as Lecture A): real SBP–age is ~linear and
+# cannot show the bias-variance tradeoff, so complexity/regularization figures use
+# a controlled nonlinear signal on the real NHANES age grid.
+def true_g(z):
+    return 120.0 + 2.0 * z + 15.0 * np.sin(1.3 * z)
+y_ill = true_g(age_z) + rng.normal(0.0, 9.0, size=len(age_z))
+
+# Ridge on a standardized polynomial basis (intercept handled by centering y, so
+# it is never penalized). Standardizing columns lets λ penalize them comparably.
+def poly_raw(z, deg):
+    return np.column_stack([z ** k for k in range(1, deg + 1)])
+
+def poly_std(z, deg, mu=None, sd=None):
+    F = poly_raw(z, deg)
+    if mu is None:
+        mu, sd = F.mean(0), F.std(0)
+    return (F - mu) / sd, mu, sd
+
+def ridge_fit(Phi, y, lam):
+    D = Phi.shape[1]
+    w = np.linalg.solve(Phi.T @ Phi + lam * np.eye(D), Phi.T @ (y - y.mean()))
+    return w, float(y.mean())
+
+# >>> PLACEHOLDER — replace with the deployed week02 bias-variance/ridge tool. <<<
+# → week02 bias-variance / ridge tool Pages URL after publish.
+PLACEHOLDER_URL = "https://example.org/REPLACE-ME-week02-bias-variance-ridge-explorer"
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture B you should be able to:
+
+1. **Explain the bias-variance decomposition** of expected test error.
+2. **State the tradeoff** and connect it to the U-curve.
+3. **Derive and apply ridge regression**, and **tune $\lambda$ by CV**.
+4. **Connect ridge to the Module 1 uniqueness condition.**
+
+::: {.notes}
+Speaker note: 2A found the U empirically; 2B explains it (bias-variance) and gives
+a knob to move along it (ridge).
+:::
+
+## Recap: the U, and why {.smaller}
+
+Lecture A: test error is **U-shaped** in complexity — underfit on the left,
+overfit on the right.
+
+Cross-validation told us *where* the bottom is. **Now: why is there a U at all?**
+
+::: {.notes}
+Speaker note: one line back to 2A. The U is not an accident — it is the sum of two
+competing quantities. Name them next.
+:::
+
+## Bias and variance, intuitively {.smaller}
+
+Imagine refitting on **many datasets** drawn the same way:
+
+- **Bias** — the *systematic* miss: even on average, a too-simple model can't reach
+  the truth.
+- **Variance** — the *sensitivity*: a too-flexible model swings wildly from one
+  dataset to the next.
+
+::: {.notes}
+Speaker note: this is the prediction-space view of the SAME repeated-sampling story
+the Module 3 covariance-ellipse tool shows in *parameter* space — flag the
+resonance. There, spread of ŵ; here, spread of the fitted curve.
+:::
+
+## Bias and variance on the data
+
+<!-- ADDED: not in Clay source — illustrative nonlinear signal (see setup). Clay 14
+     shows this repeated-fits picture on a synthetic signal; here it is the NHANES age grid. -->
+
+```{python}
+#| label: fig-bias-variance
+#| fig-alt: "Two panels, each showing the true curve (vermillion dashed), 20 fits from repeated subsamples (thin blue), and their average (orange). Left, degree 1: the fits cluster tightly but the average line misses the curved truth — high bias, low variance. Right, degree 9: the average tracks the truth but individual fits swing widely — low bias, high variance."
+#| fig-cap: "Repeated fits: degree 1 (biased, tight) vs. degree 9 (low-bias, high-variance)."
+
+grid  = np.linspace(age_z.min(), age_z.max(), 200)
+truth = true_g(grid)
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
+for ax, deg, title in [(axL, 1, "degree 1 — high bias"), (axR, 9, "degree 9 — high variance")]:
+    curves = []
+    for _ in range(20):
+        idx = rng.choice(len(age_z), 35, replace=False)
+        c = np.polyfit(age_z[idx], y_ill[idx], deg)
+        yc = np.polyval(c, grid)
+        curves.append(yc)
+        ax.plot(grid, yc, color=sh.OKABE_ITO["blue"], alpha=0.22, linewidth=1)
+    ax.plot(grid, np.mean(curves, axis=0), color=sh.OKABE_ITO["orange"],
+            linewidth=2.6, label="average fit")
+    ax.plot(grid, truth, color=sh.OKABE_ITO["vermillion"], linestyle="--",
+            linewidth=2.4, label="truth")
+    ax.set_title(title); ax.set_xlabel("standardized age (z)")
+    ax.set_ylim(95, 150)
+axL.set_ylabel("response (illustrative)")
+axR.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Repeated degree-1 and degree-9 fits with their average and the true curve, showing bias versus variance.")
+plt.show()
+```
+
+## The decomposition {.smaller}
+
+For a fixed input $\mathbf{x}$, expected test error splits into three pieces:
+
+$$
+\mathbb{E}\bigl[(y - \hat{f}(\mathbf{x}))^2\bigr]
+\;=\;
+\underbrace{\text{bias}^2}_{\text{systematic}}
+\;+\;
+\underbrace{\text{variance}}_{\text{sensitivity}}
+\;+\;
+\underbrace{\sigma^2}_{\text{irreducible}} .
+$$
+
+The $\sigma^2$ floor is noise no model can beat. Full derivation →
+[appendix-bias-variance.html](appendix-bias-variance.html).
+
+::: {.notes}
+Speaker note: expectation over training sets, at a fixed $\mathbf{x}$. The
+irreducible term is why even the true model has nonzero test error.
+:::
+
+## The tradeoff {.smaller}
+
+As complexity rises:
+
+- **bias$^2$ falls** — the model can represent more;
+- **variance rises** — the model chases the sample;
+- their **sum is the U**, resting on the irreducible $\sigma^2$ floor.
+
+[The best model is not the most flexible one — it is the one that **balances** the
+two.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: the U from 2A = bias² + variance (+ σ²). Underfit = bias-dominated
+(left); overfit = variance-dominated (right). Regularization moves us left.
+:::
+
+# Controlling the tradeoff: regularization. {.center}
+
+## Ridge regression {.smaller}
+
+Add a penalty on the size of the weights:
+
+$$
+\mathcal{L}_{\text{ridge}}(\mathbf{w}) = \lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2 + \lambda\lVert \mathbf{w}\rVert_2^2 .
+$$
+
+- $\lambda = 0$ → ordinary least squares.
+- $\lambda > 0$ → shrinks weights toward $\mathbf{0}$, **trading a little bias for
+  less variance**.
+
+::: {.notes}
+Speaker note: the penalty discourages large, wiggly-curve coefficients. λ is the
+knob that moves us along the bias-variance U — tuned by CV (2A).
+:::
+
+## Ridge: the closed form {.smaller}
+
+The penalty just adds $\lambda\mathbf{I}$ inside the normal equations:
+
+$$
+\boxed{\;\hat{\mathbf{w}}_{\text{ridge}} = \left(\mathbf{X}^{\!\top}\mathbf{X} + \lambda\mathbf{I}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y}\;}
+$$
+
+::: {.fragment}
+[$\mathbf{X}^{\!\top}\mathbf{X} + \lambda\mathbf{I}$ is **positive definite for any
+$\lambda>0$** — so it is *always* invertible. Ridge **guarantees** the unique
+solution that Module 1 needed full column rank for.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: through-line node. In M1, uniqueness required $\mathbf{X}^{\!\top}\mathbf{X}$
+invertible (full column rank). Ridge adds $\lambda\mathbf{I}$, lifting every
+eigenvalue by λ>0 — invertibility for free, even when $N<D$ or columns collide.
+:::
+
+## The coefficient path
+
+```{python}
+#| label: fig-coef-path
+#| fig-alt: "Ridge coefficient paths: six standardized polynomial coefficients plotted against lambda on a logarithmic axis. At small lambda the coefficients take a range of nonzero values; as lambda grows, every coefficient shrinks smoothly toward zero."
+#| fig-cap: "Ridge shrinks every coefficient toward 0 as λ grows (log-λ axis)."
+
+idx = rng.choice(len(age_z), 60, replace=False)
+zz, yy = age_z[idx], y_ill[idx]
+deg = 6
+Phi, mu, sd = poly_std(zz, deg)
+lams = np.logspace(-3, 4, 60)
+W = np.array([ridge_fit(Phi, yy, l)[0] for l in lams])   # (60, deg)
+
+fig, ax = plt.subplots()
+for j in range(deg):
+    s = sh.series_style(j)
+    ax.plot(lams, W[:, j], color=s["color"], linestyle=s["linestyle"], label=fr"$w_{{{j+1}}}$")
+ax.axhline(0, color=sh.OKABE_ITO["black"], linewidth=0.8, alpha=0.4)
+ax.set_xscale("log")
+ax.set_xlabel(r"regularization strength  $\lambda$  (log scale)")
+ax.set_ylabel("standardized coefficient")
+ax.legend(loc="upper right", frameon=False, ncol=2)
+sh.finalize(fig, alt="Six ridge coefficient paths shrinking toward zero as lambda increases on a log axis.")
+plt.show()
+```
+
+## The two limits {.smaller}
+
+- $\lambda \to 0$: the penalty vanishes — **ridge recovers OLS** ($\hat{\mathbf{w}}$
+  from Module 1). Maximum variance, minimum bias.
+- $\lambda \to \infty$: the penalty dominates — **$\hat{\mathbf{w}} \to \mathbf{0}$**,
+  the model predicts a constant. Maximum bias, minimum variance.
+
+The useful $\lambda$ lives in between — found by cross-validation.
+
+::: {.notes}
+Speaker note: both ends are degenerate. λ→0 is the overfit right end of the U;
+λ→∞ is the underfit left end. CV picks the middle.
+:::
+
+## Choosing λ by cross-validation
+
+```{python}
+#| label: fig-lambda-cv
+#| fig-alt: "Five-fold cross-validation error versus lambda on a logarithmic axis, for a degree-14 ridge model. The curve is U-shaped: elevated at small lambda (overfit), lowest at a moderate lambda, rising steeply at large lambda (underfit). A vertical line marks the CV-selected lambda."
+#| fig-cap: "5-fold CV error vs. λ for a degree-14 ridge fit; the minimum is the CV choice."
+
+n_cv = 90
+ci = rng.permutation(len(age_z))[:n_cv]
+zc, yc = age_z[ci], y_ill[ci]
+deg, k = 14, 5
+folds = np.array_split(np.arange(n_cv), k)
+lams = np.logspace(-6, 4, 34)
+cv = []
+for lam in lams:
+    errs = []
+    for f in range(k):
+        val = folds[f]
+        trn = np.concatenate([folds[j] for j in range(k) if j != f])
+        Phi_tr, mu, sd = poly_std(zc[trn], deg)           # standardize on TRAIN only (no leak)
+        w, b = ridge_fit(Phi_tr, yc[trn], lam)
+        Phi_val = (poly_raw(zc[val], deg) - mu) / sd
+        errs.append(mse(yc[val], Phi_val @ w + b))
+    cv.append(np.mean(errs))
+best = lams[int(np.argmin(cv))]
+
+fig, ax = plt.subplots()
+ax.plot(lams, cv, color=sh.OKABE_ITO["green"], linestyle="-", marker="o", label="CV error")
+ax.axvline(best, color=sh.OKABE_ITO["vermillion"], linestyle=":", label=fr"CV choice ($\lambda \approx$ {best:.2g})")
+ax.set_xscale("log")
+ax.set_xlabel(r"regularization strength  $\lambda$  (log scale)")
+ax.set_ylabel("cross-validation MSE")
+ax.legend(loc="upper center", frameon=False)
+sh.finalize(fig, alt="U-shaped 5-fold CV error versus lambda on a log axis, with the selected lambda marked.")
+plt.show()
+```
+
+## Live demo: bias-variance / ridge explorer
+
+```{python}
+#| label: live-iframe
+#| echo: false
+from IPython.display import HTML
+HTML(
+    f'<iframe src="{PLACEHOLDER_URL}" title="Week 2 bias-variance / ridge explorer" '
+    'width="100%" height="430" loading="lazy" '
+    'style="border:1px solid var(--border); border-radius:8px; background:var(--surface);">'
+    '</iframe>'
+)
+```
+
+::: {.notes}
+Speaker note: the week02 explorer — slide λ, watch bias and variance trade off and
+the fit stiffen. Swap `PLACEHOLDER_URL` (top of deck) after publish.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive explorer: the U-shaped cross-validation error versus lambda curve with the selected lambda marked, the same view a bias-variance / ridge tool would show."
+#| fig-cap: "Static fallback: CV error vs. λ (used in print / PDF)."
+
+fig, ax = plt.subplots()
+ax.plot(lams, cv, color=sh.OKABE_ITO["green"], linestyle="-", marker="o", label="CV error")
+ax.axvline(best, color=sh.OKABE_ITO["vermillion"], linestyle=":", label=fr"CV choice ($\lambda \approx$ {best:.2g})")
+ax.set_xscale("log")
+ax.set_xlabel(r"regularization strength  $\lambda$  (log scale)")
+ax.set_ylabel("cross-validation MSE")
+ax.set_title("bias-variance / ridge snapshot (placeholder)")
+ax.legend(loc="upper center", frameon=False)
+sh.finalize(fig, alt="Static fallback snapshot of the CV-error-versus-lambda curve.")
+plt.show()
+```
+
+## Forward hook {.smaller}
+
+<!-- ADDED: not in Clay source — keystone-adjacent through-line to Module 4. -->
+
+[The ridge penalty $\lambda\lVert\mathbf{w}\rVert_2^2$ is secretly a **Gaussian prior**
+on $\mathbf{w}$: ridge is **MAP estimation** under that prior. We derive that in
+**Module 4.**]{style="color: var(--accent)"}
+
+So "shrink the weights" and "believe, a priori, the weights are small" are the same
+statement — one more object doing double duty across the term.
+
+::: {.notes}
+Speaker note: plant this now. In M4, the Gaussian prior + Gaussian likelihood gives
+a posterior whose mode is exactly ŵ_ridge with λ = σ²/τ². Regularization = prior.
+:::
+
+## Recap {.smaller}
+
+- **Bias-variance** — test error $=$ bias$^2$ $+$ variance $+\ \sigma^2$; the U is
+  their sum.
+- **Ridge** — $\mathcal{L}+\lambda\lVert\mathbf{w}\rVert^2$, closed form
+  $\hat{\mathbf{w}}_{\text{ridge}}=(\mathbf{X}^{\!\top}\mathbf{X}+\lambda\mathbf{I})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$;
+  always invertible.
+- **Tune $\lambda$ by CV** — the knob that balances the tradeoff.
+
+Module 2 has no standalone checkpoint; generalization discipline is assessed through
+your modeling choices in **Project 1**.
+
+::: {.notes}
+Speaker note: bias-variance is the *why*, ridge is the *control*, CV is the *tuner*.
+Carry the ridge-as-prior hook into Module 4.
+:::
