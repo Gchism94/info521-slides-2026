@@ -20,4 +20,12 @@ $code-block-font-size: 0.72em;
 
 
 /*-- scss:rules --*/
-// Intentionally empty — see theme/info521-head.html for the color system.
+// Color system is in theme/info521-head.html (kept out of minifier for dark/light toggle).
+// Activity embed styling below is safe to minify.
+
+.reveal .activity-embed {
+  width: 100%;
+  height: 68vh;
+  border: 0;
+  border-radius: 8px;
+}
