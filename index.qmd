@@ -1,0 +1,26 @@
+---
+title: "INFO 521 — Lecture Slides"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+Lecture decks for **Machine Learning Foundations** (INFO 521). Each deck is a
+self-contained reveal.js presentation (dark/light toggle, speaker notes, PDF export).
+
+| Module | Deck | Link |
+|--------|------|------|
+| **M1 — Foundations & Linear Regression** | Setup & Model | [m1a-setup-and-model](modules/m1-linear-least-squares/m1a-setup-and-model.html) |
+| | Normal Equations | [m1b-normal-equations](modules/m1-linear-least-squares/m1b-normal-equations.html) |
+| | Appendix: Matrix Calculus | [appendix](modules/m1-linear-least-squares/appendix-matrix-calculus.html) |
+| | Activity Embed Demo | [index](modules/m1-linear-least-squares/index.html) |
+| **M2 — Generalization** | Evaluation & Cross-Validation | [m2a-evaluation-cv](modules/m2-generalization/m2a-evaluation-cv.html) |
+| | Bias–Variance & Ridge | [m2b-bias-variance-ridge](modules/m2-generalization/m2b-bias-variance-ridge.html) |
+| **M3 — MLE & Uncertainty** | Properties of MLE | [index](modules/m3-mle-uncertainty/index.html) |
+| | Appendix: Covariance | [appendix](modules/m3-mle-uncertainty/appendix-covariance.html) |
+| M4–M7 | *(In progress)* | — |
+
+---
+
+[← Course Hub](https://gchism94.github.io/info521){target="_blank"}
