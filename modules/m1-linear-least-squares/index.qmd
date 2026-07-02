@@ -1,0 +1,65 @@
+---
+title: "Foundations & Linear Regression"
+subtitle: "INFO 521 · Module 1"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+```
+
+## Learning outcomes {.smaller}
+
+By the end of this module you should be able to:
+
+1. **Formulate the linear regression problem** — design matrix, weights, loss.
+2. **Solve for the least-squares estimate** — normal equations and geometric interpretation.
+3. **Interpret residuals and fitted values** — diagnostics and model assessment.
+
+## The regression problem {.smaller}
+
+Given $N$ observations $(\mathbf{x}_n, y_n)$:
+
+- **Design matrix** $\mathbf{X} \in \mathbb{R}^{N \times D}$: one row per observation, one column per feature.
+- **Target vector** $\mathbf{y} \in \mathbb{R}^{N}$: continuous outcomes.
+- **Weights** $\mathbf{w} \in \mathbb{R}^{D}$: the parameters we solve for.
+
+**Prediction**: $\hat{y}_n = \mathbf{w}^{\!\top}\mathbf{x}_n$
+
+**Loss**: Mean squared error
+$$\mathcal{L}(\mathbf{w}) = \frac{1}{N}\sum_{n=1}^{N}(y_n - \mathbf{w}^{\!\top}\mathbf{x}_n)^2$$
+
+## The normal equations {.smaller}
+
+Minimizing the loss gives:
+
+$$
+\hat{\mathbf{w}} = \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y}
+$$
+
+This is the **closed-form solution** — no iteration needed. The $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}$ term assumes the design matrix is full rank.
+
+**Interpretations**:
+- $\mathbf{X}^{\!\top}\mathbf{X}$ is proportional to the *Gram matrix* (feature covariances).
+- $\mathbf{X}^{\!\top}\mathbf{y}$ is the *cross-covariance* between features and targets.
+- $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$ is the *pseudo-inverse* of $\mathbf{X}$.
+
+## Try it: Interactive tool {background-iframe="https://gchism94.github.io/info521-activities-2026/week01-least-squares/" background-interactive="true"}
+
+Take 5 minutes to explore the least-squares tool above. Adjust the data and weights, observe the loss change, and then complete the mastery quiz (≥80% reveals your token).
+
+::: {.notes}
+Speaker note: this is a full-bleed embedded iframe. Students can interact with the tool directly during lecture. The quiz randomizes each attempt, so they can retake until mastery.
+:::
