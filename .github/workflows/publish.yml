@@ -16,14 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The slides project depends on a local editable package at ../info521-projects-2026
-      # (the NHANES data loader). Check it out into the sibling path it expects.
+      # requirements.txt has `-e ../info521-projects-2026` (NHANES loader).
+      # Actions workspace rules forbid path: ../ so we check out inside the
+      # workspace and install from there instead of from the sibling path.
       - name: Check out info521-projects-2026 (NHANES loader)
         uses: actions/checkout@v4
         with:
           repository: gchism94/info521-projects-2026
-          path: ../info521-projects-2026
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: info521-projects-2026
 
       - uses: actions/setup-python@v5
         with:
@@ -31,7 +31,9 @@ jobs:
           cache: pip
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          grep -v 'info521-projects-2026' requirements.txt | pip install -r /dev/stdin
+          pip install -e ./info521-projects-2026
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
