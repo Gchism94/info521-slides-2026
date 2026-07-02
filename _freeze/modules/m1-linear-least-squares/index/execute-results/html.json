@@ -1,0 +1,12 @@
+{
+  "hash": "9eb7380eea8fd2b0060b2e6fc864f6f4",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Foundations & Linear Regression\"\nsubtitle: \"INFO 521 · Module 1\"\nauthor: \"Greg Chism\"\ninstitute: \"School of Information · University of Arizona\"\ndate: last-modified\ndate-format: \"MMMM YYYY\"\n---\n\n\n## Learning outcomes {.smaller}\n\nBy the end of this module you should be able to:\n\n1. **Formulate the linear regression problem** — design matrix, weights, loss.\n2. **Solve for the least-squares estimate** — normal equations and geometric interpretation.\n3. **Interpret residuals and fitted values** — diagnostics and model assessment.\n\n## The regression problem {.smaller}\n\nGiven $N$ observations $(\\mathbf{x}_n, y_n)$:\n\n- **Design matrix** $\\mathbf{X} \\in \\mathbb{R}^{N \\times D}$: one row per observation, one column per feature.\n- **Target vector** $\\mathbf{y} \\in \\mathbb{R}^{N}$: continuous outcomes.\n- **Weights** $\\mathbf{w} \\in \\mathbb{R}^{D}$: the parameters we solve for.\n\n**Prediction**: $\\hat{y}_n = \\mathbf{w}^{\\!\\top}\\mathbf{x}_n$\n\n**Loss**: Mean squared error\n$$\\mathcal{L}(\\mathbf{w}) = \\frac{1}{N}\\sum_{n=1}^{N}(y_n - \\mathbf{w}^{\\!\\top}\\mathbf{x}_n)^2$$\n\n## The normal equations {.smaller}\n\nMinimizing the loss gives:\n\n$$\n\\hat{\\mathbf{w}} = \\left(\\mathbf{X}^{\\!\\top}\\mathbf{X}\\right)^{-1}\\mathbf{X}^{\\!\\top}\\mathbf{y}\n$$\n\nThis is the **closed-form solution** — no iteration needed. The $(\\mathbf{X}^{\\!\\top}\\mathbf{X})^{-1}$ term assumes the design matrix is full rank.\n\n**Interpretations**:\n- $\\mathbf{X}^{\\!\\top}\\mathbf{X}$ is proportional to the *Gram matrix* (feature covariances).\n- $\\mathbf{X}^{\\!\\top}\\mathbf{y}$ is the *cross-covariance* between features and targets.\n- $(\\mathbf{X}^{\\!\\top}\\mathbf{X})^{-1}\\mathbf{X}^{\\!\\top}$ is the *pseudo-inverse* of $\\mathbf{X}$.\n\n## Try it: Interactive tool {background-iframe=\"https://gchism94.github.io/info521-activities-2026/week01-least-squares/\" background-interactive=\"true\"}\n\nTake 5 minutes to explore the least-squares tool above. Adjust the data and weights, observe the loss change, and then complete the mastery quiz (≥80% reveals your token).\n\n::: {.notes}\nSpeaker note: this is a full-bleed embedded iframe. Students can interact with the tool directly during lecture. The quiz randomizes each attempt, so they can retake until mastery.\n:::\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
