@@ -38,7 +38,7 @@ w1_per_year = w1 / age_sd                         # convert slope to mmHg per ye
 
 # >>> PLACEHOLDER — replace with the deployed week01 LS-explorer Pages URL. <<<
 # → fill with week01 LS-explorer Pages URL after publish.
-PLACEHOLDER_URL = "https://example.org/REPLACE-ME-week01-least-squares-explorer"
+PLACEHOLDER_URL = "https://gchism94.github.io/info521-activities-2026/week01-least-squares/"
 ```
 
 ## Learning outcomes {.smaller}

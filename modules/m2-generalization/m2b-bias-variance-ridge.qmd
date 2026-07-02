@@ -53,7 +53,7 @@ def ridge_fit(Phi, y, lam):
 
 # >>> PLACEHOLDER — replace with the deployed week02 bias-variance/ridge tool. <<<
 # → week02 bias-variance / ridge tool Pages URL after publish.
-PLACEHOLDER_URL = "https://example.org/REPLACE-ME-week02-bias-variance-ridge-explorer"
+PLACEHOLDER_URL = "https://gchism94.github.io/info521-activities-2026/week02-bias-variance/"
 ```
 
 ## Learning outcomes {.smaller}

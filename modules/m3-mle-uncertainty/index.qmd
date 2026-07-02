@@ -25,7 +25,7 @@ sh.use_slide_style()
 
 # >>> PLACEHOLDER — replace with the deployed parameter-uncertainty tool URL. <<<
 # Single source of truth for the live-demo iframe AND its fallback caption.
-PLACEHOLDER_URL = "https://example.org/REPLACE-ME-parameter-uncertainty-explorer"
+PLACEHOLDER_URL = "https://gchism94.github.io/info521-activities-2026/week03-bayesian-updating/"
 ```
 
 ## Learning outcomes {.smaller}
