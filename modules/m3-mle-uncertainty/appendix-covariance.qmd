@@ -21,8 +21,9 @@ $\mathbf{X}$ and $\mathbf{w}$ are fixed, and $\mathbb{E}[\mathbf{y}] = \mathbf{X
 $\;\mathrm{Cov}[\mathbf{y}] = \sigma^2\mathbf{I}$.
 
 ::: {.notes}
-Speaker note: this is the slide-10 promise paid off. Each step reveals on a
-fragment — walk it line by line; the whole thing collapses through
+Speaker note: this pays off the main deck's "derived in full in the appendix"
+promise. Each step reveals on a fragment — walk it line by line; the whole thing
+collapses through
 $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{X} = \mathbf{I}$.
 :::
 
@@ -82,5 +83,5 @@ we get $\mathrm{Cov}[\hat{\mathbf{w}}] = \mathcal{I}^{-1}$.]{style="color: var(-
 ::: {.notes}
 Speaker note: the cancellation is the satisfying step — the bias-free part
 ($\mathbf{w}\mathbf{w}^{\!\top}$) drops out, leaving pure noise scaled by the
-inverse Gram matrix. Close by tying back to Fisher info (main deck slide 11).
+inverse Gram matrix. Close by tying back to the main deck's Fisher-information slide.
 :::

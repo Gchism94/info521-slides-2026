@@ -23,9 +23,8 @@ import slide_helpers as sh
 
 sh.use_slide_style()
 
-# >>> PLACEHOLDER — replace with the deployed parameter-uncertainty tool URL. <<<
-# Single source of truth for the live-demo iframe AND its fallback caption.
-PLACEHOLDER_URL = "https://gchism94.github.io/info521-activities-2026/week03-bayesian-updating/"
+# M3 has NO activity embed (per SOURCE_MAP: the week03 Bayesian-updating tool
+# belongs to M4; a parameter-uncertainty viz for M3 is a future build).
 ```
 
 ## Learning outcomes {.smaller}
@@ -344,52 +343,6 @@ axR.set_ylabel(r"$w_1$  (slope)")
 axR.legend(loc="upper right", frameon=False)
 
 sh.finalize(fig, alt="NHANES least-squares fit and the N=40 vs full-N covariance ellipses for the fitted parameters.")
-plt.show()
-```
-
-## Live demo: parameter-uncertainty explorer
-
-::: {style="color: var(--accent); font-weight:650;"}
-Pipeline test — placeholder tool; the parameter-uncertainty viz is a future M3 build.
-:::
-
-```{python}
-#| label: live-iframe
-#| echo: false
-from IPython.display import HTML
-HTML(
-    f'<iframe src="{PLACEHOLDER_URL}" title="Parameter-uncertainty explorer" '
-    'width="100%" height="430" loading="lazy" '
-    'style="border:1px solid var(--border); border-radius:8px; background:var(--surface);">'
-    '</iframe>'
-)
-```
-
-::: {.notes}
-Speaker note: placeholder iframe — swap `PLACEHOLDER_URL` (top of deck) when the
-M3 uncertainty tool ships. The static fallback (next slide) is what prints.
-:::
-
-## Explorer — static fallback {.smaller}
-
-*The iframe above does not print or export to PDF; this snapshot stands in.*
-
-```{python}
-#| label: fig-fallback
-#| fig-alt: "Static snapshot standing in for the interactive explorer: the parameter plane of intercept w0 versus slope w1 with the small-sample (N=40, orange dashed) and full-sample (green solid) covariance ellipses, the same view a parameter-uncertainty tool would show."
-#| fig-cap: "Static fallback: the covariance ellipses (used in print / PDF)."
-
-fig, ax = plt.subplots(figsize=(7.6, 4.6))
-ax.plot(exs, eys, color=sh.OKABE_ITO["orange"], linestyle="--",
-        marker="s", markevery=30, label="N = 40")
-ax.plot(exl, eyl, color=sh.OKABE_ITO["green"], linestyle="-",
-        marker="o", markevery=30, label="N = full")
-ax.plot(w_full[0], w_full[1], marker="+", ms=12, color=sh.OKABE_ITO["purple"])
-ax.set_xlabel(r"$w_0$  (intercept)")
-ax.set_ylabel(r"$w_1$  (slope)")
-ax.set_title("parameter-uncertainty snapshot (placeholder)")
-ax.legend(loc="upper right", frameon=False)
-sh.finalize(fig, alt="Static fallback snapshot of the parameter covariance ellipses.")
 plt.show()
 ```
 
