@@ -1,0 +1,340 @@
+---
+title: "Approximate Inference & Bayesian Classification"
+subtitle: "INFO 521 · Module 5 · Lecture A — Breaking Conjugacy: Logistic Regression & Newton's Method"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+from info521.data import hypertension
+
+sh.use_slide_style()
+
+ds   = sh.load_nhanes()
+age  = sh.primary_predictor(ds)
+age_z = (age - age.mean()) / age.std()
+labels, rule = hypertension(ds)          # ACC/AHA: SBP>=130 OR DBP>=80
+X = np.column_stack([np.ones_like(age_z), age_z])
+N = len(labels)
+
+def sigmoid(a):
+    return 1.0 / (1.0 + np.exp(-a))
+
+def newton_logistic(Xs, ys, iters=25, tol=1e-10):
+    """Newton–Raphson for logistic regression (from scratch; returns the path)."""
+    w = np.zeros(Xs.shape[1])
+    path = [w.copy()]
+    for _ in range(iters):
+        p = sigmoid(Xs @ w)
+        g = Xs.T @ (ys - p)                              # gradient of ℓ
+        H = -(Xs * (p * (1 - p))[:, None]).T @ Xs        # Hessian of ℓ (neg. definite)
+        step = np.linalg.solve(H, -g)
+        w = w + step
+        path.append(w.copy())
+        if np.abs(step).max() < tol:
+            break
+    return w, path
+
+def loglik(Xs, ys, w):
+    a = Xs @ w
+    # numerically-stable Bernoulli log-likelihood: y·a − log(1+e^a)
+    return float((ys * a - np.logaddexp(0.0, a)).sum())
+
+w_mle, path = newton_logistic(X, labels)   # converges in ~5 steps → (−0.487, 0.519)
+
+rng = np.random.default_rng(521)           # fixed seed → reproducible figures
+# The week04 activity embed is a background-iframe slide attribute (literal URL —
+# Quarto does not expand variables inside slide attributes; see CLAUDE.md).
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **Explain why binarizing the outcome breaks conjugacy** — and what dies with it.
+2. **State the logistic regression model** and its log-likelihood $\ell(\mathbf{w})$.
+3. **Show there is no closed form** — and why that is structural, not bad luck.
+4. **Run Newton–Raphson** — gradient, Hessian, update — and read its convergence.
+
+::: {.notes}
+Speaker note: (Clay 22 framed discriminative per the module arc, + Clay 19).
+Project 2 opens on this exact move: same patients, binarized label.
+:::
+
+## Project 2 opens here: binarize the outcome {.smaller}
+
+Module 4 closed with everything Gaussian and every formula closed-form. Now ask
+the *clinical* question instead:
+
+**Is this patient hypertensive?** — $y_n \in \{0, 1\}$ by the ACC/AHA rule
+(SBP ≥ 130 or DBP ≥ 80; measured BP only, never a feature).
+
+::: {.fragment}
+The target is now a **Bernoulli** outcome, not a Gaussian one:
+
+$$
+p(y_n \mid \mathbf{x}_n, \mathbf{w}) = \mathrm{Bern}\!\left(y_n \,\middle|\, \mu_n\right),
+\qquad \mu_n = p(y_n = 1 \mid \mathbf{x}_n).
+$$
+:::
+
+::: {.fragment}
+[A Gaussian prior on $\mathbf{w}$ meets a **Bernoulli likelihood** — no conjugate
+pair exists. **The closed-form posterior of Module 4 is gone.** This is the
+conjugacy-break the course was built around.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: the keystone bridge — M4 ended "conjugacy breaks"; this slide is the
+break. Same data (38.8% prevalence), new target type, and the algebra that made
+Bayes easy is structurally unavailable.
+:::
+
+## The model: squash the line {.smaller}
+
+Keep the linear score $\mathbf{w}^{\!\top}\mathbf{x}$, then squash it into a
+probability with the **sigmoid** $\sigma(a) = \dfrac{1}{1 + e^{-a}}$:
+
+$$
+p(y_n = 1 \mid \mathbf{x}_n, \mathbf{w}) = \sigma\!\left(\mathbf{w}^{\!\top}\mathbf{x}_n\right)
+$$
+
+```{python}
+#| label: fig-sigmoid
+#| fig-alt: "The sigmoid function plotted over scores from minus six to six: an S-shaped blue curve rising from zero to one, crossing one half at score zero, with dashed guide lines marking the 0.5 crossing and the decision boundary."
+#| fig-cap: "The sigmoid σ(a): linear score in, probability out; σ(0) = ½ is the decision boundary."
+
+a = np.linspace(-6, 6, 300)
+fig, ax = plt.subplots(figsize=(8.2, 3.7))
+ax.plot(a, sigmoid(a), color=sh.OKABE_ITO["blue"], linestyle="-")
+ax.axhline(0.5, color=sh.OKABE_ITO["vermillion"], linestyle="--", linewidth=1.4)
+ax.axvline(0.0, color=sh.OKABE_ITO["vermillion"], linestyle=":", linewidth=1.4)
+ax.set_xlabel(r"score  $a = \mathbf{w}^{\!\top}\mathbf{x}$")
+ax.set_ylabel(r"$\sigma(a) = p(y=1)$")
+sh.finalize(fig, alt="S-shaped sigmoid curve mapping scores to probabilities with the half-probability crossing marked at zero.")
+plt.show()
+```
+
+- Still **linear in $\mathbf{w}$** inside — basis functions (m1b) still apply.
+- **Discriminative**: model $p(y \mid \mathbf{x})$ directly; no model of $\mathbf{x}$.
+
+::: {.notes}
+Speaker note: (Clay 22 — built as the discriminative model per the module arc,
+not a naive-Bayes generative deck). w tilts and shifts the S; the boundary
+wᵀx = 0 is still a line in feature space — "linear model" survives binarization.
+:::
+
+## The log-likelihood {.smaller}
+
+Bernoulli terms multiply across independent patients; take the log:
+
+$$
+\ell(\mathbf{w})
+= \sum_{n=1}^{N}\Bigl[\, y_n \log \mu_n + (1 - y_n)\log(1 - \mu_n) \Bigr],
+\qquad \mu_n = \sigma(\mathbf{w}^{\!\top}\mathbf{x}_n)
+$$
+
+Set the gradient to zero:
+
+$$
+\frac{\partial \ell}{\partial \mathbf{w}}
+= \mathbf{X}^{\!\top}(\mathbf{y} - \boldsymbol{\mu}) = \mathbf{0}
+$$
+
+::: {.fragment}
+Looks like the normal equations — but $\boldsymbol{\mu}$ hides $\mathbf{w}$
+**inside a nonlinearity**. There is no way to isolate $\mathbf{w}$:
+[**no closed form exists.** Not harder algebra — *no* algebra.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: (Clay 19/22). Compare side-by-side with m1b: there Xᵀ(y − Xw) = 0
+solved linearly; here σ(·) wraps w. The equation is transcendental. So: iterate.
+:::
+
+## Newton–Raphson: use the curvature {.smaller}
+
+Climb $\ell$ by repeatedly jumping to the peak of its **local quadratic**:
+
+$$
+\mathbf{w}^{(t+1)}
+= \mathbf{w}^{(t)} - \mathbf{H}^{-1}\,
+\frac{\partial \ell}{\partial \mathbf{w}}\bigg|_{\mathbf{w}^{(t)}}
+\qquad\quad
+\mathbf{H} = -\mathbf{X}^{\!\top}\mathbf{R}\,\mathbf{X},
+\quad
+\mathbf{R} = \mathrm{diag}\bigl(\mu_n(1-\mu_n)\bigr)
+$$
+
+- **Gradient** says which way is up; the **Hessian** $\mathbf{H}$ says how the
+  slope is changing — one solve per step, no step size to tune.
+- $\mathbf{H}$ is **negative definite** ($\mathbf{v}^{\!\top}\mathbf{H}\mathbf{v} < 0\ \forall\,\mathbf{v}\neq\mathbf{0}$):
+  $\ell$ is concave, so the peak Newton finds is **the** peak.
+- It is m3b's uniqueness argument again — $\mathbf{X}^{\!\top}\mathbf{X}$ has
+  become $\mathbf{X}^{\!\top}\mathbf{R}\mathbf{X}$, reweighted by each patient's
+  uncertainty $\mu_n(1-\mu_n)$.
+
+::: {.notes}
+Speaker note: (Clay 19). Patients near μ = ½ (the fence-sitters) get the most
+weight in R — they carry the information about where the boundary is. Gradient
+ascent would work too; Newton just uses curvature to take direct steps.
+:::
+
+## Newton on NHANES: five steps to the answer
+
+```{python}
+#| label: fig-newton-convergence
+#| fig-alt: "Two panels showing Newton-Raphson fitting logistic regression of hypertension on standardized age for all 5102 NHANES adults. Left: the Bernoulli log-likelihood versus iteration climbs steeply from its start at weights zero and is flat by iteration three, with circular markers at each step. Right: the two weight components' paths across iterations, intercept in vermillion squares settling at about minus 0.49 and slope in green triangles settling at about 0.52."
+#| fig-cap: "Newton–Raphson on real NHANES (hypertension ~ age): ℓ converges in ~3 steps; ŵ = (−0.49, 0.52) — a per-SD-of-age odds ratio of e^0.52 ≈ 1.7."
+
+lls = [loglik(X, labels, w) for w in path]
+P = np.array(path)
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
+axL.plot(range(len(lls)), lls, color=sh.OKABE_ITO["blue"], linestyle="-", marker="o")
+axL.set_xlabel("Newton iteration")
+axL.set_ylabel(r"$\ell(\mathbf{w})$")
+axL.set_title("log-likelihood climb")
+
+axR.plot(range(len(P)), P[:, 0], color=sh.OKABE_ITO["vermillion"], linestyle="--",
+         marker="s", label=r"$w_0$ (intercept)")
+axR.plot(range(len(P)), P[:, 1], color=sh.OKABE_ITO["green"], linestyle="-.",
+         marker="^", label=r"$w_1$ (slope)")
+axR.set_xlabel("Newton iteration")
+axR.set_ylabel("weight value")
+axR.set_title("parameter paths")
+axR.legend(loc="center right", frameon=False)
+sh.finalize(fig, alt="Log-likelihood rising to a plateau within three Newton steps and both weight paths flattening at their maximum-likelihood values.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: all 5,102 real patients, from-scratch Newton (setup cell). Converges
+in ~5 iterations to machine precision. Clinical read of ŵ₁ ≈ 0.52: each SD of age
+(~17 yr) multiplies the odds of hypertension by e^0.52 ≈ 1.7.
+:::
+
+## The fitted curve on the data
+
+```{python}
+#| label: fig-logistic-fit
+#| fig-alt: "Scatter of standardized age versus hypertension status for a thinned sample of NHANES adults, with the zero-one labels vertically jittered for visibility in blue, the fitted logistic curve rising with age in vermillion, the empirical hypertension fraction within age bins drawn as green diamonds tracking the curve, and a dotted vertical line at the age where the fitted probability crosses one half."
+#| fig-cap: "Logistic fit (vermillion) vs. binned empirical rates (green ⋄), real NHANES; jittered 0/1 labels in blue. P(htn) crosses ½ near z ≈ 0.94 (~age 66)."
+
+zgrid = np.linspace(age_z.min(), age_z.max(), 200)
+phat = sigmoid(w_mle[0] + w_mle[1] * zgrid)
+
+# Binned empirical rates (deciles of z) — the honest nonparametric check.
+edges = np.quantile(age_z, np.linspace(0, 1, 11))
+mids, rates = [], []
+for lo, hi in zip(edges[:-1], edges[1:]):
+    m = (age_z >= lo) & (age_z <= hi)
+    mids.append(age_z[m].mean()); rates.append(labels[m].mean())
+
+show = rng.choice(N, 900, replace=False)   # thin the scatter for legibility
+jit = labels[show] + rng.uniform(-0.04, 0.04, size=show.size)
+
+fig, ax = plt.subplots()
+ax.scatter(age_z[show], jit, s=8, alpha=0.15, color=sh.OKABE_ITO["blue"],
+           label="patients (0/1, jittered)")
+ax.plot(zgrid, phat, color=sh.OKABE_ITO["vermillion"], linestyle="-",
+        label=r"fitted  $\sigma(\hat{w}_0 + \hat{w}_1 z)$")
+ax.plot(mids, rates, color=sh.OKABE_ITO["green"], linestyle="none", marker="D",
+        ms=7, label="empirical rate (age deciles)")
+zc = -w_mle[0] / w_mle[1]
+ax.axvline(zc, color=sh.OKABE_ITO["orange"], linestyle=":",
+           label=fr"$p = \tfrac{{1}}{{2}}$ at $z \approx {zc:.2f}$")
+ax.set_xlabel("standardized age (z)")
+ax.set_ylabel("P(hypertension)")
+ax.legend(loc="center left", frameon=False, fontsize=10)
+sh.finalize(fig, alt="Fitted logistic probability curve rising with age, matching binned empirical hypertension rates from NHANES.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: the green decile diamonds are model-free — the sigmoid earns its
+keep by tracking them. The ½-crossing at z≈0.94 back-transforms to ≈66 years:
+a memorable clinical anchor.
+:::
+
+## Live demo: the logistic + Newton explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week04-logistic-regression/" background-interactive="true"}
+
+Step Newton by hand in the week04 tool — watch the quadratic model jump and the
+boundary settle.
+
+::: {.notes}
+Speaker note: full-bleed interactive embed of the week04 logistic-regression /
+Newton tool (PRIMARY pattern, CLAUDE.md). The static fallback on the next slide
+is what prints / exports to PDF.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive explorer: the Bernoulli log-likelihood climbing to its plateau across Newton iterations on the NHANES hypertension model, the same convergence view the week04 tool shows."
+#| fig-cap: "Static fallback: Newton convergence on NHANES (used in print / PDF)."
+
+fig, ax = plt.subplots(figsize=(7.8, 4.2))
+ax.plot(range(len(lls)), lls, color=sh.OKABE_ITO["blue"], linestyle="-", marker="o")
+ax.set_xlabel("Newton iteration")
+ax.set_ylabel(r"$\ell(\mathbf{w})$")
+ax.set_title("week04 explorer snapshot")
+sh.finalize(fig, alt="Static fallback snapshot of the Newton-Raphson log-likelihood convergence curve.")
+plt.show()
+```
+
+## What we have — and what we lost {.smaller}
+
+**Have** (frequentist story, fully intact):
+
+- $\hat{\mathbf{w}}_{\text{MLE}}$ by Newton; uniqueness via the concave $\ell$;
+  even m3b-style uncertainty from the curvature $-\mathbf{H}^{-1}$ at the peak.
+
+**Lost** (the Bayesian story):
+
+- The **posterior** $p(\mathbf{w} \mid \mathcal{D}) \propto
+  e^{\ell(\mathbf{w})}\, p(\mathbf{w})$ is known only **up to its normalizer** —
+  the evidence integral has no closed form, so credible intervals and honest
+  predictive probabilities are out of reach *exactly*.
+
+[Optimization survived binarization. **Integration did not.** Recovering it
+approximately is Lecture B.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: sharpen the asymmetry: finding the peak is easy (5 Newton steps);
+knowing the *mass around it* is the hard part. That's the entire agenda of m5b.
+:::
+
+## Recap & bridge {.smaller}
+
+- **Binarize → conjugacy breaks**: Bernoulli likelihood + Gaussian prior has no
+  closed-form posterior — Project 2's opening move.
+- **Logistic regression**: $p(y{=}1\mid\mathbf{x}) = \sigma(\mathbf{w}^{\!\top}\mathbf{x})$;
+  concave $\ell(\mathbf{w})$; gradient $\mathbf{X}^{\!\top}(\mathbf{y}-\boldsymbol{\mu})$.
+- **Newton–Raphson**: $\mathbf{w} \leftarrow \mathbf{w} - \mathbf{H}^{-1}\nabla\ell$
+  — five steps on all of NHANES.
+
+[**Next (Lecture B):** approximate the posterior we can't normalize — a Gaussian
+at the MAP (Laplace), then samples instead of formulas (Metropolis).]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: Newton's byproduct — the Hessian at the peak — is literally the
+Laplace approximation's covariance. Lecture B starts by reusing it.
+:::
