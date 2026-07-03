@@ -1,0 +1,352 @@
+---
+title: "Bayesian Inference"
+subtitle: "INFO 521 · Module 4 · Lecture A — Priors, Posteriors & the Beta-Binomial"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+from math import lgamma
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+from info521.data import hypertension
+
+sh.use_slide_style()
+
+ds = sh.load_nhanes()
+labels, rule = hypertension(ds)          # ACC/AHA: SBP>=130 OR DBP>=80; prevalence ≈ 0.388
+theta_full = float(labels.mean())
+
+rng = np.random.default_rng(521)          # fixed seed → reproducible figures
+order = rng.permutation(len(labels))      # one fixed screening order for the whole deck
+
+def beta_pdf(t, a, b):
+    """Beta(a,b) density on a grid (log-gamma form; no scipy dependency)."""
+    logB = lgamma(a) + lgamma(b) - lgamma(a + b)
+    return np.exp((a - 1) * np.log(t) + (b - 1) * np.log(1 - t) - logB)
+
+tgrid = np.linspace(1e-4, 1 - 1e-4, 500)
+
+# The week04 activity embed is a background-iframe slide attribute (literal URL —
+# Quarto does not expand variables inside slide attributes; see CLAUDE.md).
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **State Bayes' rule for parameters** and name every term.
+2. **Choose and read a Beta prior** for a proportion.
+3. **Perform the conjugate update** — Beta$(a,b)$ + binomial data →
+   Beta$(a{+}n_1,\ b{+}n_0)$ — by hand.
+4. **Explain what a posterior buys** that a point estimate cannot.
+
+::: {.notes}
+Speaker note: (Clay 15/16). One running question all lecture: what fraction θ of
+U.S. adults are hypertensive? Same NHANES data, new epistemics.
+:::
+
+## From "how uncertain?" to "what do we believe?" {.smaller}
+
+Module 3 quantified uncertainty by imagining **repeated datasets**:
+$\hat{\mathbf{w}}$ scatters with $\mathrm{Cov}[\hat{\mathbf{w}}]$, but the true
+parameter stays a *fixed unknown*.
+
+::: {.fragment}
+Bayes flips the object of study: keep the **one dataset you actually have**, and
+treat the parameter itself as **uncertain** — a probability distribution over
+what it might be, updated by evidence.
+:::
+
+::: {.fragment}
+[Frequentist: the *estimate* is random. Bayesian: the *belief about the
+parameter* is the distribution. Both use the same likelihood.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: (Clay 15). Don't stage a holy war — stress the shared likelihood
+and the different random object. m3b's ellipse was spread-of-ŵ; today's posterior
+is spread-of-belief.
+:::
+
+## Bayes' rule, term by term {.smaller}
+
+For a parameter $\theta$ and observed data $\mathcal{D}$:
+
+$$
+\underbrace{p(\theta \mid \mathcal{D})}_{\text{posterior}}
+\;=\;
+\frac{\overbrace{p(\mathcal{D} \mid \theta)}^{\text{likelihood}}\;
+      \overbrace{p(\theta)}^{\text{prior}}}
+     {\underbrace{p(\mathcal{D})}_{\text{evidence}}}
+$$
+
+- **Prior** — belief before this dataset.
+- **Likelihood** — the M3 object, unchanged: how probable is the data at each $\theta$.
+- **Evidence** — a normalizing constant (for today); it returns in Lecture B.
+- **Posterior** — belief after: $\ \text{posterior} \propto \text{likelihood} \times \text{prior}$.
+
+::: {.notes}
+Speaker note: (Clay 15). The ∝ form is the working form — the denominator doesn't
+depend on θ. Students should be able to label all four terms cold.
+:::
+
+## The running question: hypertension prevalence {.smaller}
+
+Screen adults one at a time and record hypertension (ACC/AHA rule:
+SBP ≥ 130 **or** DBP ≥ 80 — measured BP only, the leakage-safe Project-2 label).
+
+- Each patient: hypertensive ($1$) or not ($0$) — a **Bernoulli**$(\theta)$ draw.
+- After $N$ patients with $n_1$ positives ($n_0 = N{-}n_1$), the likelihood is
+  **binomial** in shape:
+
+$$
+p(\mathcal{D} \mid \theta) \;\propto\; \theta^{\,n_1} (1-\theta)^{\,n_0}
+$$
+
+The full NHANES answer (all $5{,}102$ adults): $\theta \approx 0.388$. Today we
+watch belief *converge* to it patient by patient.
+
+::: {.notes}
+Speaker note: real stakes — this is the same label Project 2 predicts. The lecture
+"screens" NHANES adults in a fixed random order (seed 521) so every figure is
+reproducible.
+:::
+
+## The Beta prior {.smaller}
+
+A prior for a proportion must live on $[0,1]$. The **Beta** family:
+
+$$
+p(\theta) = \mathrm{Beta}(\theta \mid a, b)
+\;\propto\; \theta^{\,a-1}(1-\theta)^{\,b-1}
+$$
+
+```{python}
+#| label: fig-beta-shapes
+#| fig-alt: "Four Beta probability density curves on the unit interval, illustrating the family's shapes: the flat Beta(1,1) uniform in blue, the gentle symmetric hump of Beta(2,2) in vermillion, a Beta(2,5) skewed toward low values in green, and a sharply peaked Beta(20,30) concentrated near 0.4 in orange."
+#| fig-cap: "The Beta family (illustrative shapes): a and b act like prior pseudo-counts of 1s and 0s."
+
+fig, ax = plt.subplots(figsize=(8.5, 4.0))
+for (a, b), key, ls, lab in [((1, 1), "blue", "-", "Beta(1,1) — flat"),
+                             ((2, 2), "vermillion", "--", "Beta(2,2) — mild center"),
+                             ((2, 5), "green", "-.", "Beta(2,5) — skeptical of high θ"),
+                             ((20, 30), "orange", ":", "Beta(20,30) — confident near 0.4")]:
+    ax.plot(tgrid, beta_pdf(tgrid, a, b), color=sh.OKABE_ITO[key], linestyle=ls, label=lab)
+ax.set_xlabel(r"$\theta$  (hypertension proportion)")
+ax.set_ylabel("density")
+ax.legend(loc="upper right", frameon=False, fontsize=11)
+sh.finalize(fig, alt="Four Beta densities showing flat, mildly centered, low-skewed, and sharply peaked prior shapes.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: (Clay 16). Read a and b as pseudo-counts: "I've effectively already
+seen a−1 positives and b−1 negatives." Beta(1,1) = seen nothing = uniform.
+:::
+
+## Conjugacy: the update is just addition {.smaller}
+
+Multiply prior by likelihood — the exponents **add**:
+
+$$
+\underbrace{\theta^{a-1}(1-\theta)^{b-1}}_{\text{prior}}
+\times
+\underbrace{\theta^{n_1}(1-\theta)^{n_0}}_{\text{likelihood}}
+\;\propto\;
+\theta^{(a+n_1)-1}(1-\theta)^{(b+n_0)-1}
+$$
+
+$$
+\boxed{\;\mathrm{Beta}(a, b)\ \xrightarrow{\ n_1\ \text{ones},\ n_0\ \text{zeros}\ }\ \mathrm{Beta}(a + n_1,\ b + n_0)\;}
+$$
+
+A prior family that reproduces itself through the likelihood is called
+**conjugate** — the posterior stays in-family, so updating is exact arithmetic.
+
+[Count successes, add to $a$; count failures, add to $b$. That's the entire
+computation.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 16/17 — the keystone mechanism, small case). This is the
+hand-computable core: the P1-M3 checkpoint asks for exactly this derivation.
+:::
+
+## Watching belief converge
+
+```{python}
+#| label: fig-sequential-update
+#| fig-alt: "Four Beta posterior density curves for the hypertension proportion, computed from real NHANES screening draws: the flat Beta(1,1) prior in blue, the wide posterior after 5 patients in orange, a narrower posterior after 20 patients in green, and a sharp posterior after 200 patients in vermillion, which concentrates around the full-sample prevalence of 0.388 marked by a dashed vertical line."
+#| fig-cap: "Beta(1,1) updated with real NHANES screening draws (seed 521): 5 → 20 → 200 patients; dashes mark the full-sample θ ≈ 0.388."
+
+fig, ax = plt.subplots()
+stages = [(0, "blue", "-", "prior — Beta(1,1)"),
+          (5, "orange", "--", None),
+          (20, "green", "-.", None),
+          (200, "vermillion", ":", None)]
+for n, key, ls, lab in stages:
+    n1 = int(labels[order[:n]].sum())
+    if lab is None:
+        lab = f"after {n} patients ({n1} positive)"
+    ax.plot(tgrid, beta_pdf(tgrid, 1 + n1, 1 + n - n1),
+            color=sh.OKABE_ITO[key], linestyle=ls, label=lab)
+ax.axvline(theta_full, color=sh.OKABE_ITO["black"], linestyle="--", alpha=0.5,
+           label=fr"full NHANES: $\theta \approx {theta_full:.3f}$")
+ax.set_xlabel(r"$\theta$  (hypertension proportion)")
+ax.set_ylabel("posterior density")
+ax.legend(loc="upper right", frameon=False, fontsize=11)
+sh.finalize(fig, alt="Sequence of Beta posteriors narrowing around the full-sample hypertension prevalence as real patients accumulate.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: real draws, not synthetic — the counts in the legend are what the
+seed-521 screening order actually produced. Uncertainty *shrinks*; the point
+estimate wobbles early and settles.
+:::
+
+## Does the prior matter?
+
+```{python}
+#| label: fig-prior-sensitivity
+#| fig-alt: "Two-panel comparison of prior sensitivity using real NHANES draws. Left panel: three different priors — flat Beta(1,1) in blue, optimistic-low Beta(2,8) in green, and wrongly confident-high Beta(12,4) in orange. Right panel: the three matching posteriors after two hundred real NHANES patients, nearly overlapping around the full-sample prevalence of 0.388, shown by a dashed line."
+#| fig-cap: "Three priors (left) vs. their posteriors after 200 real patients (right): with enough data, the likelihood dominates."
+
+n = 200
+n1 = int(labels[order[:n]].sum())
+priors = [((1, 1), "blue", "-", "flat Beta(1,1)"),
+          ((2, 8), "green", "-.", "skeptical Beta(2,8)"),
+          ((12, 4), "orange", "--", "over-confident Beta(12,4)")]
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2), sharex=True)
+for (a, b), key, ls, lab in priors:
+    axL.plot(tgrid, beta_pdf(tgrid, a, b), color=sh.OKABE_ITO[key], linestyle=ls, label=lab)
+    axR.plot(tgrid, beta_pdf(tgrid, a + n1, b + n - n1),
+             color=sh.OKABE_ITO[key], linestyle=ls, label=lab)
+for ax, title in [(axL, "priors"), (axR, f"posteriors after {n} patients")]:
+    ax.axvline(theta_full, color=sh.OKABE_ITO["black"], linestyle="--", alpha=0.5)
+    ax.set_xlabel(r"$\theta$")
+    ax.set_title(title)
+axL.set_ylabel("density")
+axL.legend(loc="upper right", frameon=False, fontsize=10)
+sh.finalize(fig, alt="Three visibly different priors versus three nearly identical posteriors after two hundred real NHANES screening draws.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: (Clay 16 — prior scenarios). Two honest lessons: priors matter most
+when data are scarce; and a bad prior *delays* but does not *destroy* convergence
+— it takes evidence proportional to its pseudo-counts to overrule.
+:::
+
+## Live demo: the Bayesian-updating explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week03-bayesian-updating/" background-interactive="true"}
+
+Set a prior, feed it patients one at a time, and watch the posterior move — the
+tool runs this lecture's exact model.
+
+::: {.notes}
+Speaker note: full-bleed interactive embed of the week03 Bayesian-updating tool
+(PRIMARY pattern, CLAUDE.md) — the Beta-Binomial model of this lecture. The
+static fallback on the next slide is what prints / exports to PDF.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive Bayesian-updating explorer: Beta posterior curves for the hypertension proportion after 0, 5, 20, and 200 real NHANES patients, narrowing toward the full-sample prevalence, the same view the week03 tool shows."
+#| fig-cap: "Static fallback: sequential Beta updating (used in print / PDF)."
+
+fig, ax = plt.subplots()
+for n, key, ls in [(0, "blue", "-"), (5, "orange", "--"),
+                   (20, "green", "-."), (200, "vermillion", ":")]:
+    n1 = int(labels[order[:n]].sum())
+    ax.plot(tgrid, beta_pdf(tgrid, 1 + n1, 1 + n - n1),
+            color=sh.OKABE_ITO[key], linestyle=ls,
+            label="prior" if n == 0 else f"after {n}")
+ax.axvline(theta_full, color=sh.OKABE_ITO["black"], linestyle="--", alpha=0.5)
+ax.set_xlabel(r"$\theta$")
+ax.set_ylabel("density")
+ax.set_title("week03 explorer snapshot")
+ax.legend(loc="upper right", frameon=False, fontsize=11)
+sh.finalize(fig, alt="Static fallback snapshot of sequential Beta posterior updating.")
+plt.show()
+```
+
+## What the posterior buys {.smaller}
+
+The posterior $\mathrm{Beta}(a{+}n_1,\ b{+}n_0)$ is a **complete answer**:
+
+- **Point estimates** — posterior mean
+  $\ \mathbb{E}[\theta \mid \mathcal{D}] = \dfrac{a + n_1}{a + b + N}$, or the mode (MAP).
+- **Intervals** — central 95% credible interval, read straight off the density.
+- **Shrinkage, made visible** — the mean is a *weighted blend* of prior mean and
+  sample frequency:
+
+$$
+\frac{a+n_1}{a+b+N}
+= \underbrace{\frac{a+b}{a+b+N}}_{\text{prior weight}} \cdot \frac{a}{a+b}
+\;+\;
+\underbrace{\frac{N}{a+b+N}}_{\text{data weight}} \cdot \frac{n_1}{N}
+$$
+
+As $N$ grows, the data weight $\to 1$ — the sensitivity figure, as algebra.
+
+::: {.notes}
+Speaker note: (Clay 17, first half). "Complete answer" is the sell: every summary
+students previously bolted on (estimate, error bar) is now a *query* against one
+object.
+:::
+
+## Predicting the next patient {.smaller}
+
+For the **next** patient, average the Bernoulli model over the posterior — the
+**posterior predictive**:
+
+$$
+p(y_{\text{new}} = 1 \mid \mathcal{D})
+= \int_0^1 \theta \; p(\theta \mid \mathcal{D})\, d\theta
+= \mathbb{E}[\theta \mid \mathcal{D}]
+= \frac{a + n_1}{a + b + N}
+$$
+
+- Prediction **integrates over parameter uncertainty** instead of plugging in a
+  point estimate.
+- With $a = b = 1$: $\ \tfrac{n_1 + 1}{N + 2}$ — Laplace's *rule of succession*;
+  never exactly 0 or 1 from finite data.
+
+::: {.notes}
+Speaker note: (Clay 17). The integral is easy *because* of conjugacy. The
+plug-in-vs-integrate distinction returns with force in m4b (predictive bands) and
+M5 (where the integral stops being free).
+:::
+
+## Recap & bridge {.smaller}
+
+- **Bayes**: posterior $\propto$ likelihood $\times$ prior — belief, updated.
+- **Beta-Binomial conjugacy**: update = **addition** —
+  $\mathrm{Beta}(a,b) \to \mathrm{Beta}(a{+}n_1, b{+}n_0)$.
+- **Posterior** = point estimates + intervals + predictions, from one object.
+
+[**Next (Lecture B):** the same conjugate trick on the *regression weights* —
+Gaussian prior + Gaussian likelihood → Gaussian posterior for $\mathbf{w}$. That
+closed form is where **Project 1 ends**.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: hand-off names the keystone before m4b opens it. Everything today
+was 1-D on purpose; Lecture B upgrades θ to the vector w with the same moves.
+:::
