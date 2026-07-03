@@ -89,7 +89,7 @@ PY
       rm -f "$ROOT/$tmp"
       sz=$( [ -f "$ROOT/$pdf" ] && wc -c < "$ROOT/$pdf" || echo 0 )
       echo "  - $pdf  (${sz} bytes)"
-    done < <(cd "$ROOT" && find docs -name '*.html')   # every deck (index + appendices)
+    done < <(cd "$ROOT" && find docs -name '*.html' ! -name 'index.html')   # every deck; index.html = thin landings, not decks
   fi
 fi
 
