@@ -1,0 +1,27 @@
+---
+title: "Module 6 — SVM & Clustering"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+
+The supervised arc closes with the maximum-margin classifier — support vectors,
+hinge vs. logistic loss, kernels at concept level, and honest evaluation at
+38.8% prevalence. Then the unsupervised turn: delete the labels and let k-means
+find structure in the features alone — assign/update, distortion $\mathcal{L}$,
+local optima, choosing $K$ — ending with the course's honesty rule: clusters
+enrich risk, but **clusters are not diagnoses**.
+
+| Deck | Link |
+|------|------|
+| Lecture A — Maximum-Margin Classification | [m6a-svm](m6a-svm.html) |
+| Lecture B — k-means & the Unsupervised Turn | [m6b-kmeans-clustering](m6b-kmeans-clustering.html) |
+
+Companion activity: [week05 k-means explorer](https://gchism94.github.io/info521-activities-2026/week05-kmeans/)
+(embedded live in Lecture B — the slug is week-named; modules ≠ weeks).
+
+[← All slide decks](../../index.html)

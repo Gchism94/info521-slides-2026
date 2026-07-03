@@ -1,0 +1,355 @@
+---
+title: "SVM & Clustering"
+subtitle: "INFO 521 · Module 6 · Lecture B — k-means & the Unsupervised Turn"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth. k-means is implemented
+# from scratch (numpy only) on REAL standardized NHANES features.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+from info521.data import hypertension
+
+sh.use_slide_style()
+
+ds = sh.load_nhanes()
+feat = ds["features"]                       # ['age','bmi','waist','chol','hdl','hba1c']
+F = ds["X"]
+Fz = (F - F.mean(0)) / F.std(0)             # standardize before distances (slide point)
+labels, _ = hypertension(ds)
+
+# 2-D clustering space for the figures: the adiposity pair (bmi, waist), r ≈ 0.90.
+P = Fz[:, [feat.index("bmi"), feat.index("waist")]]
+
+rng = np.random.default_rng(521)            # fixed seed → reproducible figures
+
+def kmeans(Pts, k, iters=200, rng=rng):
+    """Lloyd's algorithm from scratch: returns centroids, assignments, distortion."""
+    C = Pts[rng.choice(len(Pts), k, replace=False)]
+    for _ in range(iters):
+        d = ((Pts[:, None, :] - C[None]) ** 2).sum(-1)
+        a = d.argmin(1)
+        C_new = np.array([Pts[a == j].mean(0) if (a == j).any() else C[j]
+                          for j in range(k)])
+        if np.allclose(C, C_new):
+            break
+        C = C_new
+    dist = float(((Pts - C[a]) ** 2).sum(-1).mean())
+    return C, a, dist
+
+# The week05 activity embed is a background-iframe slide attribute (literal URL —
+# Quarto does not expand variables inside slide attributes; see CLAUDE.md).
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture B you should be able to:
+
+1. **Pose the clustering problem** — structure in $\mathbf{X}$, no $\mathbf{y}$.
+2. **Run k-means** — assign / update — and state its distortion objective
+   $\mathcal{L}$.
+3. **Diagnose its failure modes** — local optima, choosing $k$, scaling.
+4. **Refuse the free lunch** — clusters are *not* labels; say why with data.
+
+::: {.notes}
+Speaker note: (Clay 24 + 25-compressed). The course's last pivot: for five and a
+half modules y was the star; today we delete the y column and ask what remains.
+:::
+
+## The unsupervised turn {.smaller}
+
+Every method so far consumed pairs $(\mathbf{x}_n, y_n)$. Delete the labels:
+
+$$
+\mathcal{D} = \{\mathbf{x}_1, \dots, \mathbf{x}_N\} \subset \mathbb{R}^{D}
+\qquad\text{— no } y_n \text{, no "right answer".}
+$$
+
+- **Clustering** — do the patients form *groups*? (today)
+- **Dimensionality reduction** — do the features hide a *simpler description*?
+  (Module 7)
+
+[Without $\mathbf{y}$ there is no test-set truth to check against — evaluation
+becomes *internal* (fit to structure) plus *judgment* (is it meaningful?).]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: the loss-of-ground-truth point is the module's philosophical core —
+it returns with force on the cluster-vs-label slide.
+:::
+
+## k-means: the objective {.smaller}
+
+Choose $K$ **centroids** $\boldsymbol{\mu}_k$ and an assignment $z_n \in \{1..K\}$
+for each patient, minimizing the **distortion** — a loss again, so $\mathcal{L}$:
+
+$$
+\mathcal{L}\bigl(\{z_n\}, \{\boldsymbol{\mu}_k\}\bigr)
+= \sum_{n=1}^{N} \bigl\lVert \mathbf{x}_n - \boldsymbol{\mu}_{z_n} \bigr\rVert_2^2
+$$
+
+Two interlocking sub-problems, each trivial with the other fixed:
+
+- **Assign** (fix $\boldsymbol{\mu}$): send each $\mathbf{x}_n$ to its nearest
+  centroid.
+- **Update** (fix $z$): move each centroid to the **mean** of its members —
+  the squared-error-minimizing point (m1a's loss, yet again).
+
+Alternate until nothing moves. Each step lowers $\mathcal{L}$ ⇒ **guaranteed to
+converge** — though not necessarily to the best answer.
+
+::: {.notes}
+Speaker note: (Clay 24). Both sub-steps are closed-form *because* the loss is
+squared error — the M1 machinery reappears inside an unsupervised loop. The
+"converge ≠ converge to best" caveat is the local-optima slide's setup.
+:::
+
+## k-means on NHANES: the adiposity plane
+
+```{python}
+#| label: fig-kmeans
+#| fig-alt: "Scatter of standardized BMI against standardized waist circumference for 5102 NHANES adults, clustered by k-means with k equal to three. The three clusters form bands along the shared diagonal — lower, middle, and upper adiposity — shown in blue circles, orange squares, and sky-blue triangles, with large purple X marks at the three centroids."
+#| fig-cap: "k-means (K = 3, from scratch, seed 521) on standardized (BMI, waist): the algorithm slices the adiposity continuum into bands; purple ✕ = centroids."
+
+K = 3
+C3, a3, d3 = kmeans(P, K)
+mks = ["o", "s", "^"]
+cols = ["blue", "orange", "skyblue"]
+order = np.argsort(C3[:, 0])                # stable cluster order for colors
+
+fig, ax = plt.subplots(figsize=(8.0, 4.6))
+for rank, j in enumerate(order):
+    m = a3 == j
+    ax.scatter(P[m, 0], P[m, 1], s=9, alpha=0.25,
+               color=sh.OKABE_ITO[cols[rank]], marker=mks[rank],
+               label=f"cluster {rank + 1}  (n = {m.sum():,})")
+ax.scatter(C3[:, 0], C3[:, 1], s=200, marker="X",
+           color=sh.OKABE_ITO["purple"], edgecolors="white", linewidths=1.2,
+           label="centroids", zorder=5)
+ax.set_xlabel("BMI (standardized)")
+ax.set_ylabel("waist circumference (standardized)")
+ax.legend(loc="upper left", frameon=False, fontsize=10)
+sh.finalize(fig, alt="Three k-means clusters slicing the correlated BMI-waist scatter into low, middle, and high adiposity bands with centroids marked.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: honest read: BMI and waist are one continuum (r ≈ 0.90), and
+k-means *manufactures* three bands from it. Clusters exist because we asked for
+K = 3 — not because nature drew three groups. Carry this into the k-choice slide.
+:::
+
+## Standardize first — distances have units {.smaller}
+
+k-means lives on **Euclidean distance**, so the feature scales *are* the model:
+
+- Raw units: waist (cm, SD ≈ 17) would out-shout HbA1c (%, SD ≈ 1) hundreds-fold
+  — clustering would be "waist, with commentary."
+- Standardizing (each feature to mean 0, SD 1) gives features an equal vote —
+  the same move as m1a's standardized age, now **load-bearing**.
+- No distance-based method is scale-free: choosing units **is** choosing the
+  answer.
+
+::: {.notes}
+Speaker note: quick but non-optional. The m2a leakage discipline applies too —
+in a train/test world, standardize on train statistics only.
+:::
+
+## Local optima: restarts are not optional
+
+```{python}
+#| label: fig-restarts
+#| fig-alt: "Two panels showing k-means sensitivity to initialization on the NHANES adiposity plane with k equal to four. Left: final distortion values for twenty different random initializations, plotted as blue circles against restart index, with visibly different plateau values highlighting several distinct local optima; the best run is circled in vermillion. Right: histogram of those distortion values showing they concentrate at two or three distinct levels."
+#| fig-cap: "20 random initializations, K = 4, same data: k-means lands on different local optima — keep the restart with the lowest 𝓛."
+
+K4 = 4
+dists = []
+for r in range(20):
+    rr = np.random.default_rng(521 + r)     # varied seeds, reproducibly
+    _, _, d = kmeans(P, K4, rng=rr)
+    dists.append(d)
+dists = np.array(dists)
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.0))
+axL.plot(range(1, 21), dists, linestyle="none", marker="o",
+         color=sh.OKABE_ITO["blue"])
+best = int(np.argmin(dists))
+axL.scatter([best + 1], [dists[best]], s=210, facecolors="none",
+            edgecolors=sh.OKABE_ITO["vermillion"], linewidths=2.2,
+            label="best of 20")
+axL.set_xlabel("restart")
+axL.set_ylabel(r"final distortion  $\mathcal{L}/N$")
+axL.legend(loc="upper right", frameon=False)
+axR.hist(dists, bins=14, color=sh.OKABE_ITO["green"], alpha=0.7)
+axR.set_xlabel(r"final distortion  $\mathcal{L}/N$")
+axR.set_ylabel("count of restarts")
+sh.finalize(fig, alt="Twenty k-means restarts producing several distinct final distortion levels, with the best run circled.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: real NHANES, K = 4, only the initialization varies. Convergence
+(guaranteed) ≠ optimality (not guaranteed) — the fix is embarrassingly simple:
+many restarts, keep the lowest 𝓛. Smarter seeding (k-means++) helps too.
+:::
+
+## Choosing K: the elbow, honestly
+
+```{python}
+#| label: fig-elbow
+#| fig-alt: "Mean distortion of the best-of-ten k-means runs against the number of clusters from one to eight on the NHANES adiposity plane. The blue curve with circular markers falls steeply from k equals one to two, less steeply to three, and then declines gently and almost linearly through eight, giving only a soft elbow rather than a sharp break."
+#| fig-cap: "Distortion vs. K (best of 10 restarts each): always decreasing — the question is where it stops being worth it. Here: a soft elbow, not a verdict."
+
+ks = range(1, 9)
+elbow = []
+for k in ks:
+    best_d = np.inf
+    for r in range(10):
+        rr = np.random.default_rng(521 + 100 * k + r)
+        _, _, d = kmeans(P, k, rng=rr)
+        best_d = min(best_d, d)
+    elbow.append(best_d)
+
+fig, ax = plt.subplots(figsize=(8.0, 4.0))
+ax.plot(list(ks), elbow, color=sh.OKABE_ITO["blue"], linestyle="-", marker="o")
+ax.set_xlabel("number of clusters  K")
+ax.set_ylabel(r"distortion  $\mathcal{L}/N$  (best of 10)")
+sh.finalize(fig, alt="Distortion decreasing smoothly with cluster count and flattening gradually without a sharp elbow.")
+plt.show()
+```
+
+- $\mathcal{L}$ **always** falls with $K$ (at $K{=}N$ it is zero) — m2a's
+  training-error trap, wearing clusters.
+- Look for the **elbow** where marginal gain collapses… and accept that real
+  data often gives a *soft* one. $K$ is a modeling **choice**, owned and argued.
+
+::: {.notes}
+Speaker note: deliberately un-magical. This NHANES plane has no crisp elbow
+because the underlying structure is a continuum — which is itself the finding.
+:::
+
+## Hard assignments → soft: the GMM bridge {.smaller}
+
+<!-- Keep-compress (Clay 25): one-slide bridge, honest and brief. -->
+
+k-means gives every patient exactly one cluster — even on the fence. The
+probabilistic upgrade: a **Gaussian mixture model**,
+
+$$
+p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k\, \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k),
+$$
+
+fit by **EM** — the same assign/update dance, made soft:
+
+- **E-step**: *responsibilities* $r_{nk} = p(z_n{=}k \mid \mathbf{x}_n)$ replace
+  hard $z_n$ (Bayes' rule, m4a, inside the loop).
+- **M-step**: weighted MLE updates (m3a) for $\pi_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k$.
+- k-means **is** the $\boldsymbol{\Sigma}_k \to \varepsilon\mathbf{I}$ limit —
+  hard assignment is a shrunk-covariance special case.
+
+::: {.notes}
+Speaker note: (Clay 25, compressed to the bridge). Framing gift: EM alternation =
+k-means's two steps; responsibilities = posteriors. Every ingredient is a course
+callback — say each aloud.
+:::
+
+## Clusters are not diagnoses {.smaller}
+
+Color the K = 3 adiposity clusters by the **held-back** hypertension label:
+
+```{python}
+#| label: fig-cluster-vs-label
+#| fig-alt: "Bar chart of the true hypertension rate within each of the three k-means adiposity clusters on NHANES: roughly 30 percent in the lowest-adiposity cluster, about 40 percent in the middle, and about 48 percent in the highest, with a dashed horizontal line at the overall prevalence of 38.8 percent. All three bars are far from zero and far from one hundred percent."
+#| fig-cap: "Hypertension rate inside each K = 3 cluster vs. overall prevalence (dashed): adiposity clusters ENRICH risk — none of them IS the diagnosis."
+
+rates = [labels[a3 == j].mean() for j in order]
+fig, ax = plt.subplots(figsize=(7.6, 3.9))
+bars = ax.bar([f"cluster {i+1}" for i in range(3)], rates,
+              color=[sh.OKABE_ITO[c] for c in cols], alpha=0.85)
+ax.axhline(labels.mean(), color=sh.OKABE_ITO["black"], linestyle="--",
+           alpha=0.6, label=f"overall prevalence ≈ {labels.mean():.3f}")
+for b, r in zip(bars, rates):
+    ax.text(b.get_x() + b.get_width() / 2, r + 0.012, f"{r:.2f}",
+            ha="center", fontsize=12)
+ax.set_ylabel("hypertension rate in cluster")
+ax.set_ylim(0, 0.62)
+ax.legend(loc="upper left", frameon=False)
+sh.finalize(fig, alt="Hypertension rates by cluster rising from below to above the overall prevalence, none close to zero or one.")
+plt.show()
+```
+
+- The clusters **never saw** blood pressure (leakage rule, m1a) — yet risk
+  climbs across them: unsupervised structure is *related* to the outcome…
+- …but no cluster is remotely pure. [**Pretending clusters are labels
+  manufactures diagnoses the data never made.** Project 2's honesty
+  requirement, in one figure.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 25's cluster-vs-label / RR framing). The two readings must
+coexist: enrichment is real (30% → 48%), purity is absent. Descriptive tools
+describe; they do not diagnose.
+:::
+
+## Live demo: the k-means explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week05-kmeans/" background-interactive="true"}
+
+Step assign / update by hand in the week05 tool — trap it in a local optimum,
+then rescue it with a restart.
+
+::: {.notes}
+Speaker note: full-bleed interactive embed of the week05 k-means tool (PRIMARY
+pattern, CLAUDE.md). The static fallback on the next slide is what prints /
+exports to PDF.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive k-means explorer: the three-cluster k-means result on the standardized NHANES BMI-versus-waist plane with purple centroid crosses, the same view the week05 tool shows."
+#| fig-cap: "Static fallback: k-means on the NHANES adiposity plane (used in print / PDF)."
+
+fig, ax = plt.subplots(figsize=(7.8, 4.3))
+for rank, j in enumerate(order):
+    m = a3 == j
+    ax.scatter(P[m, 0], P[m, 1], s=9, alpha=0.25,
+               color=sh.OKABE_ITO[cols[rank]], marker=mks[rank])
+ax.scatter(C3[:, 0], C3[:, 1], s=200, marker="X",
+           color=sh.OKABE_ITO["purple"], edgecolors="white", linewidths=1.2)
+ax.set_xlabel("BMI (standardized)")
+ax.set_ylabel("waist (standardized)")
+ax.set_title("week05 explorer snapshot")
+sh.finalize(fig, alt="Static fallback snapshot of the three-cluster k-means result with centroids.")
+plt.show()
+```
+
+## Recap & bridge {.smaller}
+
+- **k-means**: assign / update on distortion $\mathcal{L}$; converges, but to
+  *a* local optimum — restart and keep the best.
+- **$K$ and scaling are choices** — the elbow suggests; you decide and defend.
+- **GMM/EM**: the soft, probabilistic upgrade; k-means is its shrunk-covariance
+  limit.
+- **Clusters ≠ labels**: enrichment (0.30 → 0.48) without purity — describe,
+  don't diagnose.
+
+[**Next (Module 7):** the other unsupervised question — not "which groups?" but
+"which *directions* matter?" PCA, and the course's closing synthesis.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: hand-off: clustering compressed patients into groups; PCA will
+compress features into directions — same instinct, transposed.
+:::
