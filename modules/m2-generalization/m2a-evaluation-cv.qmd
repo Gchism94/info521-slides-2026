@@ -99,7 +99,7 @@ plt.show()
 ## The trap: training error always drops {.smaller}
 
 Make the model more flexible and the **training error only ever goes down** — a
-degree-$N$ polynomial can interpolate $N{+}1$ points *exactly* ($\mathcal{L}=0$).
+degree-$k$ polynomial can interpolate $k{+}1$ points *exactly* ($\mathcal{L}=0$).
 
 - Low training error is **easy to buy** with complexity.
 - It says nothing about new patients.
