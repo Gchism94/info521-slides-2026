@@ -26,9 +26,9 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M2 · Generalization — Wk2 · supports P1 · activity: bias-variance/ridge
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| 06 | Evaluation / CV | Keep | |
-| 07 | Model Selection & Regularization | Keep | ridge |
-| 14 | Bias-Variance Tradeoff | Keep | |
+| 06 | Evaluation / CV | Keep | ✓ converted → modules/m2-generalization/ (m2a) |
+| 07 | Model Selection & Regularization | Keep | ridge · ✓ converted → modules/m2-generalization/ (m2a leakage + m2b ridge) |
+| 14 | Bias-Variance Tradeoff | Keep | ✓ converted → modules/m2-generalization/ (m2b) |
 
 ## M3 · MLE & parameter uncertainty — Wk3 · P1-M2
 | Clay | Title | Disposition | Notes |
