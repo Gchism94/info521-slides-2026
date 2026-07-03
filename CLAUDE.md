@@ -12,11 +12,16 @@ Each reveal.js deck can optionally embed its corresponding peer-engagement activ
 |--------|------|------------------------|
 | M1 | m1-linear-least-squares | week01-least-squares |
 | M2 | m2-generalization | week02-bias-variance |
-| M3 | m3-mle-uncertainty | week03-bayesian-updating |
-| M4 | m4-* (TBD) | week04-logistic-regression |
-| M5 | m5-* (TBD) | week05-kmeans |
-| M6 | m6-* (TBD) | week06-pca |
-| M7 | m7-* (TBD) | — (no activity) |
+| M3 | m3-mle-uncertainty | — (no activity; a parameter-uncertainty viz is a future build) |
+| M4 | m4-* (TBD) | week03-bayesian-updating (Beta-Binomial) |
+| M5 | m5-* (TBD) | week04-logistic-regression (logistic + Newton) |
+| M6 | m6-* (TBD) | week05-kmeans |
+| M7 | m7-* (TBD) | week06-pca |
+
+> **Activity slugs are week-named; modules ≠ weeks.** From M3 on, each tool lands
+> the week *after* its module opens, so the slug number trails the module number
+> by one. **SOURCE_MAP.md is the authority for this mapping** — do not infer it
+> from slug names.
 
 ### Embedding Pattern: Two Options
 
