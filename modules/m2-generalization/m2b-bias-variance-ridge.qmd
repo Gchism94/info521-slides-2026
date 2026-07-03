@@ -179,6 +179,9 @@ $$
 \mathcal{L}_{\text{ridge}}(\mathbf{w}) = \lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2 + \lambda\lVert \mathbf{w}\rVert_2^2 .
 $$
 
+*(The intercept $w_0$ is not penalized — the code centers instead. We also drop
+the $1/N$ here; it only rescales $\lambda$.)*
+
 - $\lambda = 0$ → ordinary least squares.
 - $\lambda > 0$ → shrinks weights toward $\mathbf{0}$, **trading a little bias for
   less variance**.
@@ -348,7 +351,7 @@ a posterior whose mode is exactly ŵ_ridge with λ = σ²/τ². Regularization =
   their sum.
 - **Ridge** — $\mathcal{L}+\lambda\lVert\mathbf{w}\rVert^2$, closed form
   $\hat{\mathbf{w}}_{\text{ridge}}=(\mathbf{X}^{\!\top}\mathbf{X}+\lambda\mathbf{I})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$;
-  always invertible.
+  always invertible (intercept not penalized; the dropped $1/N$ only rescales $\lambda$).
 - **Tune $\lambda$ by CV** — the knob that balances the tradeoff.
 
 Module 2 has no standalone checkpoint; generalization discipline is assessed through
