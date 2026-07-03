@@ -16,7 +16,8 @@ self-contained reveal.js presentation (dark/light toggle, speaker notes, PDF exp
 | | Appendix: Matrix Calculus | [appendix](modules/m1-linear-least-squares/appendix-matrix-calculus.html) |
 | **[M2 — Generalization](modules/m2-generalization/index.html)** | Lecture A — Evaluation & Cross-Validation | [m2a-evaluation-cv](modules/m2-generalization/m2a-evaluation-cv.html) |
 | | Lecture B — Bias–Variance & Ridge | [m2b-bias-variance-ridge](modules/m2-generalization/m2b-bias-variance-ridge.html) |
-| **[M3 — MLE & Uncertainty](modules/m3-mle-uncertainty/index.html)** | Lecture B — Properties of MLE | [m3b-mle-uncertainty](modules/m3-mle-uncertainty/m3b-mle-uncertainty.html) |
+| **[M3 — MLE & Uncertainty](modules/m3-mle-uncertainty/index.html)** | Lecture A — Likelihood & MLE | [m3a-likelihood-mle](modules/m3-mle-uncertainty/m3a-likelihood-mle.html) |
+| | Lecture B — Properties of MLE | [m3b-mle-uncertainty](modules/m3-mle-uncertainty/m3b-mle-uncertainty.html) |
 | | Appendix: Covariance | [appendix](modules/m3-mle-uncertainty/appendix-covariance.html) |
 | M4–M7 | *(In progress)* | — |
 

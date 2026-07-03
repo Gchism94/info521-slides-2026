@@ -131,7 +131,5 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
 - `modules/m2-generalization/appendix-bias-variance.qmd` — full bias-variance
   decomposition derivation, mirroring the M1/M3 appendix pattern (m2b's "The
   decomposition" slide points to "course notes (appendix forthcoming)").
-- `modules/m3-mle-uncertainty/m3a-*.qmd` — likelihood & MLE lecture
-  (Clay 09b/10/11); m3b currently recaps it in one slide.
 - M3 parameter-uncertainty visualization (activities repo) — future build; when
   it ships, add a PRIMARY embed to m3b.

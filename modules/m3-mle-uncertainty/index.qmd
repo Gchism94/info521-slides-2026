@@ -16,7 +16,7 @@ into a quantitative statement about parameter spread.
 
 | Deck | Link |
 |------|------|
-| Lecture A — Likelihood & Maximum Likelihood *(forthcoming; Clay 09b/10/11)* | — |
+| Lecture A — Likelihood & Maximum Likelihood | [m3a-likelihood-mle](m3a-likelihood-mle.html) |
 | Lecture B — Properties of the MLE | [m3b-mle-uncertainty](m3b-mle-uncertainty.html) |
 | Appendix — Full Cov[ŵ] derivation | [appendix-covariance](appendix-covariance.html) |
 
