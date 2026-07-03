@@ -1,0 +1,362 @@
+---
+title: "Approximate Inference & Bayesian Classification"
+subtitle: "INFO 521 · Module 5 · Lecture B — Laplace Approximation & a Taste of Sampling"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth. All inference here is
+# from-scratch numpy on a small REAL NHANES subsample (small N keeps the exact
+# posterior visibly non-Gaussian, which is the pedagogical point).
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+from info521.data import hypertension
+
+sh.use_slide_style()
+
+ds    = sh.load_nhanes()
+age   = sh.primary_predictor(ds)
+age_z = (age - age.mean()) / age.std()
+labels, _ = hypertension(ds)
+
+rng = np.random.default_rng(521)                      # fixed seed → reproducible
+sub = rng.choice(len(labels), 25, replace=False)      # tiny real cohort (N = 25)
+Xs, ys = np.column_stack([np.ones(25), age_z[sub]]), labels[sub].astype(float)
+
+TAU2 = 4.0                                            # prior: w ~ N(0, τ²I), τ = 2
+
+def sigmoid(a):
+    return 1.0 / (1.0 + np.exp(-a))
+
+def log_post(w):
+    """Unnormalized log posterior: ℓ(w) + log prior (Gaussian, τ²I)."""
+    a = Xs @ w
+    return float((ys * a - np.logaddexp(0.0, a)).sum() - (w @ w) / (2 * TAU2))
+
+# --- MAP + Laplace, from scratch --------------------------------------------
+w = np.zeros(2)
+for _ in range(50):
+    p = sigmoid(Xs @ w)
+    g = Xs.T @ (ys - p) - w / TAU2
+    A = (Xs * (p * (1 - p))[:, None]).T @ Xs + np.eye(2) / TAU2   # = −Hessian
+    step = np.linalg.solve(A, g)
+    w = w + step
+    if np.abs(step).max() < 1e-12:
+        break
+w_map, A_map = w, A
+S_lap = np.linalg.inv(A_map)                          # Laplace covariance
+
+# --- Exact posterior on a 2-D grid (normalizable because D = 2) --------------
+sd = np.sqrt(np.diag(S_lap))
+g0 = np.linspace(w_map[0] - 5 * sd[0], w_map[0] + 5 * sd[0], 220)
+g1 = np.linspace(w_map[1] - 5 * sd[1], w_map[1] + 5 * sd[1], 220)
+LP = np.array([[log_post(np.array([a0, a1])) for a0 in g0] for a1 in g1])
+Pgrid = np.exp(LP - LP.max())
+Pgrid /= Pgrid.sum() * (g0[1] - g0[0]) * (g1[1] - g1[0])
+marg1 = Pgrid.sum(axis=1) * (g0[1] - g0[0])           # exact marginal of w1
+
+def lap_marg1(t):
+    return np.exp(-(t - w_map[1]) ** 2 / (2 * S_lap[1, 1])) / np.sqrt(2 * np.pi * S_lap[1, 1])
+
+# --- Metropolis, from scratch -------------------------------------------------
+def metropolis(steps=24000, s=0.9):
+    """Random-walk Metropolis on the unnormalized log posterior (2-D)."""
+    w = w_map.copy()
+    lp = log_post(w)
+    chain = np.empty((steps, 2))
+    acc = 0
+    for t in range(steps):
+        w_prop = w + rng.normal(0, s, size=2)
+        lp_prop = log_post(w_prop)
+        if np.log(rng.uniform()) < lp_prop - lp:      # accept-ratio: normalizer cancels
+            w, lp = w_prop, lp_prop
+            acc += 1
+        chain[t] = w
+    return chain, acc / steps
+
+chain, acc_rate = metropolis()
+burn = 2000
+draws1 = chain[burn:, 1]
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture B you should be able to:
+
+1. **State the Laplace approximation** — a Gaussian at the MAP with the inverse
+   Hessian as covariance — and derive its two ingredients.
+2. **Connect it to the course through-line** — curvature = Fisher information.
+3. **Explain the Metropolis idea** — why *ratios* of unnormalized posteriors
+   suffice — and read a trace plot.
+4. **Choose between them** — speed vs. shape-faithfulness.
+
+::: {.notes}
+Speaker note: (Clay 20/21). Lecture A left us with a posterior we can evaluate
+but not normalize. Two escapes today: replace it with a Gaussian, or with draws.
+:::
+
+## The problem, restated {.smaller}
+
+From Lecture A: with a Gaussian prior on $\mathbf{w}$,
+
+$$
+p(\mathbf{w} \mid \mathcal{D})
+= \frac{e^{\ell(\mathbf{w})}\, p(\mathbf{w})}{p(\mathcal{D})}
+\qquad\text{with}\qquad
+p(\mathcal{D}) = \int e^{\ell(\mathbf{w})}\, p(\mathbf{w})\, d\mathbf{w}
+\;\;\text{— intractable.}
+$$
+
+We can **evaluate the numerator anywhere** — we just can't integrate it. And
+integrals are exactly what Bayes needs: normalization, credible intervals,
+posterior predictives.
+
+[Today's running example: hypertension vs. age on a **tiny real cohort**
+($N = 25$ NHANES adults, seed 521) — small samples are where approximation
+quality actually matters.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: with 5,102 patients every method agrees; with 25 they visibly
+differ. That's deliberate — it makes the Laplace mismatch photographable.
+:::
+
+## Idea 1 — Laplace: a Gaussian at the peak {.smaller}
+
+Find the peak, match the curvature, call it Gaussian:
+
+1. **Peak**: $\hat{\mathbf{w}}_{\text{MAP}} = \arg\max\ \log p(\mathbf{w}\mid\mathcal{D})$
+   — Newton, exactly as in Lecture A (one extra $-\mathbf{w}/\tau^2$ term).
+2. **Curvature**: Taylor-expand $\log p(\mathbf{w}\mid\mathcal{D})$ to second
+   order at the peak (the linear term vanishes there):
+
+$$
+\boxed{\;
+p(\mathbf{w} \mid \mathcal{D}) \;\approx\;
+\mathcal{N}\!\left(\mathbf{w} \,\middle|\, \hat{\mathbf{w}}_{\text{MAP}},\ \mathbf{A}^{-1}\right),
+\qquad
+\mathbf{A} = -\,\nabla\nabla \log p(\mathbf{w}\mid\mathcal{D})\big|_{\hat{\mathbf{w}}_{\text{MAP}}}
+\;}
+$$
+
+A quadratic log-density **is** a Gaussian — Laplace simply *decrees* the
+quadratic approximation exact.
+
+::: {.notes}
+Speaker note: (Clay 20). Two computable ingredients: a Newton fit and one matrix
+inverse. Everything Bayesian downstream (intervals, predictives) then reuses
+Module-4 Gaussian machinery.
+:::
+
+## The through-line closes {.smaller}
+
+For our model the curvature matrix is
+
+$$
+\mathbf{A} \;=\; \underbrace{\mathbf{X}^{\!\top}\mathbf{R}\,\mathbf{X}}_{\text{observed Fisher information}}
+\;+\; \underbrace{\tfrac{1}{\tau^2}\mathbf{I}}_{\text{prior precision}}
+\qquad
+\mathbf{R} = \mathrm{diag}\bigl(\mu_n(1-\mu_n)\bigr)
+$$
+
+The promise made in M1 is now fully kept — **one object, four appearances**:
+
+| Module | Role of the curvature |
+|---|---|
+| M1 | $\mathbf{X}^{\!\top}\mathbf{X}$ invertible ⇒ unique $\hat{\mathbf{w}}$ |
+| M3 | $-\tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}$ = Hessian; $\mathcal{I}^{-1} = \mathrm{Cov}[\hat{\mathbf{w}}]$ |
+| M4 | $\tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}$ = the data's precision in $\mathbf{S}_N^{-1}$ |
+| M5 | $\mathbf{X}^{\!\top}\mathbf{R}\mathbf{X} + \tfrac{1}{\tau^2}\mathbf{I}$ = Laplace covariance$^{-1}$ |
+
+::: {.notes}
+Speaker note: (SOURCE_MAP through-line #1, verbatim payoff). Students who felt
+XᵀX recur module after module should now see it was one idea: curvature = how
+sharply data pin parameters down.
+:::
+
+## Laplace vs. the exact posterior, on real patients
+
+```{python}
+#| label: fig-laplace
+#| fig-alt: "Exact posterior marginal density for the age slope in a logistic regression fit to 25 real NHANES adults, drawn in blue, versus its Laplace Gaussian approximation in dashed vermillion. The exact curve is right-skewed with a heavier upper tail; the Gaussian matches the peak location and width near the mode but underestimates the right tail and overestimates the left."
+#| fig-cap: "Slope marginal, N = 25 real patients: exact (grid-normalized, blue) vs. Laplace Gaussian (vermillion). Peak: matched. Tails: not."
+
+fig, ax = plt.subplots()
+ax.plot(g1, marg1, color=sh.OKABE_ITO["blue"], linestyle="-",
+        label="exact posterior (2-D grid, normalized)")
+ax.plot(g1, lap_marg1(g1), color=sh.OKABE_ITO["vermillion"], linestyle="--",
+        label="Laplace Gaussian")
+ax.axvline(w_map[1], color=sh.OKABE_ITO["orange"], linestyle=":",
+           label=r"$\hat{\mathbf{w}}_{\mathrm{MAP}}$ (slope)")
+ax.set_xlabel(r"slope  $w_1$")
+ax.set_ylabel("posterior density")
+ax.legend(loc="upper right", frameon=False, fontsize=11)
+sh.finalize(fig, alt="Right-skewed exact posterior marginal versus a symmetric Laplace Gaussian sharing the same peak.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: D = 2, so the "exact" curve is honest — brute-force grid
+normalization, feasible only because the parameter space is tiny. The skew is
+real posterior shape from 25 real patients, not an artist's impression.
+:::
+
+## When the peak isn't the story {.smaller}
+
+Laplace is **local**: it sees the peak and its curvature — nothing else.
+
+- **Skew** (previous slide): the Gaussian's symmetric tails misprice
+  probability precisely where risk lives.
+- **Multimodality**: a second mode is invisible from the first one.
+- It **sharpens with data**: as $N$ grows, posteriors Gaussian-ize (the
+  m4b contraction), and Laplace converges on the truth — cheap and excellent
+  at scale, risky at $N = 25$.
+
+[Wanted: a method whose error shrinks with *compute*, not with
+*assumptions*.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: fair scoreboard for Laplace — it is the workhorse (fast, one
+Newton run) and its failure mode is legible. The accent line is the handoff to
+sampling.
+:::
+
+## Idea 2 — don't approximate the shape; draw from it {.smaller}
+
+If we had samples $\mathbf{w}^{(1)}, \dots, \mathbf{w}^{(S)} \sim p(\mathbf{w}\mid\mathcal{D})$,
+every integral becomes an average:
+
+$$
+\mathbb{E}\bigl[f(\mathbf{w}) \mid \mathcal{D}\bigr]
+\;\approx\; \frac{1}{S}\sum_{s=1}^{S} f\!\left(\mathbf{w}^{(s)}\right)
+$$
+
+— intervals from sample quantiles, predictives by averaging
+$\sigma(\mathbf{w}^{(s)\top}\mathbf{x}_\ast)$, no normalizer ever computed.
+
+**Monte Carlo** trades algebra for computation. The catch: how do you draw from
+a density you can't even normalize?
+
+::: {.notes}
+Speaker note: (Clay 21). The conceptual pivot: stop describing the distribution,
+start *visiting* it. The catch line sets up Metropolis's one clever trick.
+:::
+
+## The Metropolis trick: ratios cancel the normalizer {.smaller}
+
+Random-walk **Metropolis**, one step:
+
+1. From the current $\mathbf{w}$, **propose**
+   $\mathbf{w}' \sim \mathcal{N}(\mathbf{w},\ s^2\mathbf{I})$.
+2. **Accept** with probability
+   $\ \min\!\left(1,\ \dfrac{\tilde{p}(\mathbf{w}' \mid \mathcal{D})}{\tilde{p}(\mathbf{w} \mid \mathcal{D})}\right)$;
+   otherwise stay.
+
+$\tilde{p}$ is the **unnormalized** posterior — in the ratio, the unknown
+$p(\mathcal{D})$ **cancels**. The walk visits regions in proportion to their
+posterior mass.
+
+[Uphill moves: always taken. Downhill: sometimes — that "sometimes" is what
+makes it *explore* instead of *optimize*.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 21 — concept level by design, not an algorithm dump).
+Contrast with Newton: same numerator evaluations, but Newton climbs to one point;
+Metropolis wanders in proportion to mass. Acceptance ~35% here (seed 521).
+:::
+
+## Metropolis on the real cohort
+
+```{python}
+#| label: fig-metropolis
+#| fig-alt: "Two panels of Metropolis sampling for the age slope on the 25-patient NHANES cohort. Left: the first two thousand post-burn-in trace values wander around the posterior mode without trending. Right: the histogram of twenty-two thousand post-burn-in draws, shown as a density in sky blue, closely matches the exact grid-normalized posterior curve overlaid in blue, including the right skew that the Laplace Gaussian (dashed vermillion) misses."
+#| fig-cap: "Metropolis, 24k steps (2k burn-in, seed 521): the draw histogram reproduces the exact skewed posterior — including the tail Laplace missed."
+
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
+axL.plot(draws1[:2000], color=sh.OKABE_ITO["skyblue"], linewidth=0.7)
+axL.axhline(w_map[1], color=sh.OKABE_ITO["orange"], linestyle=":")
+axL.set_xlabel("post-burn-in step")
+axL.set_ylabel(r"slope  $w_1$")
+axL.set_title("trace (first 2,000 draws)")
+
+axR.hist(draws1, bins=60, density=True, color=sh.OKABE_ITO["skyblue"],
+         alpha=0.55, label="Metropolis draws")
+axR.plot(g1, marg1, color=sh.OKABE_ITO["blue"], linestyle="-", label="exact")
+axR.plot(g1, lap_marg1(g1), color=sh.OKABE_ITO["vermillion"], linestyle="--",
+         label="Laplace")
+axR.set_xlabel(r"slope  $w_1$")
+axR.set_ylabel("density")
+axR.set_title("draws vs. exact vs. Laplace")
+axR.legend(loc="upper right", frameon=False, fontsize=10)
+sh.finalize(fig, alt="Stationary Metropolis trace and a draw histogram matching the exact skewed posterior better than the Laplace Gaussian.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: the histogram inherits the skew for free — no Gaussian decree. The
+trace is the diagnostic: it should look like this ("hairy caterpillar"), not like
+a trend (not converged) or a staircase (step size too big).
+:::
+
+## Practicalities, in one slide {.smaller}
+
+<!-- CUTTABLE: taste-level practicum. Drop first if the deck runs long. -->
+
+- **Burn-in** — early draws remember the start; discard them (we dropped 2,000).
+- **Step size $s$** — too small: baby steps, slow coverage; too big: everything
+  rejected. Tune toward moderate acceptance (~20–50%).
+- **Correlation** — consecutive draws are not independent; effective sample size
+  < $S$. More steps are cheap; *pretending* independence is not.
+- Beyond this course: smarter proposals (gradients → Hamiltonian MC), multiple
+  chains, convergence diagnostics.
+
+::: {.notes}
+Speaker note: keep to taste level per the module design — the goal is reading a
+trace and knowing the three knobs, not implementing samplers for a living.
+:::
+
+## Choosing your approximation {.smaller}
+
+| | **Laplace** | **Metropolis (MCMC)** |
+|---|---|---|
+| Cost | one Newton run | thousands of evaluations |
+| Output | a Gaussian (formulas) | draws (averages, quantiles) |
+| Error shrinks with… | more **data** | more **compute** |
+| Fails when… | skew / multimodality | poor tuning, slow mixing |
+| Use it for… | big-$N$ workhorse | small $N$, awkward shapes, audits |
+
+In practice: **Laplace first**; sample when the answer matters in the tails —
+the two agreeing is itself evidence.
+
+::: {.notes}
+Speaker note: (Clay 20/21 synthesis). Project 2's inference step accepts either —
+what's graded is *knowing which regime you're in* and saying why.
+:::
+
+## Recap & bridge {.smaller}
+
+- **Laplace**: $\mathcal{N}(\hat{\mathbf{w}}_{\text{MAP}}, \mathbf{A}^{-1})$;
+  $\mathbf{A} = \mathbf{X}^{\!\top}\mathbf{R}\mathbf{X} + \tau^{-2}\mathbf{I}$ —
+  the Fisher through-line, closed.
+- **Metropolis**: propose–accept on *ratios*; the normalizer cancels; draws
+  replace formulas.
+- **Trade**: assumptions (Laplace) vs. compute (MCMC).
+
+[**Next (Module 6):** one last supervised idea — the *maximum-margin* classifier
+— and then the unsupervised turn: structure without labels.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: this closes the inference arc (loss → likelihood → posterior →
+approximation). M6/M7 change the question rather than the machinery.
+:::

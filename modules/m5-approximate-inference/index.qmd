@@ -1,0 +1,27 @@
+---
+title: "Module 5 — Approximate Inference & Bayesian Classification"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+
+Binarize the outcome — hypertensive or not — and Module 4's conjugacy breaks:
+no closed-form posterior survives (**Project 2 opens here**). Logistic
+regression models $p(y{=}1\mid\mathbf{x}) = \sigma(\mathbf{w}^{\!\top}\mathbf{x})$;
+Newton–Raphson finds $\hat{\mathbf{w}}$ in a handful of steps; then approximation
+becomes the craft — a Gaussian at the MAP (Laplace) or draws from the
+unnormalized posterior (Metropolis).
+
+| Deck | Link |
+|------|------|
+| Lecture A — Breaking Conjugacy: Logistic Regression & Newton's Method | [m5a-logistic-newton](m5a-logistic-newton.html) |
+| Lecture B — Laplace Approximation & a Taste of Sampling | [m5b-laplace-sampling](m5b-laplace-sampling.html) |
+
+Companion activity: [week04 logistic-regression / Newton explorer](https://gchism94.github.io/info521-activities-2026/week04-logistic-regression/)
+(embedded live in Lecture A — the slug is week-named; modules ≠ weeks).
+
+[← All slide decks](../../index.html)
