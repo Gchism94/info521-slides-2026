@@ -1,0 +1,282 @@
+---
+title: "SVM & Clustering"
+subtitle: "INFO 521 · Module 6 · Lecture A — Maximum-Margin Classification"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+from info521.data import hypertension
+
+sh.use_slide_style()
+
+ds = sh.load_nhanes()
+labels, _ = hypertension(ds)
+rng = np.random.default_rng(521)          # fixed seed → reproducible figures
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **State the maximum-margin idea** and define **support vectors**.
+2. **Compare the hinge loss to the logistic loss** — same boundary family,
+   different priorities.
+3. **Explain the kernel idea** at concept level — nonlinearity without leaving
+   linear machinery.
+4. **Evaluate a classifier honestly** — beyond accuracy, at 38.8% prevalence.
+
+::: {.notes}
+Speaker note: (Build-fresh per SOURCE_MAP — no Clay source deck for SVM — plus
+Clay 23's evaluation thread, compressed). Lecture-only module half; the activity
+belongs to Lecture B's clustering.
+:::
+
+## One boundary, three philosophies {.smaller}
+
+Module 5 fit $p(y \mid \mathbf{x})$ and took its $\tfrac{1}{2}$-contour as the
+boundary. But if **the boundary is all you want**, why model probabilities at all?
+
+- **Logistic** — model the probability; the boundary falls out.
+- **Bayes-posterior** — model belief over $\mathbf{w}$; average boundaries.
+- **Max-margin** — *skip the probabilities*: choose the boundary directly, by a
+  geometric criterion.
+
+[Third act of the course, same linear score $\mathbf{w}^{\!\top}\mathbf{x}$ —
+what changes is **what we optimize**.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: framing slide. Discriminant-only methods trade calibrated
+probabilities for directness — a real trade, priced on the eval slide.
+:::
+
+## The maximum-margin idea {.smaller}
+
+Many hyperplanes separate the classes. Prefer the one **farthest from both**:
+
+$$
+\max_{\mathbf{w}, b}\ \ \frac{2}{\lVert\mathbf{w}\rVert}
+\qquad \text{s.t.} \qquad
+y_n\left(\mathbf{w}^{\!\top}\mathbf{x}_n + b\right) \ge 1 \quad \forall n,
+\qquad y_n \in \{-1, +1\}
+$$
+
+- The **margin** $2/\lVert\mathbf{w}\rVert$ is the empty corridor around the
+  boundary; maximizing it = minimizing $\lVert\mathbf{w}\rVert^2$ — a **norm
+  penalty as the *objective***, ridge's cousin (m2b).
+- Only the points **on the corridor's edge** constrain the answer — the
+  **support vectors**. Delete any other point: nothing moves.
+
+::: {.notes}
+Speaker note: two through-line hooks — the ‖w‖² objective echoes ridge, and the
+sparsity (only support vectors matter) contrasts with least squares, where every
+point pulls (m1b projection uses all of y).
+:::
+
+## The margin, drawn
+
+```{python}
+#| label: fig-margin
+#| fig-alt: "Illustrative two-dimensional classification plot with two well-separated point clouds: blue circles lower-left and vermillion squares upper-right. The maximum-margin separating line runs diagonally between them with two dashed margin lines parallel to it; the three points that touch the margin lines — the support vectors — are circled in orange, and the corridor between the dashed lines is lightly shaded."
+#| fig-cap: "Maximum margin (illustrative 2-D data): the boundary keeps the widest empty corridor; only the circled support vectors hold it up."
+
+# Illustrative separable clouds (labeled as such): geometry demo, not NHANES.
+A = rng.normal([-1.6, -1.2], 0.55, size=(28, 2))
+B = rng.normal([1.4, 1.3], 0.55, size=(28, 2))
+
+# Max-margin separator for two round clouds: found by the closest opposite pair
+# structure — for this seeded configuration, computed via a tiny grid refinement
+# over (angle, offset) maximizing the worst-case signed distance (exact enough
+# for the illustration and fully reproducible).
+best = None
+for th in np.linspace(0, np.pi, 721):
+    n = np.array([np.cos(th), np.sin(th)])
+    pa, pb = A @ n, B @ n
+    lo, hi = (pa.max(), pb.min()) if pa.max() < pb.min() else (pb.max(), pa.min())
+    if lo < hi:
+        m = (hi - lo) / 2
+        if best is None or m > best[0]:
+            best = (m, n, (lo + hi) / 2)
+margin, n_vec, c = best
+t_vec = np.array([-n_vec[1], n_vec[0]])
+
+def line(offset, tt):
+    p0 = c_pt + offset * n_vec
+    return p0[0] + tt * t_vec[0], p0[1] + tt * t_vec[1]
+
+c_pt = c * n_vec
+tt = np.linspace(-3.4, 3.4, 2)
+
+fig, ax = plt.subplots(figsize=(8.0, 4.7))
+xm, ym = line(-margin, tt)
+xp, yp = line(margin, tt)
+ax.fill(np.concatenate([xm, xp[::-1]]), np.concatenate([ym, yp[::-1]]),
+        color=sh.OKABE_ITO["orange"], alpha=0.10)
+x0, y0 = line(0.0, tt)
+ax.plot(x0, y0, color=sh.OKABE_ITO["black"], linestyle="-", alpha=0.65,
+        label="max-margin boundary")
+ax.plot(xm, ym, color=sh.OKABE_ITO["orange"], linestyle="--", linewidth=1.6)
+ax.plot(xp, yp, color=sh.OKABE_ITO["orange"], linestyle="--", linewidth=1.6,
+        label="margin edges")
+ax.scatter(*A.T, s=30, color=sh.OKABE_ITO["blue"], marker="o", label="class −1")
+ax.scatter(*B.T, s=30, color=sh.OKABE_ITO["vermillion"], marker="s", label="class +1")
+# circle the support vectors (points within numerical reach of the margin edges)
+for P in (A, B):
+    d = np.abs(P @ n_vec - c)
+    sv = P[d <= margin + 0.03]
+    ax.scatter(*sv.T, s=190, facecolors="none", edgecolors=sh.OKABE_ITO["orange"],
+               linewidths=2.0)
+ax.set_xlabel(r"$x_1$ (illustrative)")
+ax.set_ylabel(r"$x_2$ (illustrative)")
+ax.set_aspect("equal")
+ax.legend(loc="upper left", frameon=False, fontsize=10)
+sh.finalize(fig, alt="Two separable point clouds with the widest-corridor boundary, dashed margin edges, and circled support vectors.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: run the deletion thought-experiment on the figure — remove any
+uncircled point and the corridor is unchanged; nudge a circled one and the
+boundary tilts. That sparsity is the "support" in support vector machine.
+:::
+
+## Real data isn't separable: the hinge loss {.smaller}
+
+NHANES ages overlap heavily across hypertension status — no empty corridor
+exists. **Soft-margin** SVM lets points buy their way in, at a price:
+
+$$
+\min_{\mathbf{w}, b}\ \
+\underbrace{\sum_{n=1}^{N}\max\!\bigl(0,\ 1 - y_n(\mathbf{w}^{\!\top}\mathbf{x}_n + b)\bigr)}_{\text{hinge loss}}
+\;+\; \lambda \lVert\mathbf{w}\rVert^2
+$$
+
+- Inside-or-wrong-side points pay **linearly**; comfortable points pay
+  **exactly zero**.
+- Loss + norm penalty: the ridge template (m2b), with hinge in place of squares.
+- $\lambda$ trades margin width against violations — tuned by CV (m2a), as ever.
+
+::: {.notes}
+Speaker note: everything students know composes: loss + penalty + CV. Only the
+loss function is new — and the next slide prices it against logistic.
+:::
+
+## Hinge vs. logistic: what each loss cares about
+
+```{python}
+#| label: fig-losses
+#| fig-alt: "Loss curves as a function of the classification margin y times the score, from minus three to three. The zero-one misclassification loss is a black step at zero; the hinge loss in vermillion is zero beyond margin one and rises linearly leftward with a kink at one; the logistic loss in blue decays smoothly and never quite reaches zero even for confidently correct points."
+#| fig-cap: "Three losses vs. the margin y·a: hinge (kinked, exactly 0 past 1) vs. logistic (smooth, never 0) vs. the 0–1 loss both surrogate."
+
+m = np.linspace(-3, 3, 400)
+hinge = np.maximum(0.0, 1.0 - m)
+logistic = np.logaddexp(0.0, -m) / np.log(2)      # scaled to pass through 1 at m=0
+zero_one = (m < 0).astype(float)
+
+fig, ax = plt.subplots(figsize=(8.4, 4.1))
+ax.plot(m, zero_one, color=sh.OKABE_ITO["black"], linestyle=":", alpha=0.7,
+        drawstyle="steps-post", label="0–1 loss (the real goal)")
+ax.plot(m, hinge, color=sh.OKABE_ITO["vermillion"], linestyle="-",
+        label="hinge (SVM)")
+ax.plot(m, logistic, color=sh.OKABE_ITO["blue"], linestyle="--",
+        label="logistic (M5, rescaled)")
+ax.set_xlabel(r"margin  $y \cdot (\mathbf{w}^{\!\top}\mathbf{x} + b)$")
+ax.set_ylabel("loss")
+ax.set_ylim(-0.1, 3.2)
+ax.legend(loc="upper right", frameon=False, fontsize=11)
+sh.finalize(fig, alt="Hinge, logistic, and zero-one loss curves versus classification margin, showing the hinge's flat zero region and the logistic's smooth never-zero decay.")
+plt.show()
+```
+
+- **Hinge**: ignores comfortable points entirely → *sparse* (support vectors),
+  no probabilities.
+- **Logistic**: every point always pays a little → calibrated $p(y\mid\mathbf{x})$,
+  no sparsity.
+
+::: {.notes}
+Speaker note: the one-figure summary of the philosophical split. Both are convex
+stand-ins for the 0–1 loss you actually care about but cannot optimize.
+:::
+
+## Kernels, at concept level {.smaller}
+
+<!-- Concept-level by design: no dual derivation, no Mercer theory. -->
+
+Linear boundaries fail when the truth is curved. Old fix (m1b): map to features
+$\boldsymbol{\phi}(\mathbf{x})$ and stay linear *in the weights*.
+
+**Kernel observation**: max-margin training touches inputs only through inner
+products — so it needs only
+
+$$
+k(\mathbf{x}, \mathbf{x}')
+= \boldsymbol{\phi}(\mathbf{x})^{\!\top}\boldsymbol{\phi}(\mathbf{x}')
+$$
+
+- Choose $k$ **directly** (polynomial, Gaussian/RBF, …) and never build
+  $\boldsymbol{\phi}$ — even when it is infinite-dimensional.
+- The boundary becomes a weighted sum of kernels **on the support vectors** —
+  flexibility priced per support vector, not per dimension.
+
+[Basis functions (m1b) walked so kernels could run — same move, industrialized.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: keep it honest and shallow: the "kernel trick" is that φ never
+needs materializing. If asked for depth, defer to the reading — the dual is out
+of scope by design.
+:::
+
+## Evaluating classifiers at 38.8% prevalence {.smaller}
+
+NHANES hypertension prevalence is $\approx 0.388$ — so **"nobody is
+hypertensive" scores 61% accuracy** while missing every case. Accuracy alone is
+a rigged scoreboard.
+
+|  | predicted + | predicted − |
+|---|---|---|
+| **actually +** | TP | FN *(missed cases — the costly cell)* |
+| **actually −** | FP | TN |
+
+- **Sensitivity / recall** $= \mathrm{TP}/(\mathrm{TP}{+}\mathrm{FN})$ — of the
+  hypertensive, how many did we catch?
+- **Precision** $= \mathrm{TP}/(\mathrm{TP}{+}\mathrm{FP})$ — of our alarms, how
+  many were real?
+- Margin methods output scores; **where you cut the score** sets the
+  sensitivity/precision trade — a *clinical* choice, not a mathematical one.
+
+::: {.notes}
+Speaker note: (Clay 23, compressed to the SVM-relevant core; kNN itself is
+off-arc — one mention, cut). The 61%-accuracy trap lands hard with the real
+prevalence number; make students say which error is worse *for this disease*.
+:::
+
+## Recap & the unsupervised turn {.smaller}
+
+- **Max-margin**: widest corridor; held up by **support vectors** only.
+- **Hinge vs. logistic**: sparsity + geometry vs. probabilities + calibration —
+  same linear score, different contract.
+- **Kernels**: inner products only ⇒ nonlinear boundaries with linear machinery.
+- **Evaluation**: at 38.8% prevalence, report sensitivity/precision, not accuracy.
+
+[**Next (Lecture B):** drop the labels entirely. What structure lives in the
+features alone — and what happens when we *pretend* clusters are
+diagnoses?]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: this closes the supervised arc begun in m1a. Lecture B's k-means
+turn is the course's last conceptual pivot: from predicting y to describing X.
+:::
