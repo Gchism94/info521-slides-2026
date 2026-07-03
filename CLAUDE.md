@@ -52,7 +52,8 @@ Brief explanation or context.
 
 **Notes:**
 - Quarto **will expand** `{{< var activities_url >}}` inside the HTML body.
-- Apply the `.activity-embed` class for consistent sizing and styling (see **Styling** below).
+- Windowed embeds **must use the `.activity-embed` class** (defined in
+  `theme/info521.scss`) — no inline styles, no IPython-generated iframes.
 - The iframe is smaller; less immersive but pairs well with commentary.
 
 ### Styling for Windowed Embeds
@@ -97,11 +98,40 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
 
 ### Pre-built Embeds
 
-- **M1 (Linear Least Squares)**: Demo embed added near the end of the linear regression content (PRIMARY, full-bleed). See `modules/m1-linear-least-squares/index.qmd` for the example.
+- **m1a (Setup & Model)**: PRIMARY full-bleed embed of week01-least-squares on the
+  "Live demo" slide, followed by a static-fallback figure slide (the pattern to
+  replicate: live embed slide + `fig-fallback` snapshot slide, since iframes do
+  not print or export to PDF).
+- **m2b (Bias–Variance & Ridge)**: same pattern with week02-bias-variance.
+- **M3 has no embed** (no activity — see the mapping table).
 
 ---
 
-## Legacy Conventions
+## Repo Conventions
 
-- **PML notation**, **Okabe-Ito palette**, **classic scripts**, **dark mode default** — all unchanged from README.md.
-- No ES modules (decks must open via `file://` and render to self-contained HTML for D2L).
+- **`index.qmd` = thin module landing, never a lecture deck.** Each module
+  directory's `index.qmd` is a small `format: html` page: title, one-paragraph
+  module summary, a table linking its decks + appendices, and the companion
+  activity (if any). Lecture decks are named `mNa-*`, `mNb-*`; appendices
+  `appendix-*`.
+- **Attribution**: every deck's title slide carries the visible line
+  *"Adapted with permission from lecture materials by Clayton Morrison,
+  University of Arizona."* — injected once via `theme/attribution.html`
+  (include-after-body in `_quarto.yml`); do **not** add per-deck copies.
+  Per-slide `(Clay NN)` credits stay in speaker notes.
+- **PML notation**: targets $y_n$, bold vectors/matrices, estimates hatted
+  ($\hat{w}$), loss $\mathcal{L}$ (losses ONLY), log-likelihood $\ell(\mathbf{w})$,
+  operators bracket-style ($\mathbb{E}[\cdot]$, $\mathrm{Cov}[\cdot]$).
+- **Okabe-Ito palette**, **classic scripts**, **dark mode default** — unchanged
+  from README.md. No ES modules (decks must open via `file://` and render to
+  self-contained HTML for D2L).
+
+## Backlog
+
+- `modules/m2-generalization/appendix-bias-variance.qmd` — full bias-variance
+  decomposition derivation, mirroring the M1/M3 appendix pattern (m2b's "The
+  decomposition" slide points to "course notes (appendix forthcoming)").
+- `modules/m3-mle-uncertainty/m3a-*.qmd` — likelihood & MLE lecture
+  (Clay 09b/10/11); m3b currently recaps it in one slide.
+- M3 parameter-uncertainty visualization (activities repo) — future build; when
+  it ships, add a PRIMARY embed to m3b.
