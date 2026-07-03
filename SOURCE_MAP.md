@@ -67,7 +67,7 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M7 · PCA — Wk7 · P2 Gate B · activity: PCA
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| 26 | Projection / PCA | Keep | covariance eigendecomposition; + Gate B synthesis |
+| 26 | Projection / PCA | Keep | covariance eigendecomposition; + Gate B synthesis · ✓ converted → modules/m7-pca/ (m7a, incl. course-arc recap) |
 
 ## Off-arc (not slide modules)
 | Clay | Title | Disposition | Notes |

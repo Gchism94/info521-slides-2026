@@ -25,7 +25,7 @@ self-contained reveal.js presentation (dark/light toggle, speaker notes, PDF exp
 | | Lecture B — Laplace & Sampling | [m5b-laplace-sampling](modules/m5-approximate-inference/m5b-laplace-sampling.html) |
 | **[M6 — SVM & Clustering](modules/m6-svm-clustering/index.html)** | Lecture A — Maximum-Margin Classification | [m6a-svm](modules/m6-svm-clustering/m6a-svm.html) |
 | | Lecture B — k-means & the Unsupervised Turn | [m6b-kmeans-clustering](modules/m6-svm-clustering/m6b-kmeans-clustering.html) |
-| M7 | *(In progress)* | — |
+| **[M7 — PCA](modules/m7-pca/index.html)** | Lecture — PCA & Course Synthesis | [m7a-pca](modules/m7-pca/m7a-pca.html) |
 
 *(Each module name links to its landing page; `index.qmd` files are thin module
 landings, never lecture decks.)*
