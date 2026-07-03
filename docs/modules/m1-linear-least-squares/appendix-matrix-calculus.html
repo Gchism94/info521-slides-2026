@@ -1139,6 +1139,12 @@ background-color: color-mix(in srgb, var(--surface) 80%, transparent);
 color: var(--muted);
 }
 
+.reveal .info521-attribution {
+margin-top: 2.2em;
+font-size: 0.45em;
+color: var(--muted);
+}
+
 #info521-theme-toggle {
 position: fixed;
 top: 12px;
@@ -2514,6 +2520,25 @@ window.QuartoSupport = function () {
         btn.addEventListener("click", function () {
           apply(root.getAttribute("data-theme") === "light" ? "dark" : "light");
         });
+      })();
+    </script>
+    <!--
+      Title-slide attribution (repo convention: every deck credits Clay Morrison
+      visibly on its title slide). Implemented ONCE here — injected into every deck
+      via include-after-body in _quarto.yml — so current AND future decks (M4–M7)
+      inherit it with no per-deck copies. Classic inline script (NO ES module),
+      file://-safe, mirrors theme-toggle.html. Styling: .info521-attribution in
+      theme/info521-head.html. Speaker-note (Clay NN) credits stay per-slide.
+    -->
+    <script>
+      (function () {
+        var ts = document.getElementById("title-slide");
+        if (!ts) return; // e.g. a non-reveal page — nothing to do
+        var p = document.createElement("p");
+        p.className = "info521-attribution";
+        p.textContent = "Adapted with permission from lecture materials by " +
+          "Clayton Morrison, University of Arizona.";
+        ts.appendChild(p);
       })();
     </script>
     <script id="quarto-html-after-body" type="application/javascript">
