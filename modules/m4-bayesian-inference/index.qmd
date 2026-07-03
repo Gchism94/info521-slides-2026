@@ -1,0 +1,26 @@
+---
+title: "Module 4 — Bayesian Inference"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+
+Parameters stop being fixed unknowns and become beliefs: prior → likelihood →
+posterior. Conjugacy makes the update exact — Beta-Binomial for the hypertension
+proportion, then the Gaussian posterior over the regression weights
+$\mathcal{N}(\mathbf{w}\mid\mathbf{m}_N, \mathbf{S}_N)$, the closed form where
+**Project 1 ends**. Ridge regression returns as MAP with a Gaussian prior.
+
+| Deck | Link |
+|------|------|
+| Lecture A — Priors, Posteriors & the Beta-Binomial | [m4a-bayes-beta-binomial](m4a-bayes-beta-binomial.html) |
+| Lecture B — The Conjugate Gaussian Posterior | [m4b-gaussian-posterior](m4b-gaussian-posterior.html) |
+
+Companion activity: [week03 Bayesian-updating explorer](https://gchism94.github.io/info521-activities-2026/week03-bayesian-updating/)
+(embedded live in Lecture A — the slug is week-named; modules ≠ weeks).
+
+[← All slide decks](../../index.html)
