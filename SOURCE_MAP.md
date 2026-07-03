@@ -51,10 +51,10 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M5 · Approximate inference + Bayesian classification — Wk5 · P2 Gate A · activity: logistic + Newton
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| 19 | Estimation I — Gradient & Newton-Raphson | Keep | |
-| 20 | Estimation II — Laplace Approximation | Keep | Laplace cov = inverse Hessian = inverse Fisher info |
-| 21 | Estimation III — Sampling / MH | Keep | |
-| 22 | Classification — Bayes | Keep | binarize → break-conjugacy application · ⚠ confirm not a naive-Bayes generative deck |
+| 19 | Estimation I — Gradient & Newton-Raphson | Keep | ✓ converted → modules/m5-approximate-inference/ (m5a) |
+| 20 | Estimation II — Laplace Approximation | Keep | Laplace cov = inverse Hessian = inverse Fisher info · ✓ converted → modules/m5-approximate-inference/ (m5b) |
+| 21 | Estimation III — Sampling / MH | Keep | ✓ converted → modules/m5-approximate-inference/ (m5b, taste-level) |
+| 22 | Classification — Bayes | Keep | binarize → break-conjugacy application · ✓ converted → modules/m5-approximate-inference/ (m5a, built discriminative per module arc — resolves the ⚠) |
 
 ## M6 · SVM + clustering — Wk6 · P2 Gate A/B · activity: k-means
 | Clay | Title | Disposition | Notes |
