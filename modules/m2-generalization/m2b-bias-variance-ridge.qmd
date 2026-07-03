@@ -227,7 +227,7 @@ W = np.array([ridge_fit(Phi, yy, l)[0] for l in lams])   # (60, deg)
 fig, ax = plt.subplots()
 for j in range(deg):
     s = sh.series_style(j)
-    ax.plot(lams, W[:, j], color=s["color"], linestyle=s["linestyle"], label=fr"$w_{{{j+1}}}$")
+    ax.plot(lams, W[:, j], color=s["color"], linestyle=s["linestyle"], label=fr"$\hat{{w}}_{{{j+1}}}$")
 ax.axhline(0, color=sh.OKABE_ITO["black"], linewidth=0.8, alpha=0.4)
 ax.set_xscale("log")
 ax.set_xlabel(r"regularization strength  $\lambda$  (log scale)")
