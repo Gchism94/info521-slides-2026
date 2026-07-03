@@ -35,8 +35,11 @@ format:
     # Color system as raw <style> (kept out of the SCSS minifier so custom
     # properties + the light/print overrides survive — see info521-head.html).
     include-in-header: theme/info521-head.html
-    # Dark/light toggle button + classic toggle script (no ES module, file://-safe).
-    include-after-body: theme/theme-toggle.html
+    # Dark/light toggle button + classic toggle script (no ES module, file://-safe),
+    # and the title-slide attribution line (repo convention — see theme/attribution.html).
+    include-after-body:
+      - theme/theme-toggle.html
+      - theme/attribution.html
 
     slide-number: true
     slide-level: 2
