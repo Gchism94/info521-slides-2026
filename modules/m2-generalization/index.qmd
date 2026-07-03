@@ -1,0 +1,26 @@
+---
+title: "Module 2 — Generalization"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+
+How well will a fitted model do on patients it has never seen? Training error
+versus generalization error, $k$-fold cross-validation, the bias–variance
+decomposition behind the U-shaped test-error curve, and ridge regression as the
+knob that moves you along it.
+
+| Deck | Link |
+|------|------|
+| Lecture A — Evaluation & Cross-Validation | [m2a-evaluation-cv](m2a-evaluation-cv.html) |
+| Lecture B — Bias–Variance & Regularization | [m2b-bias-variance-ridge](m2b-bias-variance-ridge.html) |
+| Appendix — Bias–Variance decomposition *(forthcoming; see CLAUDE.md backlog)* | — |
+
+Companion activity: [week02 bias-variance / ridge explorer](https://gchism94.github.io/info521-activities-2026/week02-bias-variance/)
+(embedded live in Lecture B).
+
+[← All slide decks](../../index.html)
