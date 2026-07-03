@@ -15,7 +15,7 @@ Each reveal.js deck can optionally embed its corresponding peer-engagement activ
 | M3 | m3-mle-uncertainty | — (no activity; a parameter-uncertainty viz is a future build) |
 | M4 | m4-bayesian-inference | week03-bayesian-updating (Beta-Binomial) |
 | M5 | m5-approximate-inference | week04-logistic-regression (logistic + Newton) |
-| M6 | m6-* (TBD) | week05-kmeans |
+| M6 | m6-svm-clustering | week05-kmeans |
 | M7 | m7-* (TBD) | week06-pca |
 
 > **Activity slugs are week-named; modules ≠ weeks.** From M3 on, each tool lands
@@ -106,6 +106,7 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
 - **M3 has no embed** (no activity — see the mapping table).
 - **m4a (Priors & Beta-Binomial)**: same pattern with week03-bayesian-updating.
 - **m5a (Logistic & Newton)**: same pattern with week04-logistic-regression.
+- **m6b (k-means & Clustering)**: same pattern with week05-kmeans.
 
 ---
 

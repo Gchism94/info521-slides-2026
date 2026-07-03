@@ -59,10 +59,10 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M6 · SVM + clustering — Wk6 · P2 Gate A/B · activity: k-means
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| — | SVM | Build-fresh | no Clay source; lecture-only for now (stub activity TBD) |
-| 23 | Classification — NN Evaluation | Keep-compress | eval metrics → SVM eval; kNN off-arc (cut / one-slide mention) |
-| 24 | Clustering — k-means | Keep | |
-| 25 | Clustering — Mixture Models / GMM & EM | Keep-compress | soft-assignment bridge + honest cluster-vs-label (RR framing) |
+| — | SVM | Build-fresh | no Clay source; lecture-only for now (stub activity TBD) · ✓ built → modules/m6-svm-clustering/ (m6a) |
+| 23 | Classification — NN Evaluation | Keep-compress | eval metrics → SVM eval; kNN off-arc (cut / one-slide mention) · ✓ converted → modules/m6-svm-clustering/ (m6a) |
+| 24 | Clustering — k-means | Keep | ✓ converted → modules/m6-svm-clustering/ (m6b) |
+| 25 | Clustering — Mixture Models / GMM & EM | Keep-compress | soft-assignment bridge + honest cluster-vs-label (RR framing) · ✓ converted → modules/m6-svm-clustering/ (m6b) |
 
 ## M7 · PCA — Wk7 · P2 Gate B · activity: PCA
 | Clay | Title | Disposition | Notes |

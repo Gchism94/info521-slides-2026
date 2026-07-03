@@ -23,7 +23,9 @@ self-contained reveal.js presentation (dark/light toggle, speaker notes, PDF exp
 | | Lecture B — Conjugate Gaussian Posterior | [m4b-gaussian-posterior](modules/m4-bayesian-inference/m4b-gaussian-posterior.html) |
 | **[M5 — Approximate Inference & Bayesian Classification](modules/m5-approximate-inference/index.html)** | Lecture A — Logistic Regression & Newton | [m5a-logistic-newton](modules/m5-approximate-inference/m5a-logistic-newton.html) |
 | | Lecture B — Laplace & Sampling | [m5b-laplace-sampling](modules/m5-approximate-inference/m5b-laplace-sampling.html) |
-| M6–M7 | *(In progress)* | — |
+| **[M6 — SVM & Clustering](modules/m6-svm-clustering/index.html)** | Lecture A — Maximum-Margin Classification | [m6a-svm](modules/m6-svm-clustering/m6a-svm.html) |
+| | Lecture B — k-means & the Unsupervised Turn | [m6b-kmeans-clustering](modules/m6-svm-clustering/m6b-kmeans-clustering.html) |
+| M7 | *(In progress)* | — |
 
 *(Each module name links to its landing page; `index.qmd` files are thin module
 landings, never lecture decks.)*
