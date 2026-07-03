@@ -53,7 +53,7 @@ p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
 \;=\; \prod_{n=1}^{N} \mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right)
 $$
 
-Its maximizers — the MLE we derived last module:
+Its maximizers — the MLE (derived in the likelihood lecture of this module):
 
 $$
 \hat{\mathbf{w}} = \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y},
@@ -62,8 +62,9 @@ $$
 $$
 
 ::: {.notes}
-Speaker note: we established these last module; today the question is — how good
-is $\hat{\mathbf{w}}$? Is it unique, is it unbiased, and how uncertain is it?
+Speaker note: established in this module's likelihood lecture; today the question
+is — how good is $\hat{\mathbf{w}}$? Is it unique, is it unbiased, and how
+uncertain is it?
 :::
 
 # Unique, unbiased, and how uncertain. {.center}
@@ -88,7 +89,8 @@ $$
 :::
 
 ::: {.fragment}
-Hessian — constant and **negative definite** ($\mathbf{x}^{\!\top}\mathbf{H}\mathbf{x} < 0$):
+Hessian — constant and **negative definite**
+($\mathbf{v}^{\!\top}\mathbf{H}\mathbf{v} < 0\ \ \forall\,\mathbf{v}\neq\mathbf{0}$):
 
 $$
 \mathbf{H} \;=\; \frac{\partial^2 \ell}{\partial \mathbf{w}\,\partial \mathbf{w}^{\!\top}}
