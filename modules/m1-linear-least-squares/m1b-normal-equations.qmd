@@ -110,7 +110,7 @@ $\mathcal{L}=\tfrac{1}{N}\sum_n (y_n - w_0 - w_1 x_n)^2$ to zero.
 $$
 \frac{\partial \mathcal{L}}{\partial w_0} = 0
 \qquad\Longrightarrow\qquad
-w_0 = \bar{y} - w_1 \bar{x}
+\hat{w}_0 = \bar{y} - \hat{w}_1 \bar{x}
 $$
 :::
 
@@ -118,12 +118,12 @@ $$
 $$
 \frac{\partial \mathcal{L}}{\partial w_1} = 0
 \qquad\Longrightarrow\qquad
-w_1 = \frac{\sum_n (x_n - \bar{x})(y_n - \bar{y})}{\sum_n (x_n - \bar{x})^2}
+\hat{w}_1 = \frac{\sum_n (x_n - \bar{x})(y_n - \bar{y})}{\sum_n (x_n - \bar{x})^2}
 $$
 :::
 
 ::: {.fragment}
-[That is $w_1 = \dfrac{\widehat{\mathrm{cov}}(x,y)}{\widehat{\mathrm{var}}(x)}$ —
+[That is $\hat{w}_1 = \dfrac{\widehat{\mathrm{cov}}(x,y)}{\widehat{\mathrm{var}}(x)}$ —
 exactly the line you fit in Lecture A.]{style="color: var(--accent)"}
 :::
 
@@ -266,7 +266,8 @@ feature columns.
 ```
 
 In matrix form $\hat{\mathbf{y}} = \mathbf{P}\mathbf{y}$, with the **hat matrix**
-$\mathbf{P} = \mathbf{X}(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$ —
+$\mathbf{P} = \mathbf{X}(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$
+(often written $\mathbf{H}$; we reserve $\mathbf{H}$ for the Hessian) —
 symmetric and idempotent ($\mathbf{P}^2=\mathbf{P}$): it projects $\mathbf{y}$ onto
 $\mathrm{col}(\mathbf{X})$.
 
