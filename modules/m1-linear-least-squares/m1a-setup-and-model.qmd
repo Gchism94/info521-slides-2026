@@ -188,6 +188,9 @@ $$
 \hat{y} \;=\; \mathbf{w}^{\!\top}\mathbf{x} \;=\; w_0 + w_1 x_1 + \cdots + w_D x_D .
 $$
 
+*(We absorb the intercept by appending a constant-1 feature, so
+$\mathbf{x}\in\mathbb{R}^{D+1}$.)*
+
 - $w_0$ — the **intercept** (prediction when all features are 0).
 - $w_j$ — the **per-unit effect** of feature $j$: how $\hat{y}$ changes when $x_j$
   rises by one unit, holding the rest fixed.
@@ -259,12 +262,12 @@ plt.show()
 
 ## Interpreting the fit {.smaller}
 
-The fitted line is $\hat{y} = w_0 + w_1 z$ with $w_0 \approx 121.5$,
-$w_1 \approx 6.5$ (mmHg per **standard deviation** of age).
+The fitted line is $\hat{y} = \hat{w}_0 + \hat{w}_1 z$ with $\hat{w}_0 \approx 121.5$,
+$\hat{w}_1 \approx 6.5$ (mmHg per **standard deviation** of age).
 
-- **Intercept** $w_0$: predicted SBP at *average* age (where $z=0$) — about
+- **Intercept** $\hat{w}_0$: predicted SBP at *average* age (where $z=0$) — about
   **121.5 mmHg**, a clinically sensible central value.
-- **Slope** $w_1$: $+1$ SD of age ($\approx 17$ years) adds $\approx 6.5$ mmHg, i.e.
+- **Slope** $\hat{w}_1$: $+1$ SD of age ($\approx 17$ years) adds $\approx 6.5$ mmHg, i.e.
   **$\approx 0.38$ mmHg per year**.
 - **Sanity check** — sign is positive (BP rises with age) and the magnitude is
   modest and plausible. Always translate weights back to units.
