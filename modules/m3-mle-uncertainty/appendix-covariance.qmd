@@ -74,7 +74,8 @@ $$
 
 ::: {.fragment}
 [And this is exactly the inverse Fisher information: from
-$-\dfrac{\partial^2 \log\mathcal{L}}{\partial\mathbf{w}\,\partial\mathbf{w}^{\!\top}} = \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X} = \mathcal{I}$,
+$-\dfrac{\partial^2 \ell}{\partial\mathbf{w}\,\partial\mathbf{w}^{\!\top}} = \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X} = \mathcal{I}$
+(with $\ell$ the log-likelihood from the main deck),
 we get $\mathrm{cov}\{\hat{\mathbf{w}}\} = \mathcal{I}^{-1}$.]{style="color: var(--accent)"}
 :::
 

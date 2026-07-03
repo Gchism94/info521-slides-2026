@@ -49,7 +49,7 @@ uncertainty. The checkpoint gates on reproducing the first two arguments.
 The linear-Gaussian likelihood:
 
 $$
-\mathcal{L} \;=\; p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
+p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
 \;=\; \prod_{n=1}^{N} \mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right)
 $$
 
@@ -70,10 +70,11 @@ is $\hat{\mathbf{w}}$? Is it unique, is it unbiased, and how uncertain is it?
 
 ## Property 1 · Uniqueness {.smaller}
 
-The log-likelihood:
+The log-likelihood — we write it $\ell(\mathbf{w}) = \log p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)$,
+reserving $\mathcal{L}$ for losses:
 
 $$
-\log\mathcal{L} = -\tfrac{N}{2}\log 2\pi \;-\; N\log\sigma
+\ell(\mathbf{w}) = -\tfrac{N}{2}\log 2\pi \;-\; N\log\sigma
 \;-\; \tfrac{1}{2\sigma^2}\sum_{n=1}^{N}\left(y_n - \mathbf{w}^{\!\top}\mathbf{x}_n\right)^2
 $$
 
@@ -81,7 +82,7 @@ $$
 Gradient — vanishes at the normal equations:
 
 $$
-\frac{\partial \log\mathcal{L}}{\partial \mathbf{w}}
+\frac{\partial \ell}{\partial \mathbf{w}}
 = \tfrac{1}{\sigma^2}\left(\mathbf{X}^{\!\top}\mathbf{y} - \mathbf{X}^{\!\top}\mathbf{X}\mathbf{w}\right)
 $$
 :::
@@ -90,7 +91,7 @@ $$
 Hessian — constant and **negative definite** ($\mathbf{x}^{\!\top}\mathbf{H}\mathbf{x} < 0$):
 
 $$
-\mathbf{H} \;=\; \frac{\partial^2 \log\mathcal{L}}{\partial \mathbf{w}\,\partial \mathbf{w}^{\!\top}}
+\mathbf{H} \;=\; \frac{\partial^2 \ell}{\partial \mathbf{w}\,\partial \mathbf{w}^{\!\top}}
 \;=\; -\tfrac{1}{\sigma^2}\,\mathbf{X}^{\!\top}\mathbf{X}
 \quad\Longrightarrow\quad \text{a single, unique maximum.}
 $$
