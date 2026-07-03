@@ -257,7 +257,7 @@ ax.plot(mids, rates, color=sh.OKABE_ITO["green"], linestyle="none", marker="D",
         ms=7, label="empirical rate (age deciles)")
 zc = -w_mle[0] / w_mle[1]
 ax.axvline(zc, color=sh.OKABE_ITO["orange"], linestyle=":",
-           label=fr"$p = \tfrac{{1}}{{2}}$ at $z \approx {zc:.2f}$")
+           label=fr"$p = 1/2$ at $z \approx {zc:.2f}$")
 ax.set_xlabel("standardized age (z)")
 ax.set_ylabel("P(hypertension)")
 ax.legend(loc="center left", frameon=False, fontsize=10)
