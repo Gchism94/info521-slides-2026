@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>INFO 521 — Lecture Slides</title>
+<title>Module 4 — Bayesian Inference</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -38,6 +38,35 @@ ul.task-list li input[type="checkbox"] {
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap-8ffd5f67044e5306d9846f29df41dda5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -49,7 +78,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">INFO 521 — Lecture Slides</h1>
+<h1 class="title">Module 4 — Bayesian Inference</h1>
 </div>
 
 
@@ -66,76 +95,29 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Lecture decks for <strong>Machine Learning Foundations</strong> (INFO 521). Each deck is a self-contained reveal.js presentation (dark/light toggle, speaker notes, PDF export).</p>
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+<p>Parameters stop being fixed unknowns and become beliefs: prior → likelihood → posterior. Conjugacy makes the update exact — Beta-Binomial for the hypertension proportion, then the Gaussian posterior over the regression weights <span class="math inline">\(\mathcal{N}(\mathbf{w}\mid\mathbf{m}_N, \mathbf{S}_N)\)</span>, the closed form where <strong>Project 1 ends</strong>. Ridge regression returns as MAP with a Gaussian prior.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Module</th>
 <th>Deck</th>
 <th>Link</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong><a href="modules/m1-linear-least-squares/index.html">M1 — Foundations &amp; Linear Regression</a></strong></td>
-<td>Lecture A — Setup &amp; Model</td>
-<td><a href="modules/m1-linear-least-squares/m1a-setup-and-model.html">m1a-setup-and-model</a></td>
+<td>Lecture A — Priors, Posteriors &amp; the Beta-Binomial</td>
+<td><a href="m4a-bayes-beta-binomial.html">m4a-bayes-beta-binomial</a></td>
 </tr>
 <tr class="even">
-<td></td>
-<td>Lecture B — Normal Equations</td>
-<td><a href="modules/m1-linear-least-squares/m1b-normal-equations.html">m1b-normal-equations</a></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Appendix: Matrix Calculus</td>
-<td><a href="modules/m1-linear-least-squares/appendix-matrix-calculus.html">appendix</a></td>
-</tr>
-<tr class="even">
-<td><strong><a href="modules/m2-generalization/index.html">M2 — Generalization</a></strong></td>
-<td>Lecture A — Evaluation &amp; Cross-Validation</td>
-<td><a href="modules/m2-generalization/m2a-evaluation-cv.html">m2a-evaluation-cv</a></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Lecture B — Bias–Variance &amp; Ridge</td>
-<td><a href="modules/m2-generalization/m2b-bias-variance-ridge.html">m2b-bias-variance-ridge</a></td>
-</tr>
-<tr class="even">
-<td><strong><a href="modules/m3-mle-uncertainty/index.html">M3 — MLE &amp; Uncertainty</a></strong></td>
-<td>Lecture A — Likelihood &amp; MLE</td>
-<td><a href="modules/m3-mle-uncertainty/m3a-likelihood-mle.html">m3a-likelihood-mle</a></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>Lecture B — Properties of MLE</td>
-<td><a href="modules/m3-mle-uncertainty/m3b-mle-uncertainty.html">m3b-mle-uncertainty</a></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Appendix: Covariance</td>
-<td><a href="modules/m3-mle-uncertainty/appendix-covariance.html">appendix</a></td>
-</tr>
-<tr class="odd">
-<td><strong><a href="modules/m4-bayesian-inference/index.html">M4 — Bayesian Inference</a></strong></td>
-<td>Lecture A — Priors &amp; Beta-Binomial</td>
-<td><a href="modules/m4-bayesian-inference/m4a-bayes-beta-binomial.html">m4a-bayes-beta-binomial</a></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Lecture B — Conjugate Gaussian Posterior</td>
-<td><a href="modules/m4-bayesian-inference/m4b-gaussian-posterior.html">m4b-gaussian-posterior</a></td>
-</tr>
-<tr class="odd">
-<td>M5–M7</td>
-<td><em>(In progress)</em></td>
-<td>—</td>
+<td>Lecture B — The Conjugate Gaussian Posterior</td>
+<td><a href="m4b-gaussian-posterior.html">m4b-gaussian-posterior</a></td>
 </tr>
 </tbody>
 </table>
-<p><em>(Each module name links to its landing page; <code>index.qmd</code> files are thin module landings, never lecture decks.)</em></p>
-<hr>
-<p><a href="https://gchism94.github.io/info521" target="_blank">← Course Hub</a></p>
+<p>Companion activity: <a href="https://gchism94.github.io/info521-activities-2026/week03-bayesian-updating/">week03 Bayesian-updating explorer</a> (embedded live in Lecture A — the slug is week-named; modules ≠ weeks).</p>
+<p><a href="../../index.html">← All slide decks</a></p>
 
 </main>
 <!-- /main column -->

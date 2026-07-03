@@ -13,7 +13,7 @@ Each reveal.js deck can optionally embed its corresponding peer-engagement activ
 | M1 | m1-linear-least-squares | week01-least-squares |
 | M2 | m2-generalization | week02-bias-variance |
 | M3 | m3-mle-uncertainty | — (no activity; a parameter-uncertainty viz is a future build) |
-| M4 | m4-* (TBD) | week03-bayesian-updating (Beta-Binomial) |
+| M4 | m4-bayesian-inference | week03-bayesian-updating (Beta-Binomial) |
 | M5 | m5-* (TBD) | week04-logistic-regression (logistic + Newton) |
 | M6 | m6-* (TBD) | week05-kmeans |
 | M7 | m7-* (TBD) | week06-pca |
@@ -104,6 +104,7 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
   not print or export to PDF).
 - **m2b (Bias–Variance & Ridge)**: same pattern with week02-bias-variance.
 - **M3 has no embed** (no activity — see the mapping table).
+- **m4a (Priors & Beta-Binomial)**: same pattern with week03-bayesian-updating.
 
 ---
 

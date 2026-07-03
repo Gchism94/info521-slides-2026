@@ -44,9 +44,9 @@ Crosswalk from Clay Morrison's source lecture decks to the redesigned **7-module
 ## M4 · Bayesian inference — Wk4 · P1-M3 · activity: Beta-Binomial
 | Clay | Title | Disposition | Notes |
 |---|---|---|---|
-| 15 | Intro to Bayes | Keep | |
-| 16 | Posterior / Prior Scenarios | Keep | |
-| 17 | Using Posterior / Marginal Likelihood / Hyperparams | Keep | lands on conjugate posterior (**keystone**) |
+| 15 | Intro to Bayes | Keep | ✓ converted → modules/m4-bayesian-inference/ (m4a) |
+| 16 | Posterior / Prior Scenarios | Keep | ✓ converted → modules/m4-bayesian-inference/ (m4a) |
+| 17 | Using Posterior / Marginal Likelihood / Hyperparams | Keep | lands on conjugate posterior (**keystone**) · ✓ converted → modules/m4-bayesian-inference/ (m4b) |
 
 ## M5 · Approximate inference + Bayesian classification — Wk5 · P2 Gate A · activity: logistic + Newton
 | Clay | Title | Disposition | Notes |
