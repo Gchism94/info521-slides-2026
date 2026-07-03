@@ -1,0 +1,333 @@
+---
+title: "PCA"
+subtitle: "INFO 521 · Module 7 — Principal Component Analysis & Course Synthesis"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth. PCA is computed from
+# scratch (covariance + eigh) on the six standardized NHANES features.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+ds   = sh.load_nhanes()
+feat = ds["features"]                        # ['age','bmi','waist','chol','hdl','hba1c']
+F    = ds["X"]
+Fz   = (F - F.mean(0)) / F.std(0)            # center + standardize (slide point)
+N, D = Fz.shape
+
+# PCA from scratch: covariance eigendecomposition, eigenvalues descending.
+C = (Fz.T @ Fz) / (N - 1)
+vals, vecs = np.linalg.eigh(C)
+vals, vecs = vals[::-1], vecs[:, ::-1]
+# Sign convention: make the adiposity block load POSITIVELY on PC1 (eigh's sign
+# is arbitrary; flipping an eigenvector changes nothing).
+if vecs[feat.index("bmi"), 0] < 0:
+    vecs[:, 0] = -vecs[:, 0]
+if vecs[feat.index("age"), 1] < 0:
+    vecs[:, 1] = -vecs[:, 1]
+ve = vals / vals.sum()                        # ≈ [0.373, 0.218, 0.172, 0.125, 0.097, 0.013]
+scores = Fz @ vecs                            # patient coordinates on the PCs
+
+rng = np.random.default_rng(521)              # fixed seed → reproducible figures
+# The week06 activity embed is a background-iframe slide attribute (literal URL —
+# Quarto does not expand variables inside slide attributes; see CLAUDE.md).
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Module 7 you should be able to:
+
+1. **Compute PCA** — center, covariance, eigendecomposition — from scratch.
+2. **State both views** — maximum variance ⟺ minimum reconstruction error.
+3. **Read variance explained** ($\lambda_k / \sum_j \lambda_j$) and choose a
+   number of components with a scree plot.
+4. **Interpret components on NHANES** — and state PCA's limits honestly.
+
+::: {.notes}
+Speaker note: (Clay 26 + Gate B synthesis). Last module: clustering compressed
+patients into groups; PCA compresses features into directions.
+:::
+
+## The question: which directions matter? {.smaller}
+
+Six NHANES features per patient — but are they six *independent* pieces of
+information?
+
+- BMI and waist circumference track each other at $r \approx 0.90$ — nearly one
+  measurement wearing two names.
+- **PCA asks**: find new axes — **principal components** — that are
+  *uncorrelated*, ordered by how much variance each carries.
+
+$$
+\mathbf{z}_n = \mathbf{V}^{\!\top} \mathbf{x}_n
+\qquad
+\text{with } \mathbf{V} = [\mathbf{v}_1 \cdots \mathbf{v}_D] \text{ orthonormal.}
+$$
+
+Keep the first $K \ll D$ coordinates: a **shorter description** of every patient,
+losing as little as possible.
+
+::: {.notes}
+Speaker note: (Clay 26). Ground the abstraction in the r=0.90 fact immediately —
+students saw that redundancy in m6b's clustering plane.
+:::
+
+## Center first, then covariance {.smaller}
+
+PCA is a statement about **spread around the mean**, so:
+
+1. **Center** each feature ($\mathbf{x}_n \leftarrow \mathbf{x}_n - \bar{\mathbf{x}}$)
+   — otherwise the first component just points at the mean.
+2. **Standardize** when units differ (they do here — years, kg/m², cm, mg/dL, %):
+   variance is unit-squared, and PCA maximizes it. m6b's scaling lesson, verbatim.
+3. Form the **sample covariance**
+   $\ \mathbf{C} = \tfrac{1}{N-1}\mathbf{X}^{\!\top}\mathbf{X}$ (centered
+   $\mathbf{X}$) — the object m3b promised would return.
+
+$$
+\mathbf{C}\,\mathbf{v}_k = \lambda_k\,\mathbf{v}_k
+\qquad
+\lambda_1 \ge \lambda_2 \ge \cdots \ge \lambda_D \ge 0
+$$
+
+**Eigenvectors** = the new axes; **eigenvalues** = the variance each carries.
+
+::: {.notes}
+Speaker note: (Clay 26 — covariance eigendecomposition). XᵀX one final time, now
+as the covariance whose eigenstructure IS the answer rather than a means to one.
+:::
+
+## Two views, one solution {.smaller}
+
+**View 1 — max variance.** Find the unit direction with the most spread:
+
+$$
+\max_{\lVert\mathbf{v}\rVert = 1}\ \mathbf{v}^{\!\top}\mathbf{C}\,\mathbf{v}
+\;\;\Longrightarrow\;\; \mathbf{v} = \mathbf{v}_1\ (\text{top eigenvector}).
+$$
+
+**View 2 — min reconstruction.** Project onto $K$ directions and rebuild; choose
+directions minimizing the squared error:
+
+$$
+\min_{\mathbf{V}_K}\ \sum_{n=1}^{N}
+\bigl\lVert \mathbf{x}_n - \mathbf{V}_K^{\phantom{\top}}\!\mathbf{V}_K^{\!\top}\mathbf{x}_n \bigr\rVert_2^2
+\;\;\Longrightarrow\;\; \text{the same top-}K\text{ eigenvectors.}
+$$
+
+[Variance kept + reconstruction error = total variance (a constant): maximizing
+one **is** minimizing the other. Least squares (m1b's projection!) closes the
+course as it opened it.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: V_K V_Kᵀ is an orthogonal projection — m1b's hat-matrix geometry,
+now applied to feature space. The conservation argument makes the equivalence a
+one-liner instead of a derivation.
+:::
+
+## PC1 on the adiposity plane
+
+```{python}
+#| label: fig-pc-arrows
+#| fig-alt: "Scatter of standardized BMI against standardized waist circumference for NHANES adults with two arrows from the origin: a long vermillion arrow along the shared diagonal of the point cloud labeled as the leading direction in this plane, and a short green arrow perpendicular to it. The cloud is strongly elongated along the vermillion arrow."
+#| fig-cap: "The (BMI, waist) plane, r ≈ 0.90: almost all spread lies along one shared direction (vermillion) — the redundancy PCA is built to remove."
+
+# 2-D PCA restricted to the adiposity pair, for a drawable picture.
+P2 = Fz[:, [feat.index("bmi"), feat.index("waist")]]
+C2 = (P2.T @ P2) / (N - 1)
+l2, v2 = np.linalg.eigh(C2)
+l2, v2 = l2[::-1], v2[:, ::-1]
+if v2[0, 0] < 0:
+    v2[:, 0] = -v2[:, 0]
+
+show = rng.choice(N, 1500, replace=False)
+fig, ax = plt.subplots(figsize=(7.6, 4.7))
+ax.scatter(P2[show, 0], P2[show, 1], s=8, alpha=0.18, color=sh.OKABE_ITO["blue"])
+for k, key, lab in [(0, "vermillion", "leading direction"),
+                    (1, "green", "residual direction")]:
+    a = v2[:, k] * 2.4 * np.sqrt(l2[k])
+    ax.annotate("", xy=(a[0], a[1]), xytext=(0, 0),
+                arrowprops=dict(arrowstyle="-|>", lw=2.6,
+                                color=sh.OKABE_ITO[key]))
+    ax.annotate(lab, xy=(a[0], a[1]), xytext=(a[0] + 0.15, a[1] + 0.15),
+                color=sh.OKABE_ITO[key], fontsize=12, fontweight=650)
+ax.set_xlabel("BMI (standardized)")
+ax.set_ylabel("waist circumference (standardized)")
+ax.set_aspect("equal")
+sh.finalize(fig, alt="Elongated BMI-versus-waist point cloud with a long arrow along its main diagonal and a short perpendicular arrow.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: the 2-D warm-up: one direction carries ~95% of this plane's spread.
+Now do the same with all six features at once — next slide.
+:::
+
+## All six features: the scree plot
+
+```{python}
+#| label: fig-scree
+#| fig-alt: "Scree plot for PCA on the six standardized NHANES features. Blue bars show the variance explained by each component: 37.3 percent, 21.8, 17.2, 12.5, 9.7, and 1.3 percent. A vermillion line with circular markers shows the cumulative total crossing 59 percent at two components, 76 percent at three, and reaching 100 percent at six."
+#| fig-cap: "PCA on all six standardized features: PC1 carries 37.3%, PC1–2 59.1%, PC1–3 76.4% — and PC6 a residual 1.3% (the BMI/waist redundancy, found)."
+
+fig, ax = plt.subplots(figsize=(8.2, 4.2))
+ks = np.arange(1, D + 1)
+ax.bar(ks, ve, color=sh.OKABE_ITO["blue"], alpha=0.8, label="per component")
+ax.plot(ks, np.cumsum(ve), color=sh.OKABE_ITO["vermillion"], linestyle="-",
+        marker="o", label="cumulative")
+for k in ks:
+    ax.text(k, ve[k - 1] + 0.015, f"{ve[k-1]*100:.1f}%", ha="center", fontsize=11)
+ax.set_xlabel("principal component")
+ax.set_ylabel("fraction of variance explained")
+ax.set_ylim(0, 1.06)
+ax.legend(loc="center right", frameon=False)
+sh.finalize(fig, alt="Bar chart of variance explained per component with a cumulative curve reaching one at six components.")
+plt.show()
+```
+
+- **Variance explained**: $\lambda_k \big/ \sum_j \lambda_j$.
+- The near-zero PC6 (1.3%) is the algebra's way of saying *one of these six
+  numbers is almost redundant* — we already knew which pair.
+
+::: {.notes}
+Speaker note: real numbers, verified from the loader: 37.3 / 21.8 / 17.2 /
+12.5 / 9.7 / 1.3. No cliff after PC1 — clinical features are genuinely
+multi-dimensional; the strong signal is the *floor* at PC6.
+:::
+
+## What do the components mean? {.smaller}
+
+Loadings of the first two components (signs fixed by convention):
+
+```{python}
+#| label: fig-loadings
+#| fig-alt: "Two horizontal bar charts of PCA loadings across the six NHANES features. PC1, explaining 37 percent, loads strongly and positively on BMI and waist, moderately on HbA1c, weakly positively on age, and negatively on HDL cholesterol, with total cholesterol near zero — an adiposity and metabolic-risk axis. PC2, explaining 22 percent, loads mainly on age, total cholesterol, and HDL together — an age and cholesterol axis largely separate from adiposity."
+#| fig-cap: "Loadings: PC1 ≈ an adiposity/metabolic axis (BMI + waist + HbA1c, HDL opposing); PC2 ≈ an age–cholesterol axis."
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.0), sharey=True)
+ypos = np.arange(D)
+for i, ax in enumerate(axes):
+    load = vecs[:, i]
+    colr = [sh.OKABE_ITO["vermillion"] if v < 0 else sh.OKABE_ITO["blue"] for v in load]
+    ax.barh(ypos, load, color=colr, alpha=0.85)
+    ax.axvline(0, color=sh.OKABE_ITO["black"], linewidth=0.8, alpha=0.5)
+    ax.set_title(f"PC{i+1}  ({ve[i]*100:.1f}% of variance)")
+    ax.set_xlabel("loading")
+axes[0].set_yticks(ypos)
+axes[0].set_yticklabels(feat)
+sh.finalize(fig, alt="Horizontal loading bars showing PC1 dominated by BMI, waist, and HbA1c with HDL opposing, and PC2 dominated by age and the cholesterol pair.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: the payoff of interpretability: PC1 is a *metabolic/adiposity*
+axis (the m6b block plus HbA1c, HDL pushing the other way — clinically sensible);
+PC2 separates age-plus-cholesterol. Positive/negative bar colors are redundant
+with the axis-side cue.
+:::
+
+## Choosing K, and what "explained" buys {.smaller}
+
+- **Scree / elbow** — the m6b judgment call again: after PC3 the gains flatten;
+  2–3 components describe these patients reasonably.
+- **Threshold** — "keep 90%" → here $K = 5$ (cumulative 98.7% at 5, 88.9% at 4).
+- **Downstream use** — if the scores feed a supervised model, choose $K$ by
+  **cross-validation** on that model (m2a closes the loop).
+
+[Compression is a *tool*, not a truth: variance explained is measured on
+$\mathbf{X}$ — no label ever voted.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: three legitimate selection styles, one warning that leads into the
+limitations slide. The CV option reconnects unsupervised output to supervised
+discipline — Gate B synthesis in one bullet.
+:::
+
+## Limitations — said plainly {.smaller}
+
+- **Linear**: components are straight axes; a curved manifold (spirals,
+  clusters on a ring) is invisible to them.
+- **Variance ≠ usefulness**: PCA never saw the label. The direction that
+  predicts hypertension may hide in a low-variance component — m6b's
+  cluster-vs-label caution, transposed to axes.
+- **Scale-dependent**: standardize or the units choose your components (m6b).
+- **Interpretability is a gift, not a guarantee**: PC1 happened to be clinically
+  readable here; rotated blends often aren't.
+
+::: {.notes}
+Speaker note: the "variance ≠ usefulness" bullet is the one students must carry
+into Project 2 — a PCA that "explains 90%" can still discard the diagnostic 10%.
+:::
+
+## Live demo: the PCA explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week06-pca/" background-interactive="true"}
+
+Rotate the candidate axis in the week06 tool and watch variance-captured and
+reconstruction-error trade places — the two views of one solution.
+
+::: {.notes}
+Speaker note: full-bleed interactive embed of the week06 PCA tool (PRIMARY
+pattern, CLAUDE.md). The static fallback on the next slide is what prints /
+exports to PDF.
+:::
+
+## Explorer — static fallback {.smaller}
+
+*The iframe above does not print or export to PDF; this snapshot stands in.*
+
+```{python}
+#| label: fig-fallback
+#| fig-alt: "Static snapshot standing in for the interactive PCA explorer: the standardized BMI-versus-waist scatter with the leading principal direction drawn as a vermillion arrow, the same view the week06 tool shows."
+#| fig-cap: "Static fallback: the leading direction on the adiposity plane (used in print / PDF)."
+
+fig, ax = plt.subplots(figsize=(7.4, 4.4))
+ax.scatter(P2[show, 0], P2[show, 1], s=8, alpha=0.18, color=sh.OKABE_ITO["blue"])
+a = v2[:, 0] * 2.4 * np.sqrt(l2[0])
+ax.annotate("", xy=(a[0], a[1]), xytext=(0, 0),
+            arrowprops=dict(arrowstyle="-|>", lw=2.6,
+                            color=sh.OKABE_ITO["vermillion"]))
+ax.set_xlabel("BMI (standardized)")
+ax.set_ylabel("waist (standardized)")
+ax.set_title("week06 explorer snapshot")
+ax.set_aspect("equal")
+sh.finalize(fig, alt="Static fallback snapshot of the leading principal direction on the adiposity scatter.")
+plt.show()
+```
+
+## The course, in one arc {.smaller}
+
+One dataset, five ways of seeing — each module's answer became the next one's
+question:
+
+| | The move | The object |
+|---|---|---|
+| **Loss** (M1–M2) | minimize $\mathcal{L}$; control flexibility | $\hat{\mathbf{w}} = (\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$ |
+| **Likelihood** (M3) | model the noise; maximize $\ell$ | same $\hat{\mathbf{w}}$ + $\hat{\sigma}^2$ + $\mathrm{Cov}[\hat{\mathbf{w}}]$ |
+| **Posterior** (M4) | believe, then update | $\mathcal{N}(\mathbf{m}_N, \mathbf{S}_N)$ — Project 1's endpoint |
+| **Approximation** (M5) | when conjugacy breaks, approximate | Laplace $\mathbf{A}^{-1}$; Metropolis draws |
+| **Discovery** (M6–M7) | drop the labels | clusters; principal axes — described, not diagnosed |
+
+[And one object followed you the whole way: $\mathbf{X}^{\!\top}\mathbf{X}$ —
+loss bowl, likelihood curvature, Fisher information, posterior precision,
+covariance. **That's the course.**]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Gate B synthesis). Land the arc slowly — five rows, one dataset,
+one recurring matrix. Every row is something they derived by hand at least once.
+Close by pointing students to Project 2's reflection prompt, which asks for this
+table in their own words.
+:::

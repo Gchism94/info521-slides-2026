@@ -1,0 +1,26 @@
+---
+title: "Module 7 — PCA"
+format:
+  html:
+    theme: cosmo
+    toc: false
+---
+
+<!-- Thin module landing (repo convention: index.qmd is a landing, never a
+     lecture deck). Decks live beside it; see CLAUDE.md. -->
+
+The closing module: center → covariance → eigendecomposition. Maximum variance
+and minimum reconstruction error turn out to be the same problem; variance
+explained ($\lambda_k / \sum_j \lambda_j$) and the scree plot guide how many
+components to keep. On NHANES, PC1 emerges as an adiposity/metabolic axis and
+the near-zero PC6 exposes the BMI–waist redundancy. Ends with the course-arc
+synthesis: loss → likelihood → posterior → approximation → discovery.
+
+| Deck | Link |
+|------|------|
+| Lecture — PCA & Course Synthesis | [m7a-pca](m7a-pca.html) |
+
+Companion activity: [week06 PCA explorer](https://gchism94.github.io/info521-activities-2026/week06-pca/)
+(embedded live in the lecture — the slug is week-named; modules ≠ weeks).
+
+[← All slide decks](../../index.html)
