@@ -52,9 +52,9 @@ $$
 This is the **closed-form solution** — no iteration needed. The $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}$ term assumes the design matrix is full rank.
 
 **Interpretations**:
-- $\mathbf{X}^{\!\top}\mathbf{X}$ is proportional to the *Gram matrix* (feature covariances).
+- $\mathbf{X}^{\!\top}\mathbf{X}$ is the *Gram matrix* of the feature columns (proportional to the feature covariance matrix when the columns are centered).
 - $\mathbf{X}^{\!\top}\mathbf{y}$ is the *cross-covariance* between features and targets.
-- $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$ is the *pseudo-inverse* of $\mathbf{X}$.
+- $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}$ is the *pseudo-inverse* of $\mathbf{X}$ (when full column rank).
 
 ## Try it: Interactive tool {background-iframe="https://gchism94.github.io/info521-activities-2026/week01-least-squares/" background-interactive="true"}
 
