@@ -51,9 +51,8 @@ def ridge_fit(Phi, y, lam):
     w = np.linalg.solve(Phi.T @ Phi + lam * np.eye(D), Phi.T @ (y - y.mean()))
     return w, float(y.mean())
 
-# >>> PLACEHOLDER — replace with the deployed week02 bias-variance/ridge tool. <<<
-# → week02 bias-variance / ridge tool Pages URL after publish.
-PLACEHOLDER_URL = "https://gchism94.github.io/info521-activities-2026/week02-bias-variance/"
+# The week02 activity embed is a background-iframe slide attribute (literal URL —
+# Quarto does not expand variables inside slide attributes; see CLAUDE.md).
 ```
 
 ## Learning outcomes {.smaller}
@@ -145,8 +144,8 @@ $$
 \underbrace{\sigma^2}_{\text{irreducible}} .
 $$
 
-The $\sigma^2$ floor is noise no model can beat. Full derivation →
-[appendix-bias-variance.html](appendix-bias-variance.html).
+The $\sigma^2$ floor is noise no model can beat. Full derivation in the course
+notes (appendix forthcoming).
 
 ::: {.notes}
 Speaker note: expectation over training sets, at a fixed $\mathbf{x}$. The
@@ -289,23 +288,15 @@ sh.finalize(fig, alt="U-shaped 5-fold CV error versus lambda on a log axis, with
 plt.show()
 ```
 
-## Live demo: bias-variance / ridge explorer
+## Live demo: bias-variance / ridge explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week02-bias-variance/" background-interactive="true"}
 
-```{python}
-#| label: live-iframe
-#| echo: false
-from IPython.display import HTML
-HTML(
-    f'<iframe src="{PLACEHOLDER_URL}" title="Week 2 bias-variance / ridge explorer" '
-    'width="100%" height="430" loading="lazy" '
-    'style="border:1px solid var(--border); border-radius:8px; background:var(--surface);">'
-    '</iframe>'
-)
-```
+Slide $\lambda$ — watch bias trade against variance as the fit stiffens, live on
+this slide.
 
 ::: {.notes}
-Speaker note: the week02 explorer — slide λ, watch bias and variance trade off and
-the fit stiffen. Swap `PLACEHOLDER_URL` (top of deck) after publish.
+Speaker note: full-bleed interactive embed of the week02 bias-variance / ridge
+explorer (PRIMARY pattern, CLAUDE.md). The static fallback on the next slide is
+what prints / exports to PDF.
 :::
 
 ## Explorer — static fallback {.smaller}
@@ -323,7 +314,7 @@ ax.axvline(best, color=sh.OKABE_ITO["vermillion"], linestyle=":", label=fr"CV ch
 ax.set_xscale("log")
 ax.set_xlabel(r"regularization strength  $\lambda$  (log scale)")
 ax.set_ylabel("cross-validation MSE")
-ax.set_title("bias-variance / ridge snapshot (placeholder)")
+ax.set_title("bias-variance / ridge snapshot")
 ax.legend(loc="upper center", frameon=False)
 sh.finalize(fig, alt="Static fallback snapshot of the CV-error-versus-lambda curve.")
 plt.show()
