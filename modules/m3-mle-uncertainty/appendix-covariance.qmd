@@ -1,5 +1,5 @@
 ---
-title: "Appendix: Full cov{ŵ} derivation"
+title: "Appendix: Full Cov[ŵ] derivation"
 subtitle: "INFO 521 · Module 3 — supplement"
 author: "Greg Chism"
 institute: "School of Information · University of Arizona"
@@ -13,12 +13,12 @@ From the main deck: $\hat{\mathbf{w}}$ is unbiased ($\mathbb{E}[\hat{\mathbf{w}}
 and the parameter covariance is
 
 $$
-\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}.
+\mathrm{Cov}[\hat{\mathbf{w}}] \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}.
 $$
 
 This appendix derives that result in full. Only $\mathbf{y}$ is random;
 $\mathbf{X}$ and $\mathbf{w}$ are fixed, and $\mathbb{E}[\mathbf{y}] = \mathbf{X}\mathbf{w}$,
-$\;\mathrm{cov}\{\mathbf{y}\} = \sigma^2\mathbf{I}$.
+$\;\mathrm{Cov}[\mathbf{y}] = \sigma^2\mathbf{I}$.
 
 ::: {.notes}
 Speaker note: this is the slide-10 promise paid off. Each step reveals on a
@@ -31,7 +31,7 @@ $(\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{X} = \mathbf{I}$
 Start from the covariance definition, using $\mathbb{E}[\hat{\mathbf{w}}] = \mathbf{w}$:
 
 $$
-\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \mathbb{E}\!\left[\hat{\mathbf{w}}\hat{\mathbf{w}}^{\!\top}\right] - \mathbf{w}\mathbf{w}^{\!\top}
+\mathrm{Cov}[\hat{\mathbf{w}}] \;=\; \mathbb{E}\!\left[\hat{\mathbf{w}}\hat{\mathbf{w}}^{\!\top}\right] - \mathbf{w}\mathbf{w}^{\!\top}
 $$
 
 ::: {.fragment}
@@ -47,7 +47,7 @@ $$
 :::
 
 ::: {.fragment}
-The data second moment, from $\mathrm{cov}\{\mathbf{y}\} = \mathbb{E}[\mathbf{y}\mathbf{y}^{\!\top}] - \mathbb{E}[\mathbf{y}]\mathbb{E}[\mathbf{y}]^{\!\top}$:
+The data second moment, from $\mathrm{Cov}[\mathbf{y}] = \mathbb{E}[\mathbf{y}\mathbf{y}^{\!\top}] - \mathbb{E}[\mathbf{y}]\mathbb{E}[\mathbf{y}]^{\!\top}$:
 
 $$
 \mathbb{E}\!\left[\mathbf{y}\mathbf{y}^{\!\top}\right]
@@ -68,7 +68,7 @@ $$
 The $\mathbf{w}\mathbf{w}^{\!\top}$ cancels against the $-\mathbf{w}\mathbf{w}^{\!\top}$ from the definition:
 
 $$
-\boxed{\;\mathrm{cov}\{\hat{\mathbf{w}}\} \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\;}
+\boxed{\;\mathrm{Cov}[\hat{\mathbf{w}}] \;=\; \sigma^2\left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\;}
 $$
 :::
 
@@ -76,7 +76,7 @@ $$
 [And this is exactly the inverse Fisher information: from
 $-\dfrac{\partial^2 \ell}{\partial\mathbf{w}\,\partial\mathbf{w}^{\!\top}} = \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X} = \mathcal{I}$
 (with $\ell$ the log-likelihood from the main deck),
-we get $\mathrm{cov}\{\hat{\mathbf{w}}\} = \mathcal{I}^{-1}$.]{style="color: var(--accent)"}
+we get $\mathrm{Cov}[\hat{\mathbf{w}}] = \mathcal{I}^{-1}$.]{style="color: var(--accent)"}
 :::
 
 ::: {.notes}
