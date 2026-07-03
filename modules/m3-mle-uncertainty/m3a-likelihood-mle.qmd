@@ -1,0 +1,389 @@
+---
+title: "Likelihood & Maximum Likelihood"
+subtitle: "INFO 521 · Module 3 · Lecture A — From Loss to Likelihood"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+```{python}
+#| label: setup
+#| include: false
+# ---------------------------------------------------------------------------
+# Deck setup. Runs from the project root (execute-dir: project), so the shared
+# helpers import the same way from any module depth.
+# ---------------------------------------------------------------------------
+import sys
+sys.path.insert(0, "shared")
+
+import numpy as np
+import matplotlib.pyplot as plt
+import slide_helpers as sh
+
+sh.use_slide_style()
+
+ds   = sh.load_nhanes()
+age  = sh.primary_predictor(ds)
+sbp  = ds["y"]
+age_z = (age - age.mean()) / age.std()
+
+# The Module-1 least-squares fit (soon to be re-earned as the MLE).
+X    = np.column_stack([np.ones_like(age_z), age_z])
+what = np.linalg.solve(X.T @ X, X.T @ sbp)          # ŵ = (XᵀX)⁻¹Xᵀy
+res  = sbp - X @ what
+s2   = float((res ** 2).mean())                      # σ̂² = (1/N)Σ r²  (≈ 253.9)
+N    = len(sbp)
+
+rng = np.random.default_rng(521)                     # fixed seed → reproducible figures
+# M3 has NO activity embed (per SOURCE_MAP: the week03 Bayesian-updating tool
+# belongs to M4; a parameter-uncertainty viz for M3 is a future build).
+```
+
+## Learning outcomes {.smaller}
+
+By the end of Lecture A you should be able to:
+
+1. **State the linear-Gaussian noise model** and read it generatively.
+2. **Write the likelihood** $p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)$ and
+   the log-likelihood $\ell(\mathbf{w})$.
+3. **Derive the MLE** — and show $\hat{\mathbf{w}}_{\text{MLE}}$ **is** the
+   least-squares $\hat{\mathbf{w}}$ from Module 1.
+4. **Estimate the noise** — $\hat{\sigma}^2$ — and explain why it is **biased**.
+
+::: {.notes}
+Speaker note: the arc is loss → likelihood. Same fit, new foundation — and the
+foundation buys two things the loss never gave us: σ̂² and (Lecture B) uncertainty.
+:::
+
+## Why squared error? (the debt from Module 1) {.smaller}
+
+Module 1 *chose* the mean-squared-error loss
+
+$$
+\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}\,\lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2
+$$
+
+because it was smooth and penalized big misses. Reasonable — but a **choice**.
+
+[Today we *earn* it: squared error is what a **Gaussian noise model** implies.
+The accent hint on m1a's loss slide was this lecture.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 10, framing). Students accepted MSE on faith in M1; this
+lecture replaces faith with a model. Pay the debt explicitly — it lands well.
+:::
+
+## The noise model {.smaller}
+
+Assume each patient's systolic BP is the linear signal **plus Gaussian noise**:
+
+$$
+y_n = \mathbf{w}^{\!\top}\mathbf{x}_n + \varepsilon_n,
+\qquad
+\varepsilon_n \sim \mathcal{N}(0,\ \sigma^2)\ \ \text{independently.}
+$$
+
+Equivalently, each observation is a **draw from a Gaussian centered on the line**:
+
+$$
+p(y_n \mid \mathbf{x}_n, \mathbf{w}, \sigma^2)
+= \mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right).
+$$
+
+This is a **generative story**: fix $\mathbf{w}, \sigma^2$, and the model can
+*produce* datasets — the picture m3b's repeated-datasets schematic draws.
+
+::: {.notes}
+Speaker note: (Clay 10). Two readings of one equation: signal + noise, or a
+conditional Gaussian per patient. The generative reading powers everything in M3.
+:::
+
+## The Gaussian, in one slide {.smaller}
+
+<!-- CUTTABLE: prereq recap (async L09b). Drop first if the deck runs long. -->
+
+$$
+\mathcal{N}(y \mid \mu, \sigma^2)
+= \frac{1}{\sqrt{2\pi\sigma^2}}
+  \exp\!\left(-\frac{(y-\mu)^2}{2\sigma^2}\right)
+$$
+
+```{python}
+#| label: fig-gaussian
+#| fig-alt: "Illustrative Gaussian probability density curve centered at mu with the one- and two-standard-deviation intervals shaded in progressively lighter blue; roughly 68 percent of the area lies within one standard deviation and 95 percent within two."
+#| fig-cap: "The Gaussian (illustrative): mean μ sets the center, σ sets the spread — ~68% within ±1σ, ~95% within ±2σ."
+
+mu, sg = 0.0, 1.0
+t = np.linspace(-4, 4, 400)
+pdf = np.exp(-(t - mu) ** 2 / (2 * sg ** 2)) / np.sqrt(2 * np.pi * sg ** 2)
+
+fig, ax = plt.subplots(figsize=(8.5, 3.9))
+ax.plot(t, pdf, color=sh.OKABE_ITO["blue"], linestyle="-")
+m1 = (t >= -1) & (t <= 1)
+m2 = (t >= -2) & (t <= 2)
+ax.fill_between(t[m2], pdf[m2], alpha=0.15, color=sh.OKABE_ITO["blue"])
+ax.fill_between(t[m1], pdf[m1], alpha=0.30, color=sh.OKABE_ITO["blue"])
+ax.annotate("±1σ (~68%)", xy=(0, 0.16), ha="center", fontsize=13)
+ax.annotate("±2σ (~95%)", xy=(0, 0.035), ha="center", fontsize=13)
+ax.set_xlabel(r"$y-\mu$  (in units of $\sigma$)")
+ax.set_ylabel("density")
+sh.finalize(fig, alt="Illustrative Gaussian density with the one- and two-sigma central intervals shaded.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: (Clay 09b, compressed to one slide — the rest of probability review
+is async prereq). Only two facts matter today: μ centers it, σ scales it.
+:::
+
+## The likelihood {.smaller}
+
+The patients are independent, so the probability of the **whole dataset** is a
+product — read as a **function of the parameters** with the data fixed:
+
+$$
+p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
+= \prod_{n=1}^{N} \mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right)
+$$
+
+::: {.fragment}
+- Data $(\mathbf{X}, \mathbf{y})$: **fixed** — it already happened.
+- Parameters $(\mathbf{w}, \sigma^2)$: **free** — the knobs we turn.
+- **The likelihood scores the knobs**: parameters under which the observed data
+  are *more probable* score higher.
+:::
+
+::: {.fragment}
+[**Maximum likelihood**: pick the parameters that make the data you actually saw
+as probable as possible.]{style="color: var(--accent)"}
+:::
+
+::: {.notes}
+Speaker note: (Clay 10/11). The single most common confusion: a likelihood is not
+a distribution over parameters (that's Bayes, Module 4) — it is a *score*.
+:::
+
+## The log-likelihood {.smaller}
+
+Products of exponentials beg for a logarithm — we write the log-likelihood
+$\ell(\mathbf{w}) = \log p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)$,
+reserving $\mathcal{L}$ for losses:
+
+$$
+\ell(\mathbf{w}) = -\tfrac{N}{2}\log 2\pi \;-\; N\log\sigma
+\;-\; \tfrac{1}{2\sigma^2}\sum_{n=1}^{N}\left(y_n - \mathbf{w}^{\!\top}\mathbf{x}_n\right)^2
+$$
+
+::: {.fragment}
+Look at the $\mathbf{w}$-dependent part: it is **$-$(sum of squared errors),
+scaled**. Maximizing $\ell$ in $\mathbf{w}$ *is* minimizing squared error:
+
+$$
+\arg\max_{\mathbf{w}} \ell(\mathbf{w})
+\;=\;
+\arg\min_{\mathbf{w}} \mathcal{L}(\mathbf{w}).
+$$
+:::
+
+::: {.notes}
+Speaker note: log is monotone, so it preserves the argmax; it turns the product
+into a sum and the exponential into the quadratic students already know. The
+equivalence is visible before any calculus — point at the third term.
+:::
+
+## The likelihood surface over NHANES
+
+```{python}
+#| label: fig-loglik-profile
+#| fig-alt: "Profile of the log-likelihood as a function of the slope parameter w1 for the NHANES systolic-blood-pressure-on-age model, with the intercept held at its estimate. The curve is a smooth concave arch peaking at the maximum-likelihood slope of about 6.5 mmHg per standard deviation of age, marked with a vermillion vertical line; the least-squares estimate from Module 1 sits at exactly the same spot."
+#| fig-cap: "ℓ(w₁) for SBP on standardized age (intercept at ŵ₀): the peak IS the Module-1 least-squares slope."
+
+w1g = np.linspace(what[1] - 6, what[1] + 6, 300)
+# ℓ(w1) with w0 fixed at ŵ0 and σ² at σ̂² (constants dropped affect none of the shape).
+sse = np.array([((sbp - (what[0] + w1 * age_z)) ** 2).sum() for w1 in w1g])
+ll = -N / 2 * np.log(2 * np.pi * s2) - sse / (2 * s2)
+
+fig, ax = plt.subplots()
+ax.plot(w1g, ll, color=sh.OKABE_ITO["blue"], linestyle="-", label=r"$\ell(w_1)$")
+ax.axvline(what[1], color=sh.OKABE_ITO["vermillion"], linestyle=":",
+           label=fr"$\hat{{w}}_1 = {what[1]:.2f}$ (= least squares)")
+ax.set_xlabel(r"slope  $w_1$  (mmHg per SD of age)")
+ax.set_ylabel("log-likelihood")
+ax.legend(loc="lower center", frameon=False)
+sh.finalize(fig, alt="Concave log-likelihood profile in the slope parameter peaking at the least-squares estimate.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: one smooth concave arch — the 1-D shadow of m1b's convex loss bowl,
+flipped. The peak lands on 6.48, the same number from m1a's fitted line.
+:::
+
+## MLE for w: an old friend {.smaller}
+
+Set the gradient of $\ell$ in $\mathbf{w}$ to zero:
+
+$$
+\frac{\partial \ell}{\partial \mathbf{w}}
+= \tfrac{1}{\sigma^2}\left(\mathbf{X}^{\!\top}\mathbf{y} - \mathbf{X}^{\!\top}\mathbf{X}\mathbf{w}\right)
+= \mathbf{0}
+\qquad\Longrightarrow\qquad
+\boxed{\;\hat{\mathbf{w}}_{\text{MLE}} = \left(\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1}\mathbf{X}^{\!\top}\mathbf{y}\;}
+$$
+
+The **normal equations again** — $\sigma^2$ cancels entirely.
+
+[**Least squares = maximum likelihood under Gaussian noise.** Same $\hat{\mathbf{w}}$,
+better foundation: now it comes from a model, not a preference.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: (Clay 10/11 — the punchline). Nothing new to memorize: the
+derivation IS m1b's, wearing likelihood clothes. What's new is the *interpretation*
+— and the two dividends on the next slides.
+:::
+
+## Dividend 1: the noise gets estimated too {.smaller}
+
+The loss treated the scatter around the line as a nuisance. The likelihood makes
+it a **parameter**. Setting $\partial\ell/\partial\sigma = 0$:
+
+$$
+\hat{\sigma}^2
+= \tfrac{1}{N}\sum_{n=1}^{N}\left(y_n - \hat{\mathbf{w}}^{\!\top}\mathbf{x}_n\right)^2
+= \tfrac{1}{N}\left(\mathbf{y}^{\!\top}\mathbf{y} - \mathbf{y}^{\!\top}\mathbf{X}\hat{\mathbf{w}}\right)
+$$
+
+— the **average squared residual** at the fitted line.
+
+For SBP on standardized age: $\hat{\sigma} \approx 15.9$ mmHg — the model's honest
+"give or take" for one patient.
+
+::: {.notes}
+Speaker note: (Clay 11). This is exactly the σ̂² formula m3b's recap slide quotes.
+Clinical read: predictions carry ±16 mmHg of patient-level scatter — age explains
+the trend, not the person.
+:::
+
+## Model check: are the residuals Gaussian-ish?
+
+```{python}
+#| label: fig-residuals
+#| fig-alt: "Histogram of the residuals from the NHANES systolic-blood-pressure-on-age fit, shown as a density, with the fitted Gaussian curve with mean zero and standard deviation about 16 mmHg overlaid in vermillion. The histogram is roughly bell-shaped but visibly right-skewed, with a heavier tail of large positive residuals than the Gaussian predicts."
+#| fig-cap: "NHANES residuals vs. the fitted 𝒩(0, σ̂²): bell-ish, but right-skewed — models are assumptions, check them."
+
+fig, ax = plt.subplots()
+ax.hist(res, bins=50, density=True, color=sh.OKABE_ITO["blue"], alpha=0.55,
+        label="residuals")
+t = np.linspace(res.min(), res.max(), 300)
+ax.plot(t, np.exp(-t**2 / (2 * s2)) / np.sqrt(2 * np.pi * s2),
+        color=sh.OKABE_ITO["vermillion"], linestyle="--",
+        label=fr"$\mathcal{{N}}(0,\ \hat{{\sigma}}^2),\ \hat{{\sigma}} \approx {np.sqrt(s2):.1f}$")
+ax.set_xlabel(r"residual  $y_n - \hat{y}_n$  (mmHg)")
+ax.set_ylabel("density")
+ax.legend(loc="upper right", frameon=False)
+sh.finalize(fig, alt="Residual histogram with fitted Gaussian overlay, showing a right-skewed heavy positive tail.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: honest data moment — the Gaussian is decent in the bulk but the
+right tail (hypertensive spikes) is heavier. The assumption is *useful*, not
+*true*; binarizing that tail is exactly what Project 2 / Module 5 does.
+:::
+
+## Dividend 2 — with a catch: $\hat{\sigma}^2$ is biased {.smaller}
+
+Averaging over repeated datasets from the generating process:
+
+$$
+\mathbb{E}\!\left[\hat{\sigma}^2\right] = \frac{N - D}{N}\,\sigma^2 \;<\; \sigma^2
+\qquad(D\ \text{fitted parameters})
+$$
+
+- The fit **chases the sample**: residuals from $\hat{\mathbf{w}}$ are
+  *systematically smaller* than the true errors from $\mathbf{w}$.
+- Each fitted parameter eats one *degree of freedom* — hence the $N{-}D$.
+- The classic repair divides by $N{-}D$ instead of $N$; at $N \approx 5{,}102$,
+  $D = 2$, the difference is invisible — at $N = 10$ it is not.
+
+::: {.notes}
+Speaker note: (Clay 11 — the bias example). Contrast with Lecture B's result that
+$\hat{\mathbf{w}}$ is unbiased: MLE does NOT hand you unbiasedness for free; you
+check it per estimator. That contrast is the point of the next figure.
+:::
+
+## Seeing the bias
+
+```{python}
+#| label: fig-sigma-bias
+#| fig-alt: "Average of the maximum-likelihood noise-variance estimate across two thousand repeated NHANES subsamples, plotted against subsample size from 4 to 60 as a blue line with circular markers. The average sits well below the full-sample sigma-hat-squared reference line (vermillion, dashed) at small sizes and climbs toward it as the subsample grows, closely tracking the theoretical (N minus 2 over N) bias curve drawn in green."
+#| fig-cap: "Mean σ̂² over 2,000 NHANES subsamples per size: small samples systematically UNDER-estimate the noise, tracking (N−2)/N · σ²."
+
+sizes = np.array([4, 6, 8, 10, 14, 20, 30, 45, 60])
+mean_s2 = []
+for m in sizes:
+    vals = []
+    for _ in range(2000):
+        idx = rng.choice(N, m, replace=False)
+        Xi, yi = X[idx], sbp[idx]
+        wi = np.linalg.solve(Xi.T @ Xi, Xi.T @ yi)
+        vals.append(((yi - Xi @ wi) ** 2).mean())
+    mean_s2.append(np.mean(vals))
+
+fig, ax = plt.subplots()
+ax.plot(sizes, mean_s2, color=sh.OKABE_ITO["blue"], linestyle="-", marker="o",
+        label=r"mean $\hat{\sigma}^2$ across subsamples")
+ax.plot(sizes, (sizes - 2) / sizes * s2, color=sh.OKABE_ITO["green"],
+        linestyle="-.", marker="^", label=r"theory: $\frac{N-2}{N}\,\sigma^2$")
+ax.axhline(s2, color=sh.OKABE_ITO["vermillion"], linestyle="--",
+           label=r"full-sample $\hat{\sigma}^2$ (reference)")
+ax.set_xlabel(r"subsample size  $N$")
+ax.set_ylabel(r"$\hat{\sigma}^2$  (mmHg²)")
+ax.legend(loc="lower right", frameon=False)
+sh.finalize(fig, alt="Mean MLE noise variance versus subsample size, rising toward the reference level along the theoretical bias curve.")
+plt.show()
+```
+
+::: {.notes}
+Speaker note: real NHANES resampling, no synthetic data. The empirical curve rides
+the (N−2)/N line almost exactly — theory you can watch happen. Fixed seed 521.
+:::
+
+## What maximum likelihood buys {.smaller}
+
+One framework, three purchases:
+
+1. **A principled loss.** Squared error stops being a taste and becomes a
+   *consequence* (of Gaussian noise). Different noise model ⇒ different loss.
+2. **Noise as a first-class estimate.** $\hat{\sigma}^2$ quantifies patient-level
+   scatter — the loss view had nowhere to put it.
+3. **A road to uncertainty.** The *curvature* of $\ell$ at the peak says how
+   sharply the data pin down $\hat{\mathbf{w}}$ — that is **Lecture B**.
+
+And one caution: MLE estimators are not automatically unbiased ($\hat{\sigma}^2$
+wasn't) — properties get **checked**, not assumed.
+
+::: {.notes}
+Speaker note: consolidation slide. If students remember one line: same fit,
+stronger story, plus σ̂² — and the curvature tease sets up Lecture B verbatim.
+:::
+
+## Recap & bridge {.smaller}
+
+- **Noise model**: $y_n = \mathbf{w}^{\!\top}\mathbf{x}_n + \varepsilon_n$,
+  $\ \varepsilon_n \sim \mathcal{N}(0, \sigma^2)$.
+- **Likelihood → $\ell(\mathbf{w})$**: maximizing it **is** minimizing
+  $\mathcal{L}$ — least squares, re-earned.
+- **$\hat{\sigma}^2 = \tfrac{1}{N}\sum_n r_n^2$** — biased by $(N{-}D)/N$; repair
+  with $N{-}D$.
+
+[**Next (Lecture B):** how *uncertain* is $\hat{\mathbf{w}}$? The Hessian of
+$\ell$ — the same $\mathbf{X}^{\!\top}\mathbf{X}$ yet again — becomes the Fisher
+information, and uncertainty gets a formula.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: hand off to m3b exactly where it picks up ("the MLE derived in the
+likelihood lecture of this module"). The through-line object is XᵀX: loss bowl
+(M1), likelihood peak (here), Fisher information (m3b), Laplace posterior (M5).
+:::
