@@ -20,18 +20,18 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # requirements.txt has `-e ../info521-projects-2026` (NHANES loader).
       # Actions workspace rules forbid path: ../ so we check out inside the
       # workspace and install from there instead of from the sibling path.
       - name: Check out info521-projects-2026 (NHANES loader)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: gchism94/info521-projects-2026
           path: info521-projects-2026
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -47,11 +47,11 @@ jobs:
 
       # Register the Pages deployment before uploading (parity with the
       # activities workflow — resolves queued/failed deployments).
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
         id: deploy
