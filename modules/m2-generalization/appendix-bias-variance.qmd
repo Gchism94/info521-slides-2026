@@ -1,0 +1,136 @@
+---
+title: "Appendix: The Bias–Variance Decomposition"
+subtitle: "INFO 521 · Module 2 · Lecture B — supplement"
+author: "Greg Chism"
+institute: "School of Information · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+---
+
+## Where we are {.smaller}
+
+Lecture B stated that, at a fixed input $\mathbf{x}$, expected test error splits into
+three pieces:
+
+$$
+\mathbb{E}\bigl[(y - \hat{f}(\mathbf{x}))^2\bigr]
+\;=\; \text{bias}^2 \;+\; \text{variance} \;+\; \sigma^2 .
+$$
+
+This appendix derives that in full. Bookkeeping first — at the fixed $\mathbf{x}$:
+
+- **Truth**: $y = f(\mathbf{x}) + \varepsilon$, with
+  $\mathbb{E}[\varepsilon] = 0$, $\ \mathbb{E}[\varepsilon^2] = \sigma^2$.
+- **Estimate**: $\hat{f} = \hat{f}_{\mathcal{D}}(\mathbf{x})$ — random *through the
+  training set* $\mathcal{D}$ (m3b's repeated-datasets picture, in prediction space).
+- **Average fit**: $\bar{f} = \mathbb{E}_{\mathcal{D}}[\hat{f}]$ — the orange curve from
+  Lecture B's repeated-fits figure.
+- $\varepsilon$ is a **new** test-time noise draw, independent of $\mathcal{D}$.
+
+::: {.notes}
+Speaker note: optional depth for students who want the algebra. Everything hangs on one
+trick — add and subtract $\bar{f}$ — and two cross terms dying.
+:::
+
+## The one trick: add and subtract $\bar{f}$ {.smaller}
+
+Write the miss as three centered pieces:
+
+$$
+y - \hat{f}
+= \underbrace{\bigl(f - \bar{f}\bigr)}_{\text{systematic miss}}
+\;+\; \underbrace{\bigl(\bar{f} - \hat{f}\bigr)}_{\text{dataset luck}}
+\;+\; \underbrace{\varepsilon}_{\text{fresh noise}} .
+$$
+
+::: {.fragment}
+Square and take the expectation (over $\mathcal{D}$ *and* $\varepsilon$):
+
+$$
+\mathbb{E}\bigl[(y - \hat{f})^2\bigr]
+= \mathbb{E}\bigl[(f - \bar{f})^2\bigr]
++ \mathbb{E}\bigl[(\bar{f} - \hat{f})^2\bigr]
++ \mathbb{E}\bigl[\varepsilon^2\bigr]
++ \text{(three cross terms)} .
+$$
+:::
+
+::: {.notes}
+Speaker note: $(a+b+c)^2 = a^2+b^2+c^2+2ab+2ac+2bc$ — nothing deeper. The work is showing
+the cross terms vanish; that's the next slide.
+:::
+
+## The cross terms die {.smaller}
+
+Take each in turn:
+
+::: {.fragment}
+$$
+\mathbb{E}\bigl[(f - \bar{f})\,(\bar{f} - \hat{f})\bigr]
+= (f - \bar{f})\;\mathbb{E}_{\mathcal{D}}\bigl[\bar{f} - \hat{f}\bigr]
+= (f - \bar{f}) \cdot 0 = 0
+$$
+
+— $f - \bar{f}$ is a **constant** (no randomness left), and $\hat{f}$ is centered on
+$\bar{f}$ *by definition*.
+:::
+
+::: {.fragment}
+$$
+\mathbb{E}\bigl[(f - \bar{f})\,\varepsilon\bigr] = (f - \bar{f})\,\mathbb{E}[\varepsilon] = 0,
+\qquad
+\mathbb{E}\bigl[(\bar{f} - \hat{f})\,\varepsilon\bigr]
+= \mathbb{E}_{\mathcal{D}}\bigl[\bar{f} - \hat{f}\bigr]\,\mathbb{E}[\varepsilon] = 0
+$$
+
+— the test-time noise is mean-zero and **independent of the training set**, so both
+$\varepsilon$ cross terms factor and vanish.
+:::
+
+::: {.notes}
+Speaker note: the independence assumption earns its keep exactly here — if training data
+leaked into the test draw, the last factorization would fail. Leakage (m2a) breaks the
+theorem, not just the estimate.
+:::
+
+## The decomposition, earned {.smaller}
+
+What survives:
+
+$$
+\boxed{\;
+\mathbb{E}\bigl[(y - \hat{f}(\mathbf{x}))^2\bigr]
+= \underbrace{\bigl(f(\mathbf{x}) - \bar{f}(\mathbf{x})\bigr)^2}_{\text{bias}^2}
++ \underbrace{\mathbb{E}_{\mathcal{D}}\bigl[(\hat{f}(\mathbf{x}) - \bar{f}(\mathbf{x}))^2\bigr]}_{\text{variance}}
++ \underbrace{\sigma^2}_{\text{irreducible}}
+\;}
+$$
+
+- **bias²** — how far the *average* fit sits from the truth: rigidity's price.
+- **variance** — how much a single fit swings around that average: flexibility's price.
+- **$\sigma^2$** — the noise floor; no model, however tuned, goes below it.
+
+[Complexity moves the first two in opposite directions; their sum is the U-curve of
+Lectures A/B. Ridge's $\lambda$ walks you along it.]{style="color: var(--accent)"}
+
+::: {.notes}
+Speaker note: point back to m2b's repeated-fits figure — degree 1 was the bias² term made
+visible; degree 9 was the variance term. The figure and this box are the same statement.
+:::
+
+## Fine print {.smaller}
+
+Three things the derivation quietly fixed — say them out loud once:
+
+- **One $\mathbf{x}$ at a time.** The decomposition holds pointwise; "test error" in
+  practice averages it over the input distribution.
+- **Squared loss only.** The clean three-way split is a property of the square; other
+  losses decompose differently (or not at all).
+- **Expectations, not your dataset.** Bias and variance describe the *procedure* across
+  repeated datasets — on your one sample you see a single draw, which is why CV (m2a)
+  estimates rather than computes them.
+
+::: {.notes}
+Speaker note: the third bullet closes the loop to m2a — CV is how the ideal quantities in
+this appendix get estimated from one real dataset.
+:::

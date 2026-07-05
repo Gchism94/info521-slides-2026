@@ -144,8 +144,8 @@ $$
 \underbrace{\sigma^2}_{\text{irreducible}} .
 $$
 
-The $\sigma^2$ floor is noise no model can beat. Full derivation in the course
-notes (appendix forthcoming).
+The $\sigma^2$ floor is noise no model can beat. Full derivation →
+[appendix-bias-variance.html](appendix-bias-variance.html).
 
 ::: {.notes}
 Speaker note: expectation over training sets, at a fixed $\mathbf{x}$. The

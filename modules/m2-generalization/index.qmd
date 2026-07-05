@@ -18,7 +18,7 @@ knob that moves you along it.
 |------|------|
 | Lecture A — Evaluation & Cross-Validation | [m2a-evaluation-cv](m2a-evaluation-cv.html) |
 | Lecture B — Bias–Variance & Regularization | [m2b-bias-variance-ridge](m2b-bias-variance-ridge.html) |
-| Appendix — Bias–Variance decomposition *(forthcoming; see CLAUDE.md backlog)* | — |
+| Appendix — The Bias–Variance Decomposition | [appendix-bias-variance](appendix-bias-variance.html) |
 
 Companion activity: [week02 bias-variance / ridge explorer](https://gchism94.github.io/info521-activities-2026/week02-bias-variance/)
 (embedded live in Lecture B).
