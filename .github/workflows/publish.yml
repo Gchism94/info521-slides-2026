@@ -13,6 +13,12 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Declare the Pages deployment environment explicitly — required for
+    # deploy-pages to target the right environment (mirrors the working
+    # activities-repo workflow; its absence produces "Deployment failed").
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,8 +45,13 @@ jobs:
 
       - uses: quarto-dev/quarto-actions/render@v2
 
+      # Register the Pages deployment before uploading (parity with the
+      # activities workflow — resolves queued/failed deployments).
+      - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
       - uses: actions/deploy-pages@v4
+        id: deploy
