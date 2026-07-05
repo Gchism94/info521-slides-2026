@@ -12,7 +12,7 @@ Each reveal.js deck can optionally embed its corresponding peer-engagement activ
 |--------|------|------------------------|
 | M1 | m1-linear-least-squares | week01-least-squares |
 | M2 | m2-generalization | week02-bias-variance |
-| M3 | m3-mle-uncertainty | — (no activity; a parameter-uncertainty viz is a future build) |
+| M3 | m3-mle-uncertainty | m3-parameter-uncertainty (in-lecture demo — **no peer loop**; module-named slug) |
 | M4 | m4-bayesian-inference | week03-bayesian-updating (Beta-Binomial) |
 | M5 | m5-approximate-inference | week04-logistic-regression (logistic + Newton) |
 | M6 | m6-svm-clustering | week05-kmeans |
@@ -103,7 +103,8 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
   replicate: live embed slide + `fig-fallback` snapshot slide, since iframes do
   not print or export to PDF).
 - **m2b (Bias–Variance & Ridge)**: same pattern with week02-bias-variance.
-- **M3 has no embed** (no activity — see the mapping table).
+- **m3b (Properties of the MLE)**: PRIMARY embed of the m3-parameter-uncertainty
+  in-lecture demo (no peer loop; the deck's covariance-ellipse figure is the fallback).
 - **m4a (Priors & Beta-Binomial)**: same pattern with week03-bayesian-updating.
 - **m5a (Logistic & Newton)**: same pattern with week04-logistic-regression.
 - **m6b (k-means & Clustering)**: same pattern with week05-kmeans.
@@ -132,8 +133,6 @@ This sets the iframe to fill the slide width, use 68% viewport height (leaving r
 
 ## Backlog
 
-- `modules/m2-generalization/appendix-bias-variance.qmd` — full bias-variance
-  decomposition derivation, mirroring the M1/M3 appendix pattern (m2b's "The
-  decomposition" slide points to "course notes (appendix forthcoming)").
-- M3 parameter-uncertainty visualization (activities repo) — future build; when
-  it ships, add a PRIMARY embed to m3b.
+- (clear as of 2026-07-04 — the m2 bias-variance appendix and the M3
+  parameter-uncertainty demo both shipped. Only the SVM stub activity remains
+  deliberately deferred; see SOURCE_MAP's M6 row.)

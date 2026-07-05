@@ -23,8 +23,9 @@ import slide_helpers as sh
 
 sh.use_slide_style()
 
-# M3 has NO activity embed (per SOURCE_MAP: the week03 Bayesian-updating tool
-# belongs to M4; a parameter-uncertainty viz for M3 is a future build).
+# M3 has NO peer loop (the week03 Bayesian-updating tool belongs to M4). The
+# in-lecture parameter-uncertainty demo is embedded below as a background-iframe
+# (literal URL — Quarto does not expand variables inside slide attributes).
 ```
 
 ## Learning outcomes {.smaller}
@@ -345,6 +346,17 @@ axR.legend(loc="upper right", frameon=False)
 sh.finalize(fig, alt="NHANES least-squares fit and the N=40 vs full-N covariance ellipses for the fitted parameters.")
 plt.show()
 ```
+
+## Live demo: the parameter-uncertainty explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/m3-parameter-uncertainty/" background-interactive="true"}
+
+Draw datasets from a fixed process — watch $\hat{\mathbf{w}}$ scatter and fill the
+$\mathrm{Cov}[\hat{\mathbf{w}}]$ ellipse, live on this slide.
+
+::: {.notes}
+Speaker note: full-bleed interactive embed of the M3 parameter-uncertainty demo
+(PRIMARY pattern, CLAUDE.md). In-lecture demo only — M3 has no peer loop. The
+covariance-ellipse figure on the previous slide is the print / PDF fallback.
+:::
 
 ## Through-line {.smaller}
 

@@ -36,8 +36,8 @@ s2   = float((res ** 2).mean())                      # σ̂² = (1/N)Σ r²  (�
 N    = len(sbp)
 
 rng = np.random.default_rng(521)                     # fixed seed → reproducible figures
-# M3 has NO activity embed (per SOURCE_MAP: the week03 Bayesian-updating tool
-# belongs to M4; a parameter-uncertainty viz for M3 is a future build).
+# M3 has NO peer loop (the week03 Bayesian-updating tool belongs to M4). The
+# in-lecture parameter-uncertainty demo is embedded in Lecture B (m3b).
 ```
 
 ## Learning outcomes {.smaller}

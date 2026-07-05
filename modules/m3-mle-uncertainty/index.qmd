@@ -20,7 +20,7 @@ into a quantitative statement about parameter spread.
 | Lecture B — Properties of the MLE | [m3b-mle-uncertainty](m3b-mle-uncertainty.html) |
 | Appendix — Full Cov[ŵ] derivation | [appendix-covariance](appendix-covariance.html) |
 
-No companion activity this module (a parameter-uncertainty visualization is a
-future build; the week03 Bayesian-updating tool belongs to **Module 4**).
+No peer loop this module — the [in-lecture parameter-uncertainty demo](https://gchism94.github.io/info521-activities-2026/m3-parameter-uncertainty/)
+is embedded live in Lecture B (the week03 Bayesian-updating tool belongs to **Module 4**).
 
 [← All slide decks](../../index.html)
