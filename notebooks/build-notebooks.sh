@@ -13,5 +13,6 @@ for q in w*.qmd; do
   quarto convert "$q" --output "$n.ipynb" --quiet
   jupyter nbconvert --to notebook --execute --inplace "$n.ipynb" \
     --ExecutePreprocessor.timeout=300 >/dev/null
+  jupyter nbconvert --to html "$n.ipynb" --log-level ERROR
 done
 echo "[notebooks] done — executed .ipynb files ready for D2L."
