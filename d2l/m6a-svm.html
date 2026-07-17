@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 6 · Lecture A — Maximum-Margin Classification</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 6 · Lecture A</span> — Maximum-Margin Classification</h1>
+  <span class="read">≈ 6 min read</span>
+</header>
+<main>
+<p>If the boundary between two classes is all you want, why model probabilities at all? The support vector machine chooses the boundary directly, by a geometric criterion — the third way of thinking about a classifier, alongside logistic (model the probability) and Bayesian (model belief over $\mathbf{w}$).</p>
+<h2>The maximum margin</h2>
+<p>When classes are separable, many hyperplanes split them; prefer the one farthest from both, leaving the widest empty corridor. The corridor width is the <strong>margin</strong> $2/\lVert\mathbf{w}\rVert$, so maximizing it minimizes $\lVert\mathbf{w}\rVert^2$ — a norm penalty as the <em>objective</em> itself (ridge&#x27;s cousin). Only the points on the corridor&#x27;s edge constrain the answer: the <strong>support vectors</strong>. Delete any other point and the boundary does not move; nudge a support vector and it tilts. That sparsity is the opposite of least squares, where every point pulls.</p>
+<h2>Hinge loss and kernels</h2>
+<p>Real data is not separable — NHANES ages overlap across hypertension status. The <strong>soft-margin</strong> SVM lets points violate the margin at a price given by the <strong>hinge loss</strong>: comfortably-correct points pay exactly zero, violators pay linearly. Added to the norm penalty, this is the ridge template (loss + penalty), with $\lambda$ tuned by cross-validation.</p>
+<p>Comparing losses against the classification margin: the <strong>hinge</strong> drops to exactly zero past the margin (giving sparsity, but no probabilities), while the <strong>logistic</strong> loss decays smoothly and never reaches zero (giving calibrated probabilities, but no sparsity). Both are convex surrogates for the un-optimizable 0–1 loss.</p>
+<p><strong>Kernels</strong> handle curved boundaries. Max-margin training touches inputs only through inner products, so you supply a kernel $k(\mathbf{x},\mathbf{x}') = \boldsymbol{\phi}(\mathbf{x})^{\top}\boldsymbol{\phi}(\mathbf{x}')$ directly and never build the (possibly infinite-dimensional) feature map — Module 1&#x27;s basis functions, industrialized.</p>
+<h2>Honest evaluation</h2>
+<p>At ≈ 39% prevalence, a model that predicts &quot;nobody hypertensive&quot; scores 61% accuracy while catching zero cases — <strong>accuracy is a rigged scoreboard</strong>. Read the confusion matrix instead: <strong>sensitivity/recall</strong> (of the hypertensive, how many were caught — the costly false-negative cell) and <strong>precision</strong> (of the alarms, how many were real). Margin methods output a score, and where you cut it trades sensitivity against precision — a <em>clinical</em> decision about which error is worse, not a mathematical one.</p>
+<h2>What to remember</h2>
+<ul><li>Max-margin picks the widest corridor, held up only by support vectors (sparse).</li><li>Hinge vs logistic: geometry/sparsity vs probabilities/calibration; both surrogate the 0–1 loss.</li><li>Kernels give nonlinear boundaries using only inner products.</li><li>At skewed prevalence, report sensitivity and precision, not accuracy.</li></ul>
+<h2>Through-lines</h2>
+<p>The $\lVert\mathbf{w}\rVert^2$ objective echoes ridge (Module 2); the leakage-safe hypertension label is the same one from Module 1. Lecture B makes the course&#x27;s last pivot: drop the labels and ask what structure the features hold on their own.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

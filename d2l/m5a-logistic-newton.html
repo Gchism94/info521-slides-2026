@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 5 · Lecture A — Breaking Conjugacy: Logistic Regression &amp; Newton&#x27;s Method</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 5 · Lecture A</span> — Breaking Conjugacy: Logistic Regression &amp; Newton&#x27;s Method</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>Module 4 ended with everything Gaussian and every formula closed-form. Asking the clinical question — <em>is this patient hypertensive?</em> — binarizes the outcome and breaks that machinery. This is the second act of the course, and where Project 2 opens.</p>
+<h2>The conjugacy break</h2>
+<p>The target is now a <strong>Bernoulli</strong> outcome, not a Gaussian one. A Gaussian prior on $\mathbf{w}$ meeting a Bernoulli likelihood has <strong>no conjugate pair</strong> — the closed-form posterior of Module 4 is gone. Same data (≈ 39% prevalence), new target type, and the algebra that made Bayes easy is structurally unavailable.</p>
+<h2>Logistic regression</h2>
+<p>Keep the linear score and squash it into a probability with the <strong>sigmoid</strong>,</p>
+<p>$$p(y=1\mid\mathbf{x},\mathbf{w}) = \sigma(\mathbf{w}^{\top}\mathbf{x}),
+\qquad \sigma(a) = \tfrac{1}{1+e^{-a}}.$$</p>
+<p>It is still linear in $\mathbf{w}$ (basis functions still apply) and <strong>discriminative</strong> (it models $p(y\mid\mathbf{x})$ directly); the decision boundary $\mathbf{w}^{\top}\mathbf{x}=0$ is still a line. The log-likelihood is the cross-entropy, and setting its gradient to zero gives $\mathbf{X}^{\top}(\mathbf{y}-\boldsymbol{\mu})=\mathbf{0}$ — which <em>looks</em> like the normal equations, but $\boldsymbol{\mu}$ hides $\mathbf{w}$ inside the sigmoid. There is <strong>no closed form</strong>: the equation is transcendental, not merely harder. So we iterate.</p>
+<h2>Newton–Raphson</h2>
+<p>Newton repeatedly jumps to the peak of the local quadratic, using both the gradient (which way is up) and the <strong>Hessian</strong> (how the slope curves): $\mathbf{H} = -\mathbf{X}^{\top}\mathbf{R}\mathbf{X}$ with $\mathbf{R} = \mathrm{diag}(\mu_n(1-\mu_n))$. It is negative definite, so the log-likelihood is concave and the peak Newton finds is <em>the</em> peak — Module 3&#x27;s uniqueness argument, with $\mathbf{X}^{\top}\mathbf{X}$ reweighted into $\mathbf{X}^{\top}\mathbf{R}\mathbf{X}$. The fence-sitters near $\mu=\tfrac12$ carry the most weight — they locate the boundary. On all of NHANES it converges in about five steps to $\hat{\mathbf{w}}\approx(-0.49,\,0.52)$: each SD of age multiplies the odds of hypertension by $e^{0.52}\approx 1.7$, and the fitted probability crosses $\tfrac12$ near age 66.</p>
+<p>The logistic explorer (framed as tumor size, benign vs malignant — the same model) lets you set the bias and steepness by eye and watch the log loss and accuracy respond, then <strong>Show MLE fit</strong> snaps to the maximum-likelihood solution and <strong>Generative comparison</strong> shows a per-class Gaussian model reaching essentially the same boundary.</p>
+<h2>What survived, and what did not</h2>
+<p>The frequentist story is intact: $\hat{\mathbf{w}}$ by Newton, uniqueness from concavity, even Module-3-style uncertainty from the curvature at the peak. The Bayesian story took the hit: the posterior is known only up to its normalizer (the evidence integral has no closed form), so exact credible intervals and honest predictive probabilities are out of reach. <strong>Optimization survived binarization; integration did not.</strong></p>
+<h2>What to remember</h2>
+<ul><li>Binarizing gives a Bernoulli likelihood; with a Gaussian prior there is no conjugate posterior.</li><li>Logistic regression: $p(y=1\mid\mathbf{x})=\sigma(\mathbf{w}^{\top}\mathbf{x})$, concave $\ell$, gradient $\mathbf{X}^{\top}(\mathbf{y}-\boldsymbol{\mu})$.</li><li>Newton uses curvature ($\mathbf{H}=-\mathbf{X}^{\top}\mathbf{R}\mathbf{X}$) and converges in ~5 steps.</li><li>Finding the peak is easy; knowing the mass around it is the hard part (Lecture B).</li></ul>
+<h2>Through-lines</h2>
+<p>$\mathbf{X}^{\top}\mathbf{X}$ becomes $\mathbf{X}^{\top}\mathbf{R}\mathbf{X}$, and the Hessian at the peak is about to become the covariance of a Gaussian approximation to the posterior — Lecture B reuses it directly.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

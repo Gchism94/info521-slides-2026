@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 2 · Lecture B — Bias–Variance &amp; Regularization</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 2 · Lecture B</span> — Bias–Variance &amp; Regularization</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>Lecture A found the U-curve empirically. This lecture explains why it exists (the bias–variance decomposition) and gives a knob to move along it (ridge regression).</p>
+<h2>Bias and variance</h2>
+<p>Imagine refitting on many datasets drawn the same way. <strong>Bias</strong> is the systematic miss: a too-simple model is wrong in the same direction on average. <strong>Variance</strong> is the sensitivity: a too-flexible model swings wildly from dataset to dataset, chasing each one&#x27;s noise. In the repeated-fits picture, a degree-1 model has fits that huddle tightly but miss the truth (high bias, low variance), while a degree-9 model tracks the truth on average but its individual fits fan out wildly (low bias, high variance).</p>
+<p>For a fixed input, expected test error splits into three pieces,</p>
+<p>$$\mathbb{E}\bigl[(y - \hat f(\mathbf{x}))^2\bigr] = \text{bias}^2 + \text{variance} + \sigma^2,$$</p>
+<p>where $\sigma^2$ is irreducible noise no model can beat. As complexity rises, bias$^2$ falls and variance rises; their sum is the U-curve, resting on the $\sigma^2$ floor. The best model balances the two — it is not the most flexible one. The full derivation is in the bias–variance appendix.</p>
+<h2>Ridge regression</h2>
+<p>Ridge adds a penalty on weight size to the loss,</p>
+<p>$$\mathcal{L}_{\text{ridge}}(\mathbf{w}) = \lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert^2 + \lambda\lVert\mathbf{w}\rVert^2,$$</p>
+<p>which discourages the large coefficients that drive wiggly overfit curves. It has a closed form that just adds $\lambda\mathbf{I}$ inside the normal equations:</p>
+<p>$$\hat{\mathbf{w}}_{\text{ridge}} = (\mathbf{X}^{\top}\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^{\top}\mathbf{y}.$$</p>
+<p>That added term lifts every eigenvalue by $\lambda>0$, making the matrix positive definite and <strong>always invertible</strong> — even with more features than patients, or collinear columns. Ridge hands you, for free, the unique solution Module 1 had to assume.</p>
+<p>As $\lambda$ grows, every coefficient shrinks smoothly toward zero (the coefficient path). The two limits are degenerate: $\lambda\to 0$ recovers ordinary least squares (the overfit right end of the U), and $\lambda\to\infty$ crushes the weights to a constant fit (the underfit left end). The useful $\lambda$ lives in between and is <strong>tuned by cross-validation</strong>, exactly as in Lecture A but with $\lambda$ as the knob.</p>
+<h2>The demo</h2>
+<p>The bias–variance / ridge explorer lets you raise the polynomial degree and watch train and test MSE diverge, toggle <strong>Show 20 fits</strong> to see the variance fan widen at high degree, and slide $\lambda$ up to pull the fan back in as variance drops and a little bias creeps in.</p>
+<h2>What to remember</h2>
+<ul><li>Test error $=$ bias$^2$ $+$ variance $+ \sigma^2$; the U is the sum of the first two.</li><li>Ridge trades a little bias for less variance and is always invertible — uniqueness for free.</li><li>$\lambda\to 0$ is OLS; $\lambda\to\infty$ is a constant; CV picks the middle.</li></ul>
+<h2>Through-lines</h2>
+<p>Ridge&#x27;s $\mathbf{X}^{\top}\mathbf{X}+\lambda\mathbf{I}$ is the Module 1 uniqueness condition, guaranteed. And the ridge penalty is secretly a <strong>Gaussian prior</strong> on the weights — ridge is MAP estimation, a fact Module 4 makes exact ($\lambda = \sigma^2/\tau^2$).</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 4 · Lecture B — The Conjugate Gaussian Posterior</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 4 · Lecture B</span> — The Conjugate Gaussian Posterior</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>This is the keystone of the course. Lecture A put a distribution on a proportion; here the same conjugate move scales up to the <strong>regression weights</strong>, and the whole Project 1 pipeline comes to rest.</p>
+<h2>The posterior</h2>
+<p>Place a Gaussian prior on the weights, $p(\mathbf{w}) = \mathcal{N}(\mathbf{m}_0, \mathbf{S}_0)$, and pair it with the Module 3 linear-Gaussian likelihood (treating $\sigma^2$ as known). A Gaussian prior times a Gaussian likelihood gives a <strong>Gaussian posterior</strong> in closed form:</p>
+<p>$$\mathbf{S}_N^{-1} = \mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{X},
+\qquad
+\mathbf{m}_N = \mathbf{S}_N\!\left(\mathbf{S}_0^{-1}\mathbf{m}_0 + \tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{y}\right).$$</p>
+<p>Every ingredient is a callback: $\mathbf{X}^{\top}\mathbf{X}$ (Module 1), $\tfrac{1}{\sigma^2}$ (Module 3), the prior (Lecture A). <strong>Project 1 ends exactly here.</strong></p>
+<p>Read in <strong>precisions</strong> (inverse covariances), the update is addition again — posterior precision = prior precision + data precision — and the data&#x27;s term $\tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{X}$ is the <strong>Fisher information</strong> from Module 3 (its fourth appearance). The mean is a precision-weighted blend of prior and data. As $N$ grows the data drowns the prior: $\mathbf{m}_N \to \hat{\mathbf{w}}_{\text{MLE}}$ and $\mathbf{S}_N \to \sigma^2(\mathbf{X}^{\top}\mathbf{X})^{-1}$ — the Module 3 covariance. On NHANES the posterior ellipse contracts from a wide prior to a tight blob on the MLE; it is the Module 3 ellipse <em>reborn</em>, but now it is belief given one real dataset rather than spread over imagined ones — same math, opposite epistemics.</p>
+<h2>Ridge as MAP, and prediction</h2>
+<p>Take a zero-mean isotropic prior, $\mathbf{S}_0 = \tau^2\mathbf{I}$, and the posterior mean becomes</p>
+<p>$$\mathbf{m}_N = \bigl(\mathbf{X}^{\top}\mathbf{X} + \tfrac{\sigma^2}{\tau^2}\mathbf{I}\bigr)^{-1}\mathbf{X}^{\top}\mathbf{y} = \hat{\mathbf{w}}_{\text{ridge}},
+\qquad \lambda = \tfrac{\sigma^2}{\tau^2}.$$</p>
+<p>This cashes Module 2&#x27;s hook: <strong>the ridge penalty is a Gaussian prior</strong>, and $\lambda$ becomes a statement (noisy data or a tight prior both shrink harder). The <strong>MAP</strong> estimate is the posterior&#x27;s peak (= mean for a Gaussian); it keeps the location but discards the spread $\mathbf{S}_N$. In this Gaussian world MAP and the full posterior look interchangeable — Module 5 breaks that illusion.</p>
+<p>Predicting a new patient integrates over the posterior, giving a variance with two parts: $\sigma^2$ (irreducible patient-level noise) plus $\mathbf{x}_*^{\top}\mathbf{S}_N\mathbf{x}_*$ (our ignorance about $\mathbf{w}$, which shrinks with data and grows away from the data&#x27;s center). Plug-in prediction uses only the first term and is over-confident — most visibly at extreme ages, where the predictive band flares.</p>
+<h2>What to remember</h2>
+<ul><li>Conjugate Gaussian posterior: precisions add; $\mathbf{S}_N^{-1} = \mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{X}$.</li><li>Ridge = MAP under a zero-mean Gaussian prior, $\lambda = \sigma^2/\tau^2$.</li><li>Predictive variance = noise $\sigma^2$ + parameter uncertainty $\mathbf{x}_*^{\top}\mathbf{S}_N\mathbf{x}_*$.</li><li>The marginal likelihood (evidence) scores whole models and is a built-in Occam&#x27;s razor.</li></ul>
+<h2>Through-lines</h2>
+<p>$\mathbf{X}^{\top}\mathbf{X}$ is now the posterior precision. Every formula here exists because everything is Gaussian — Module 5 binarizes the outcome, conjugacy breaks, and approximation begins.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

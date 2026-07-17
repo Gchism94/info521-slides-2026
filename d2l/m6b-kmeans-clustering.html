@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 6 · Lecture B — k-means &amp; the Unsupervised Turn</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 6 · Lecture B</span> — k-means &amp; the Unsupervised Turn</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>For five and a half modules the label $y$ was the star. Here we delete it and ask a different question: with only the features, do the patients form groups? Without labels there is no test-set truth — evaluation becomes internal fit plus judgment about meaning.</p>
+<h2>k-means</h2>
+<p>Pick $K$ <strong>centroids</strong> and an assignment of each patient to one, minimizing the <strong>distortion</strong> (a squared-error loss again),</p>
+<p>$$\mathcal{L} = \sum_{n} \lVert \mathbf{x}_n - \boldsymbol{\mu}_{z_n}\rVert^2 .$$</p>
+<p>It splits into two steps, each trivial given the other: <strong>assign</strong> each patient to its nearest centroid, then <strong>update</strong> each centroid to the mean of its members (the squared-error-minimizing point — Module 1 again). Alternating lowers $\mathcal{L}$ every step, so it <strong>converges</strong> — though not necessarily to the best answer.</p>
+<p>On the standardized (BMI, waist) plane — two features correlated at $r\approx 0.90$, essentially one continuum — $K=3$ slices the cloud into adiposity bands. The clusters exist because three were requested, not because nature drew three. k-means always returns $K$ clusters whether or not they are real.</p>
+<h2>Three failure modes</h2>
+<p><strong>Scaling.</strong> k-means runs on Euclidean distance, so feature scales <em>are</em> the model; raw units let waist drown out HbA1c. Standardize first (Module 1&#x27;s move, now load-bearing); the Module 2 leakage discipline applies too.</p>
+<p><strong>Local optima.</strong> With $K=4$ and only the initialization varying, 20 runs land on visibly different distortions. The fix is dumb but essential: many random restarts, keep the lowest distortion (smarter seeding like k-means++ also helps).</p>
+<p><strong>Choosing $K$.</strong> Distortion always falls with $K$ (zero at $K=N$) — the Module 2 training-error trap in new clothes. Look for the <strong>elbow</strong>, and accept that real data often gives a soft one; $K$ is a modelling choice you own and defend.</p>
+<p>The <strong>Gaussian mixture model</strong> is the soft upgrade, fit by <strong>EM</strong> — the same assign/update dance, where responsibilities (posteriors, Module 4) replace hard assignments and the M-step is weighted MLE (Module 3). k-means is the shrunk-covariance limit of a GMM.</p>
+<h2>Clusters are not diagnoses</h2>
+<p>Colouring the three adiposity clusters (which never saw blood pressure) by the held-back hypertension label, the rate climbs ≈ 30% → 40% → 48% against 39% overall. Two things hold at once: the <strong>enrichment is real</strong> (and the clusters obeyed the leakage rule), yet <strong>no cluster is remotely pure</strong>. Pretending clusters are labels manufactures diagnoses the data never made — Project 2&#x27;s honesty requirement in one figure. Descriptive tools describe; they do not diagnose.</p>
+<p>The k-means explorer (BMI vs fasting glucose, no labels) lets you set $k$, drag the centroids to seed them, <strong>Step</strong> through assign/update or <strong>Run to convergence</strong>, and use <strong>New centroids</strong> to escape a bad local optimum.</p>
+<h2>What to remember</h2>
+<ul><li>Distortion = squared error; assign/update converges to <em>a</em> local optimum — restart and keep the best.</li><li>Standardize (distances have units); $K$ is a defended choice, not a data verdict.</li><li>GMM/EM is the soft version; responsibilities are posteriors, the M-step is weighted MLE.</li><li>Clusters enrich risk without being pure — never treat them as labels.</li></ul>
+<h2>Through-lines</h2>
+<p>Squared error, standardization, the training-error trap, Bayes&#x27; rule, and MLE all reappear inside the unsupervised loop. Module 7 asks the other unsupervised question — which <em>directions</em> matter — and closes the course.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

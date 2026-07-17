@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 1 · Lecture B — Normal Equations &amp; Geometry</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 1 · Lecture B</span> — Normal Equations &amp; Geometry</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>Lecture A left the best weights unfound. This lecture solves for them in closed form, shows the geometry underneath the algebra, and ends on the condition that makes the answer unique.</p>
+<h2>From loss to normal equations</h2>
+<p>The MSE loss is a smooth, convex bowl in $\mathbf{w}$: one bottom, no other dips, so the minimum sits wherever the gradient vanishes. In one dimension, setting the two partial derivatives to zero puts the line through the means and gives the slope as covariance-over-variance — exactly the line fit in Lecture A.</p>
+<p>Scaling to all $D$ features, the gradient of the matrix form is</p>
+<p>$$\nabla_{\mathbf{w}}\mathcal{L} = -\tfrac{2}{N}\,\mathbf{X}^{\top}(\mathbf{y} - \mathbf{X}\mathbf{w}),$$</p>
+<p>and setting it to zero drops the constant and leaves the <strong>normal equations</strong>,</p>
+<p>$$\mathbf{X}^{\top}\mathbf{X}\,\hat{\mathbf{w}} = \mathbf{X}^{\top}\mathbf{y}
+\qquad\Longrightarrow\qquad
+\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}.$$</p>
+<p>One expression gives the global optimum in a single shot — no iteration. In practice you <em>solve</em> the linear system rather than form the inverse (better conditioned, less work). The full vector-calculus behind the gradient is in the matrix-calculus appendix; reproducing the $\nabla\mathcal{L}=0 \Rightarrow \hat{\mathbf{w}}$ step is the Project-1 checkpoint.</p>
+<p>On NHANES with all six features, a predicted-vs-actual plot tilts along the identity line but scatters widely — an honest verdict: useful, not the whole story. How good is good enough is Module 2.</p>
+<h2>The geometry: least squares is a projection</h2>
+<p>Picture a space with one axis per patient. The target $\mathbf{y}$ is a point; every possible prediction $\mathbf{X}\mathbf{w}$ lives in the <strong>column space</strong> of $\mathbf{X}$. Least squares drops $\mathbf{y}$ straight onto that subspace: the prediction $\hat{\mathbf{y}}$ is the closest point in it, and the residual is perpendicular to the subspace. In matrix form $\hat{\mathbf{y}} = \mathbf{P}\mathbf{y}$ with the <strong>hat matrix</strong> $\mathbf{P} = \mathbf{X}(\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}$ — symmetric and idempotent.</p>
+<p>The algebra and the geometry are one statement: &quot;residual perpendicular to every feature column&quot; is $\mathbf{X}^{\top}\mathbf{r} = \mathbf{0}$, which rearranges straight back into the normal equations.</p>
+<h2>Basis functions and uniqueness</h2>
+<p>Replacing raw inputs with functions of them, $\boldsymbol{\phi}(\mathbf{x})$, keeps the model <strong>linear in the weights</strong> — so the same solution applies with $\mathbf{X}$ swapped for the feature matrix $\boldsymbol{\Phi}$. &quot;Linear model&quot; means linear in $\mathbf{w}$, not in $x$; you can fit curves. But more flexibility means more room to overfit (a degree-9 polynomial chases individual points), which is exactly Module 2&#x27;s subject.</p>
+<p>The solution is <strong>unique</strong> iff $\mathbf{X}^{\top}\mathbf{X}$ is invertible, iff $\mathbf{X}$ has full column rank: no feature is a combination of the others (no collinearity), and there are at least as many patients as features. Otherwise infinitely many weight vectors tie.</p>
+<h2>What to remember</h2>
+<ul><li>$\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$, from $\nabla\mathcal{L}=0$; solve the system, don&#x27;t invert.</li><li>Least squares = orthogonal projection of $\mathbf{y}$ onto $\mathrm{col}(\mathbf{X})$; the residual is orthogonal to every feature.</li><li>Basis functions buy curves while staying linear in the weights — at the cost of overfitting risk.</li><li>Uniqueness needs full column rank (invertible $\mathbf{X}^{\top}\mathbf{X}$).</li></ul>
+<h2>Through-lines</h2>
+<p>The uniqueness condition here — $\mathbf{X}^{\top}\mathbf{X}$ invertible — returns in Module 3 as a <em>negative-definite Hessian</em>: uniqueness becomes curvature. The overfitting hook opens Module 2.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

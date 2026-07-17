@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 4 · Lecture A — Priors, Posteriors &amp; the Beta–Binomial</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 4 · Lecture A</span> — Priors, Posteriors &amp; the Beta–Binomial</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>Module 3 measured uncertainty by imagining repeated datasets, with the parameter a fixed unknown. Bayes flips what is random: keep the one dataset you have, and treat the <strong>parameter itself</strong> as uncertain — a distribution updated by evidence.</p>
+<h2>Bayes&#x27; rule</h2>
+<p>$$p(\theta\mid\mathcal{D}) \;\propto\; p(\mathcal{D}\mid\theta)\,p(\theta)
+\qquad(\text{posterior} \propto \text{likelihood} \times \text{prior}).$$</p>
+<p>The <strong>prior</strong> is belief before the data; the <strong>likelihood</strong> is the same Module 3 object; the <strong>posterior</strong> is belief after. Frequentist and Bayesian differ only in what is random — the estimate versus the belief about the parameter — and share the likelihood. The running question: what fraction $\theta$ of adults are hypertensive? Each screened patient is a Bernoulli draw, so after $N$ patients with $n_1$ positives the likelihood is binomial in shape, $\theta^{n_1}(1-\theta)^{n_0}$. The full-NHANES answer is $\theta \approx 0.388$.</p>
+<h2>The Beta prior and conjugacy</h2>
+<p>A prior for a proportion lives on $[0,1]$; the <strong>Beta</strong> family fits, with parameters $a, b$ read as <strong>pseudo-counts</strong> (&quot;as if I had already seen $a{-}1$ positives and $b{-}1$ negatives&quot;). $\mathrm{Beta}(1,1)$ is flat — total ignorance.</p>
+<p>The key mechanism is <strong>conjugacy</strong>: multiplying the Beta prior by the binomial likelihood adds the exponents, so</p>
+<p>$$\mathrm{Beta}(a,b) \;\xrightarrow{\;n_1\text{ ones},\ n_0\text{ zeros}\;}\; \mathrm{Beta}(a+n_1,\; b+n_0).$$</p>
+<p>The posterior stays in the family, and updating collapses to arithmetic: count successes, add to $a$; count failures, add to $b$. Watching real NHANES draws, the posterior narrows around 0.388 as patients accumulate; and three very different priors converge to nearly the same posterior after 200 patients — priors matter most when data are scarce, but enough evidence washes them out. A bad prior delays convergence, it does not destroy it.</p>
+<h2>What the posterior buys</h2>
+<p>The posterior is a complete answer. A <strong>point estimate</strong> is its mean $\tfrac{a+n_1}{a+b+N}$ (or mode); an <strong>error bar</strong> is a 95% <strong>credible interval</strong> read off the density (there is a 95% probability $\theta$ lies in it — what people wish a confidence interval meant). The mean is a weighted <strong>blend</strong> of prior mean and sample frequency, with the data&#x27;s weight approaching 1 as $N$ grows. Prediction integrates over parameter uncertainty (the <strong>posterior predictive</strong>) rather than plugging in a point estimate; with a flat prior this is Laplace&#x27;s rule of succession, $\tfrac{n_1+1}{N+2}$, never exactly 0 or 1.</p>
+<p>The Beta–Binomial explorer lets you set the prior $(a,b)$, add &quot;positive&quot; and &quot;negative&quot; patients one at a time, and watch the posterior mean and variance update while the posterior curve shifts.</p>
+<h2>What to remember</h2>
+<ul><li>Posterior $\propto$ likelihood $\times$ prior; Bayes makes the <em>parameter</em> the random object.</li><li>Beta–Binomial conjugacy makes the update pure addition on the pseudo-counts.</li><li>One posterior yields point estimates, credible intervals, and predictions.</li><li>Priors dominate when data are scarce and fade as evidence accumulates.</li></ul>
+<h2>Through-lines</h2>
+<p>Everything here is one-dimensional by design. Lecture B runs the same conjugate trick on the <em>regression weights</em> — a Gaussian prior meets a Gaussian likelihood — and that closed form is where Project 1 ends.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

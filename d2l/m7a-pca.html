@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 7 — Principal Component Analysis &amp; Course Synthesis</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 7</span> — Principal Component Analysis &amp; Course Synthesis</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>The last module asks the other unsupervised question: not which <em>groups</em> the patients form, but which <em>directions</em> among the features actually matter. It ends by resolving all seven modules into one arc.</p>
+<h2>PCA from scratch</h2>
+<p>Six NHANES features are not six independent pieces of information — BMI and waist track each other at $r\approx 0.90$. PCA finds new axes (<strong>principal components</strong>) that are uncorrelated and ordered by how much variance each carries. The recipe: <strong>center</strong> each feature (else the first component points at the mean), <strong>standardize</strong> (variance is unit-squared — Module 6&#x27;s scaling lesson again), form the sample covariance $\mathbf{C} = \tfrac{1}{N-1}\mathbf{X}^{\top}\mathbf{X}$, and take its <strong>eigendecomposition</strong>. Eigenvectors are the new axes; eigenvalues are the variance each carries.</p>
+<h2>Two views, one solution</h2>
+<p>PCA solves two problems that turn out identical. <strong>Maximum variance</strong>: the unit direction with the most projected spread is the top eigenvector. <strong>Minimum reconstruction error</strong>: projecting onto $K$ directions and rebuilding with least squared error picks the same top-$K$ eigenvectors. They coincide because variance kept + reconstruction error = total variance (fixed), so maximizing one minimizes the other. And that reconstruction picture is least squares — Module 1&#x27;s projection geometry, now in feature space. <strong>Least squares closes the course as it opened it.</strong></p>
+<p>On the (BMI, waist) plane, one direction carries ≈ 95% of the spread. On all six features the scree plot reads 37.3 / 21.8 / 17.2 / 12.5 / 9.7 / <strong>1.3%</strong> — no cliff after PC1 (clinical features are genuinely multi-dimensional), but a near-zero floor at PC6 announcing the known redundancy. The loadings are interpretable: <strong>PC1</strong> is an adiposity/metabolic axis (BMI + waist + HbA1c, HDL opposing), <strong>PC2</strong> an age–cholesterol axis.</p>
+<h2>Choosing K and honest limits</h2>
+<p>Choose the number of components by the <strong>scree elbow</strong>, a <strong>variance threshold</strong> (&quot;keep 90%&quot; → $K=5$ here), or — if the scores feed a supervised model — by <strong>cross-validation</strong> on that model (Module 2 closing the loop). But: PCA is <strong>linear</strong> (blind to curved structure); <strong>scale-dependent</strong> (standardize or units choose the components); interpretability is a gift, not a guarantee; and most importantly, <strong>variance is not usefulness</strong> — PCA never saw the label, so the direction that predicts hypertension may hide in a low-variance component you were about to discard. It is Module 6&#x27;s cluster-versus-label caution, transposed to axes.</p>
+<p>The PCA explorer (systolic vs diastolic BP) lets you rotate a candidate axis and watch variance-captured rise while reconstruction-error falls, both hitting their best at the same angle — the two views as one solution — with <strong>Snap to PC1</strong> to confirm.</p>
+<h2>The course in one arc</h2>
+<p>One dataset, five ways of seeing, each module&#x27;s answer becoming the next one&#x27;s question:</p>
+<table><thead><tr><th>Move</th><th>Object</th></tr></thead><tbody><tr><td><strong>Loss</strong> (M1–M2)</td><td>$\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$; flexibility controlled</td></tr><tr><td><strong>Likelihood</strong> (M3)</td><td>same $\hat{\mathbf{w}}$ + $\hat\sigma^2$ + $\mathrm{Cov}[\hat{\mathbf{w}}]$</td></tr><tr><td><strong>Posterior</strong> (M4)</td><td>$\mathcal{N}(\mathbf{m}_N,\mathbf{S}_N)$ — Project 1&#x27;s endpoint</td></tr><tr><td><strong>Approximation</strong> (M5)</td><td>Laplace $\mathbf{A}^{-1}$; Metropolis draws</td></tr><tr><td><strong>Discovery</strong> (M6–M7)</td><td>clusters; principal axes — described, not diagnosed</td></tr></tbody></table>
+<p>And one object followed the whole way: $\mathbf{X}^{\top}\mathbf{X}$ — the loss bowl (M1), the likelihood curvature and Fisher information (M3), the posterior precision (M4), and the covariance whose eigenvectors PCA reads (M7). Same matrix, the whole course through.</p>
+<h2>What to remember</h2>
+<ul><li>PCA = eigendecomposition of the (standardized) covariance; eigenvalues are variance explained.</li><li>Maximum variance and minimum reconstruction error are the same solution (least squares in feature space).</li><li>Choose $K$ by elbow, threshold, or downstream CV — and remember variance ≠ usefulness.</li><li>The whole course is one dataset seen five ways, around the recurring matrix $\mathbf{X}^{\top}\mathbf{X}$.</li></ul>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

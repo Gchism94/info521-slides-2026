@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 5 · Lecture B — Laplace Approximation &amp; a Taste of Sampling</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 5 · Lecture B</span> — Laplace Approximation &amp; a Taste of Sampling</h1>
+  <span class="read">≈ 7 min read</span>
+</header>
+<main>
+<p>Lecture A left a posterior we can evaluate anywhere but cannot normalize. Two escape routes recover approximate inference: replace it with a Gaussian, or draw from it. The running example is deliberately small — 25 real NHANES adults — because at large $N$ every method agrees and there is nothing to see.</p>
+<h2>Laplace: a Gaussian at the peak</h2>
+<p>Find the peak (the MAP, by Newton), Taylor-expand the log-posterior to second order there, and declare the quadratic exact. A quadratic log-density is a Gaussian, so</p>
+<p>$$p(\mathbf{w}\mid\mathcal{D}) \approx \mathcal{N}\bigl(\hat{\mathbf{w}}_{\text{MAP}},\; \mathbf{A}^{-1}\bigr),
+\qquad \mathbf{A} = \mathbf{X}^{\top}\mathbf{R}\mathbf{X} + \tfrac{1}{\tau^2}\mathbf{I}.$$</p>
+<p>Two computable ingredients — a Newton fit and one matrix inverse — and all Bayesian machinery downstream reuses the Module 4 Gaussian formulas.</p>
+<p><strong>The through-line closes here.</strong> The curvature matrix $\mathbf{X}^{\top}\mathbf{R}\mathbf{X}$ is the observed Fisher information, and $\mathbf{X}^{\top}\mathbf{X}$ has now appeared four times: Module 1 (invertible $\Rightarrow$ unique $\hat{\mathbf{w}}$), Module 3 (the Hessian, and $\mathcal{I}^{-1} = \mathrm{Cov}[\hat{\mathbf{w}}]$), Module 4 (the data&#x27;s precision in $\mathbf{S}_N^{-1}$), and Module 5 (the Laplace covariance$^{-1}$). One object — <em>curvature: how sharply the data pin the parameters down</em> — the whole course through.</p>
+<p>Laplace is <strong>local</strong>: it matches the peak and its curvature and nothing else. On 25 patients the exact posterior for the age slope is skewed with a heavy upper tail, and the symmetric Gaussian misprices exactly there. It fails on skew and multimodality, but <strong>sharpens with data</strong> (posteriors Gaussian-ize as $N$ grows) — cheap and excellent at scale, risky at $N=25$.</p>
+<h2>Metropolis: draw instead of describe</h2>
+<p>If we had samples $\mathbf{w}^{(s)} \sim p(\mathbf{w}\mid\mathcal{D})$, every integral would become an average — intervals from sample quantiles, predictions by averaging $\sigma(\mathbf{w}^{(s)\top}\mathbf{x}_*)$, no normalizer ever computed. <strong>Random-walk Metropolis</strong> draws them: propose a nearby move, and accept it with probability equal to the ratio of the (unnormalized) posterior at the two points. Because it is a ratio, the intractable normalizer <strong>cancels</strong>. Uphill moves are always taken, downhill moves sometimes — that &quot;sometimes&quot; is what makes it <em>explore</em> rather than <em>optimize</em>.</p>
+<p>On the 25-patient cohort the trace is a stationary &quot;hairy caterpillar&quot; (good mixing), and the histogram of draws reproduces the exact skewed posterior — including the tail Laplace flattened — for free.</p>
+<h2>Choosing</h2>
+<p>Laplace costs one Newton run and outputs a Gaussian; its error shrinks with <strong>data</strong>, and it fails on skew/multimodality. Metropolis costs thousands of evaluations and outputs draws; its error shrinks with <strong>compute</strong>, and it fails on poor tuning/slow mixing. Practically: <strong>Laplace first</strong>, sample when the answer matters in the tails — the two agreeing is itself evidence. (Three sampling knobs to know: burn-in, step size, and correlation between draws.)</p>
+<h2>What to remember</h2>
+<ul><li>Laplace = $\mathcal{N}(\hat{\mathbf{w}}_{\text{MAP}}, \mathbf{A}^{-1})$ with $\mathbf{A} = \mathbf{X}^{\top}\mathbf{R}\mathbf{X} + \tau^{-2}\mathbf{I}$.</li><li>It matches the peak but misses skew and multimodality; it improves with more data.</li><li>Metropolis accepts on <em>ratios</em>, so the normalizer cancels; draws replace formulas.</li><li>Assumptions (Laplace) vs compute (MCMC) is the trade.</li></ul>
+<h2>Through-lines</h2>
+<p>This closes the inference arc — loss → likelihood → posterior → approximation — around one recurring matrix. Modules 6–7 change the <em>question</em> (drop the labels), not the machinery.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

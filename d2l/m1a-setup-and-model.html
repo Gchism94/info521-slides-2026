@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 1 · Lecture A — Setup, Data &amp; the Linear Model</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 1 · Lecture A</span> — Setup, Data &amp; the Linear Model</h1>
+  <span class="read">≈ 6 min read</span>
+</header>
+<main>
+<p>This lecture lays the ground floor for the whole course: it frames the regression problem, introduces the one dataset used all term, and assembles the two ingredients least squares is built from — a <strong>model</strong> and a <strong>loss</strong>. Solving for the best fit is deferred to Lecture B.</p>
+<h2>The course spine</h2>
+<p>The term studies a single clinical outcome — <strong>systolic blood pressure (SBP)</strong> — through four lenses: least squares (Module 1), maximum likelihood (Module 3), the Bayesian posterior (Module 4), and unsupervised discovery (Modules 6–7). Because the data never changes, differences you see across modules are differences in <em>method</em>, not in problem. You build intuition on one clinical question.</p>
+<h2>Regression, notation, and the data</h2>
+<p>Machine learning splits into supervised (learning from labelled pairs), unsupervised (structure with no labels), and reinforcement (learning from reward). <strong>Regression is supervised learning with a continuous target</strong>: given pairs $(\mathbf{x}_n, y_n)$, learn $f$ so that $\hat y = f(\mathbf{x}) \approx y$ on unseen patients.</p>
+<p>One patient is a feature vector $\mathbf{x}_n$; stacking all patients as rows gives the <strong>design matrix</strong> $\mathbf{X}$ (with $N$ rows and $D$ columns), and their targets stack into the vector $\mathbf{y}$. Note the convention: targets are written $y$ (where Bishop&#x27;s textbook uses $t$).</p>
+<p>The data is <strong>NHANES 2021–22</strong>: about 5,102 U.S. adults, target SBP in mmHg, with six leakage-safe features — <code>age</code> (the Project-1 primary predictor), <code>bmi</code>, <code>waist</code>, <code>chol</code>, <code>hdl</code>, and <code>hba1c</code>. Diastolic blood pressure is deliberately excluded.</p>
+<h2>The leakage rule</h2>
+<p>Diastolic BP is held out because of the <strong>leakage rule</strong>: exclude any predictor that is itself a blood-pressure measurement, or that would trivially determine the label. This is a modelling choice made <em>by design, before fitting</em> — not something the algorithm discovers. The same discipline returns in Module 2 (cross-validation) and in Project 2&#x27;s cluster-versus-label reveal.</p>
+<h2>Model and loss</h2>
+<p>The linear model predicts the target as a weighted sum of features, $\hat y = \mathbf{w}^{\top}\mathbf{x}$, with the intercept absorbed as a constant-1 feature. Fit is scored by the <strong>mean squared error</strong>,</p>
+<p>$$\mathcal{L}(\mathbf{w}) = \tfrac{1}{N}\lVert \mathbf{y} - \mathbf{X}\mathbf{w}\rVert_2^2 .$$</p>
+<p>Squared error is chosen because it is smooth (differentiable — which lets Lecture B set a gradient to zero) and because it penalises large misses disproportionately. A quiet foreshadow: a squared loss is exactly what a Gaussian-noise model implies — the tie made explicit in Module 3.</p>
+<p>On NHANES, the scalar fit of SBP on standardized age gives an intercept near 121.5 mmHg (predicted BP at average age) and a slope near 6.5 mmHg per standard deviation of age — about 0.38 mmHg per year. Always translate a weight back into clinical units before trusting it.</p>
+<h2>The demo</h2>
+<p>The least-squares explorer lets you drag a fit line (or move intercept/slope sliders) and watch the residuals and the loss respond; <strong>Show least-squares solution</strong> reveals the optimum, and <strong>Add outlier</strong> drops in a young, high-BP patient so you can watch the least-squares line swing toward it — a direct look at squared error&#x27;s sensitivity to outliers.</p>
+<h2>What to remember</h2>
+<ul><li>Regression = supervised learning with a continuous target; $\mathbf{X}$ is patients-by-features, $\mathbf{y}$ their targets.</li><li>The linear model $\hat y = \mathbf{w}^{\top}\mathbf{x}$ plus the MSE loss are the two pieces least squares needs.</li><li>Leakage is decided before fitting; the answer must never sneak into the inputs.</li><li>Squared error is smooth and outlier-sensitive, and secretly assumes Gaussian noise (Module 3).</li></ul>
+<h2>Through-lines</h2>
+<p>The matrix $\mathbf{X}^{\top}\mathbf{X}$ that dominates the loss here is the object that recurs all term (Modules 3–7). The single NHANES problem and the leakage discipline both persist throughout.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>

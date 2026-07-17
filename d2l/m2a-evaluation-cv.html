@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INFO 521 · Module 2 · Lecture A — Evaluation &amp; Cross-Validation</title>
+<!--
+  D2L lecture-note page. UPLOAD this file as a D2L content topic (HTML file).
+  Do NOT paste the source into the D2L WYSIWYG editor: it strips the MathJax
+  <script>, so the equations would not render. Uploaded HTML topics run the
+  script and render math correctly. Self-contained except the MathJax CDN.
+-->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --bg:#1a1a1a; --surface:#2c2c2a; --text:#e5e5e5; --muted:#b4b2a9;
+          --border:#5f5e5a; --link:#7fb2e6; --accent:#e3786b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  header { padding:16px 22px; background:var(--surface);
+           border-bottom:2px solid var(--accent);
+           display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:1.15rem; font-weight:650; }
+  header .course { color:var(--muted); font-weight:400; }
+  header .read { color:var(--muted); font-size:0.82rem; border:1px solid var(--border);
+                 border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  main { max-width:760px; margin:0 auto; padding:8px 22px 48px; }
+  h2 { font-size:1.05rem; font-weight:650; margin:1.9em 0 0.5em;
+       padding-bottom:4px; border-bottom:1px solid var(--border); }
+  p { margin:0.7em 0; }
+  a { color:var(--link); }
+  strong { color:#fff; }
+  code { background:#3a3a38; padding:1px 6px; border-radius:5px; font-size:0.92em; }
+  ul { margin:0.6em 0; padding-left:1.3em; }
+  li { margin:0.35em 0; }
+  table { border-collapse:collapse; width:100%; margin:1em 0; font-size:0.95rem; }
+  th, td { border:1px solid var(--border); padding:8px 10px; text-align:left;
+           vertical-align:top; }
+  th { background:var(--surface); }
+  mjx-container { color:var(--text); }
+  mjx-container[display="true"] { overflow-x:auto; overflow-y:hidden; }
+  footer { max-width:760px; margin:0 auto; padding:0 22px 40px;
+           color:var(--muted); font-size:0.82rem; border-top:1px solid var(--border);
+           padding-top:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="course">INFO 521 · Module 2 · Lecture A</span> — Evaluation &amp; Cross-Validation</h1>
+  <span class="read">≈ 6 min read</span>
+</header>
+<main>
+<p>Module 1 produced a fit; Module 2 asks whether it will hold up on unseen patients. This lecture is the diagnostic half: how to measure whether a model has learned the pattern or merely memorized the sample.</p>
+<h2>Training error is not generalization error</h2>
+<p>Basis functions make a model arbitrarily flexible, and flexibility buys fit — a high-degree curve can pass through every training point. But <strong>training error only ever falls with complexity</strong>; a degree-$k$ polynomial can interpolate $k{+}1$ points and hit zero training loss. Low training error is cheap and says nothing about the next patient. A zero on the training set may mean a perfect model or a memorized one, and training error alone cannot tell which.</p>
+<p>The honest estimate comes from scoring on data the model never saw while fitting. Split patients into a <strong>training</strong> set (fit) and a <strong>test</strong> set (score only); when a knob is also being tuned, a third <strong>validation/dev</strong> set does the tuning so the test set stays sealed. The test set is sacred — touch it once, at the very end.</p>
+<h2>The U-curve and the generalization gap</h2>
+<p>Plotting error against complexity, training error slides down while <strong>test error is U-shaped</strong>: high on the left (too simple to catch the signal), lowest in the middle, rising again on the right (fitting noise). The distance between the curves — the <strong>generalization gap</strong> — diagnoses the model: a wide gap with low training error is overfitting; both curves high is underfitting; the bottom of the U is just-right.</p>
+<h2>Cross-validation</h2>
+<p>A single train/test split wastes data and is high-variance (a different split gives a different number). <strong>$k$-fold cross-validation</strong> fixes both: partition into $k$ folds, and in each round one fold validates while the other $k{-}1$ train. Every patient validates exactly once and trains $k{-}1$ times; the CV error is the average of the round scores. Sweeping complexity produces a stable CV curve whose minimum is the chosen setting.</p>
+<p>Selection and reporting are different jobs: <strong>cross-validation selects</strong> the complexity, then you refit on all training data and <strong>report</strong> on the sealed test set. Don&#x27;t let the data that picks the model also grade it.</p>
+<h2>Leakage</h2>
+<p>Cross-validation only tells the truth if folds are honestly separated. Any preprocessing that learns from data — centering, scaling — must be fit <em>inside each training fold</em> and applied to the validation fold, never on pooled data. This is the same discipline as Module 1&#x27;s feature-leakage rule: the answer must not sneak into the inputs (there it was diastolic BP; here it is the fold statistics).</p>
+<h2>What to remember</h2>
+<ul><li>Training error falls with complexity; test/CV error is U-shaped.</li><li>The generalization gap distinguishes overfitting (wide gap) from underfitting (both high).</li><li>$k$-fold CV gives a stable estimate using all the data; use it to <em>select</em>, and a sealed test set to <em>report</em>.</li><li>Preprocess inside folds — pooled preprocessing leaks and inflates the estimate.</li></ul>
+<h2>Through-lines</h2>
+<p>CV tells you <em>where</em> you sit on the U; Lecture B explains <em>why</em> the U exists (bias–variance) and gives a knob to move along it (ridge). The leakage rule is the same one introduced in Module 1.</p>
+</main>
+<footer>INFO 521 · lecture notes. Adapted with permission from lecture materials by Clayton Morrison, University of Arizona.</footer>
+</body>
+</html>
