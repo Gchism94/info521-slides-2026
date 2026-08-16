@@ -1,0 +1,39 @@
+# This CITATION.cff file was generated to make this repository citable.
+# Check https://citation-file-format.github.io/ for guidance.
+#
+# Before your first Zenodo release: fill in `version`, `date-released`, and
+# `license` below (no LICENSE file exists in this repo yet; pick one, e.g.
+# CC-BY-4.0 for slide content, and add the corresponding LICENSE file).
+# ORCID is optional but recommended if you have one.
+
+cff-version: 1.2.0
+message: "If you use or adapt these slides, please cite them as below."
+title: "INFO 521: Machine Learning Foundations — Lecture Slides"
+abstract: >-
+  Quarto and reveal.js lecture decks for INFO 521, Machine Learning
+  Foundations, at the University of Arizona College of Information Science.
+  Seven modules covering least squares and maximum likelihood, probability
+  and estimation, Monte Carlo methods, exact and conjugate Bayesian
+  inference, approximate Bayesian inference, classification, and
+  unsupervised methods, plus a per-module overview deck, recording scripts,
+  and student note pages. Rendered output is committed and served as a
+  static site. Companion repository to the INFO 521 course hub.
+type: software
+authors:
+  - family-names: "Chism"
+    given-names: "Greg"
+    affiliation: "University of Arizona, College of Information Science"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/gchism94/info521-slides-2026"
+url: "https://gchism94.github.io/info521-slides-2026"
+# version: "2026.1"
+# date-released: "YYYY-MM-DD"
+# license: "CC-BY-4.0"
+keywords:
+  - machine-learning
+  - statistics
+  - lecture-slides
+  - reveal-js
+  - quarto
+  - graduate-course
+  - open-educational-resources
