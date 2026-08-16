@@ -7,7 +7,7 @@ reading_time_min: 7
 
 # Module 4 · Lecture B — The Conjugate Gaussian Posterior
 
-This is the keystone of the course. Lecture A put a distribution on a proportion; here the same conjugate move scales up to the **regression weights**, and the whole Project 1 pipeline comes to rest.
+This is the keystone of the course. Lecture A put a distribution on a proportion; here the same conjugate move scales up to the **regression weights**, and the whole Part 1 pipeline comes to rest.
 
 ## The posterior
 
@@ -17,7 +17,7 @@ $$\mathbf{S}_N^{-1} = \mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\top}\m
 \qquad
 \mathbf{m}_N = \mathbf{S}_N\!\left(\mathbf{S}_0^{-1}\mathbf{m}_0 + \tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{y}\right).$$
 
-Every ingredient is a callback: $\mathbf{X}^{\top}\mathbf{X}$ (Module 1), $\tfrac{1}{\sigma^2}$ (Module 3), the prior (Lecture A). **Project 1 ends exactly here.**
+Every ingredient is a callback: $\mathbf{X}^{\top}\mathbf{X}$ (Module 1), $\tfrac{1}{\sigma^2}$ (Module 3), the prior (Lecture A). **Part 1 ends exactly here.**
 
 Read in **precisions** (inverse covariances), the update is addition again — posterior precision = prior precision + data precision — and the data's term $\tfrac{1}{\sigma^2}\mathbf{X}^{\top}\mathbf{X}$ is the **Fisher information** from Module 3 (its fourth appearance). The mean is a precision-weighted blend of prior and data. As $N$ grows the data drowns the prior: $\mathbf{m}_N \to \hat{\mathbf{w}}_{\text{MLE}}$ and $\mathbf{S}_N \to \sigma^2(\mathbf{X}^{\top}\mathbf{X})^{-1}$ — the Module 3 covariance. On NHANES the posterior ellipse contracts from a wide prior to a tight blob on the MLE; it is the Module 3 ellipse *reborn*, but now it is belief given one real dataset rather than spread over imagined ones — same math, opposite epistemics.
 

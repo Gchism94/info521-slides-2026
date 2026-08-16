@@ -2,7 +2,7 @@
 title: "Properties of MLE: Uncertainty in Parameters"
 subtitle: "INFO 521 · Module 3 · Lecture B — Properties of the MLE"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -380,8 +380,9 @@ Three properties of the linear-Gaussian MLE:
 2. **Unbiased** — $\mathbb{E}[\hat{\mathbf{w}}] = \mathbf{w}$.
 3. **Uncertain, quantifiably** — $\mathrm{Cov}[\hat{\mathbf{w}}] = \sigma^2(\mathbf{X}^{\!\top}\mathbf{X})^{-1} = \mathcal{I}^{-1}$.
 
-The **P1-M2 closed-book checkpoint** gates on reproducing the **uniqueness** and
-**unbiasedness** arguments from scratch.
+**Checkpoint quiz 1.2** (Week 3, D2L) gates milestone 1.2 on reproducing the
+**uniqueness** and **unbiasedness** arguments; the MLE == OLS check lives in
+Homework Unit 3.
 
 ::: {.notes}
 Speaker note: bridge to the checkpoint. Students should be able to reproduce the

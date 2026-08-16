@@ -10,7 +10,7 @@ est_runtime_min: 11.7   # at ~130 wpm
 
 ## Title slide — Bayesian Inference
 
-Welcome back to Module 4 — Lecture B, the conjugate Gaussian posterior. This is the keystone of the whole course, so I want you fully present for it. In Lecture A we put a distribution on a single proportion and watched it update by simple addition. Today we scale that exact move up to the regression weights of our Module 1 model: a Gaussian prior meets a Gaussian likelihood, and out comes a Gaussian posterior for w, in closed form. This is where the entire Project 1 pipeline comes to rest. These materials are adapted with permission from lecture materials by Clayton Morrison at the University of Arizona.
+Welcome back to Module 4 — Lecture B, the conjugate Gaussian posterior. This is the keystone of the whole course, so I want you fully present for it. In Lecture A we put a distribution on a single proportion and watched it update by simple addition. Today we scale that exact move up to the regression weights of our Module 1 model: a Gaussian prior meets a Gaussian likelihood, and out comes a Gaussian posterior for w, in closed form. This is where the entire Part 1 pipeline comes to rest. These materials are adapted with permission from lecture materials by Clayton Morrison at the University of Arizona.
 
 ## Learning outcomes
 
@@ -22,7 +22,7 @@ In Lecture A we put a distribution on a proportion. Now we put one on the regres
 
 ## The conjugate Gaussian posterior
 
-And here it is — the keystone. Gaussian prior times Gaussian likelihood gives a Gaussian posterior, in closed form, described by two formulas. The posterior covariance S-N is the inverse of S-nought-inverse plus one-over-sigma-squared X-transpose-X. And the posterior mean m-N is S-N times the quantity S-nought-inverse m-nought, plus one-over-sigma-squared X-transpose y. Don't let the symbols wash over you — recognize every ingredient. There's X-transpose-X, from Module 1. There's one-over-sigma-squared, from Module 3. And there's the prior, from Lecture A. Three modules, meeting in two boxed formulas. In the accent color: Project 1 ends exactly here. The whole pipeline — data, model, loss, likelihood, posterior — closes on this pair.
+And here it is — the keystone. Gaussian prior times Gaussian likelihood gives a Gaussian posterior, in closed form, described by two formulas. The posterior covariance S-N is the inverse of S-nought-inverse plus one-over-sigma-squared X-transpose-X. And the posterior mean m-N is S-N times the quantity S-nought-inverse m-nought, plus one-over-sigma-squared X-transpose y. Don't let the symbols wash over you — recognize every ingredient. There's X-transpose-X, from Module 1. There's one-over-sigma-squared, from Module 3. And there's the prior, from Lecture A. Three modules, meeting in two boxed formulas. In the accent color: Part 1 ends exactly here. The whole pipeline — data, model, loss, likelihood, posterior — closes on this pair.
 
 ## Reading the formulas
 
@@ -56,4 +56,4 @@ One quick idea, if we have time. Remember the denominator we waved away in Lectu
 
 ## Recap & bridge
 
-To recap the keystone. The conjugate Gaussian posterior: precision adds, prior plus data — S-N-inverse equals S-nought-inverse plus one-over-sigma-squared X-transpose-X, and the mean is the precision-weighted blend. That's Project 1's endpoint. Ridge is its MAP under a zero-mean Gaussian prior, with lambda equal to sigma-squared over tau-squared. And the predictive variance splits cleanly into noise plus our ignorance about w. Now the cliff edge, in the accent color. Every single formula today existed because everything in sight was Gaussian. In Module 5 we binarize the outcome — hypertensive or not — the Gaussian likelihood is gone, conjugacy breaks, no closed form survives, and approximation becomes the craft. That's the second act of the course.
+To recap the keystone. The conjugate Gaussian posterior: precision adds, prior plus data — S-N-inverse equals S-nought-inverse plus one-over-sigma-squared X-transpose-X, and the mean is the precision-weighted blend. That's Part 1's endpoint. Ridge is its MAP under a zero-mean Gaussian prior, with lambda equal to sigma-squared over tau-squared. And the predictive variance splits cleanly into noise plus our ignorance about w. Now the cliff edge, in the accent color. Every single formula today existed because everything in sight was Gaussian. In Module 5 we binarize the outcome — hypertensive or not — the Gaussian likelihood is gone, conjugacy breaks, no closed form survives, and approximation becomes the craft. That's the second act of the course.

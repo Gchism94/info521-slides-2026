@@ -10,6 +10,11 @@
   (function () {
     var ts = document.getElementById("title-slide");
     if (!ts) return; // e.g. a non-reveal page — nothing to do
+    // Per-deck opt-out for decks NOT adapted from Clay's materials (e.g.
+    // intro/gc-intro.qmd). Set in that deck's YAML header:
+    //   title-slide-attributes:
+    //     data-no-attribution: "true"
+    if (ts.hasAttribute("data-no-attribution")) return;
     var p = document.createElement("p");
     p.className = "info521-attribution";
     p.textContent = "Adapted with permission from lecture materials by " +

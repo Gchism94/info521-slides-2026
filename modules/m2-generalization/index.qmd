@@ -16,6 +16,7 @@ knob that moves you along it.
 
 | Deck | Link |
 |------|------|
+| Module 2 Overview (about 3 min) | [m2-overview](m2-overview.html) |
 | Lecture A — Evaluation & Cross-Validation | [m2a-evaluation-cv](m2a-evaluation-cv.html) |
 | Lecture B — Bias–Variance & Regularization | [m2b-bias-variance-ridge](m2b-bias-variance-ridge.html) |
 | Appendix — The Bias–Variance Decomposition | [appendix-bias-variance](appendix-bias-variance.html) |

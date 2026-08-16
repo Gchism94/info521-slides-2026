@@ -13,6 +13,22 @@ run the script and render correctly.
 (`cdn.jsdelivr.net/npm/mathjax@3`). If your D2L instance blocks external
 scripts, a MathML-prerendered variant that needs no script can be produced.
 
+## PDFs (`pdf/`)
+
+`pdf/` carries the same lecture material as printable, D2L-attachable PDFs, two
+families with matching stems so everything sorts together:
+
+- `slides-<deck>.pdf` — one landscape page per slide, forced light, copied from
+  the rendered decks in `../docs/`. Regenerate the decks first (`./render.sh`),
+  then re-copy.
+- `notes-<deck>.pdf` — the student notes from `../notes/`, US Letter, UA styled.
+  Regenerate with `python build-notes-pdfs.py` from the repo root (needs quarto
+  and pdftotext).
+
+Upload either as content-topic attachments beside the matching HTML page; the
+PDFs need no external scripts, so they also work where D2L blocks the MathJax
+CDN the HTML pages rely on.
+
 ## Pages
 
 | File | Lecture |

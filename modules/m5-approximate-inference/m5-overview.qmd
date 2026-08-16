@@ -1,0 +1,52 @@
+---
+title: "Module 5: Approximate Inference and Bayesian Classification"
+subtitle: "INFO 521 · Module 5 · Overview"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### What do you do when the posterior has no closed form?
+
+Binarise the outcome, put a logistic link on the linear model, and the conjugacy from Module 4 is gone. There is no formula for the posterior any more. This module gives you two honest ways to proceed: approximate the shape, or draw samples from it.
+
+
+## What the lectures do {.smaller}
+
+**Lecture A: Logistic Regression and Newton's Method**
+
+: Squashing the line, the log-likelihood that results, and Newton-Raphson using curvature to reach the answer in a handful of steps.
+
+**Lecture B: Laplace Approximation and a Taste of Sampling**
+
+: Fitting a Gaussian at the mode, when the peak is not the story, and the Metropolis trick that lets you sample without ever computing the normaliser.
+
+
+## Where this sits
+
+This is the week the course stops having exact answers, which is also the week it starts looking like practice. It is the busiest week on the calendar: the project midpoint lands here, and the second half of the project opens on the binarised outcome this module introduces.
+
+
+## Week 5 at a glance {.smaller}
+
+- Homework Unit 5, approximate Bayesian inference.
+- Checkpoint quiz 2.1 on the Newton-Raphson update. Passing it opens Milestone 2.1 and Gate A.
+- Milestones 1.3 and 1.4 are due this week.
+- The project midpoint: Part 1 is due. Part 2 begins immediately after.
+- Activity loop: the week04 logistic-regression explorer. No discussion this week; it is the midpoint.
+- Reading: PML sections 10.1 to 10.2 and 4.6.8; Think Bayes Chapter 19.
+
+
+## Watch out for {.smaller}
+
+**Laplace only sees the peak.** It is a Gaussian fitted at the mode. Skew and multimodality are invisible to it, which is fine until it is not. Lecture B shows a case where it is not.
+
+**Plan for the midpoint before it arrives.** Week 5 carries two milestones, a checkpoint, a homework unit, and the Part 1 deadline. Starting it on the Wednesday will not work.

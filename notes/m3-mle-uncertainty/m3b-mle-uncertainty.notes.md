@@ -38,7 +38,7 @@ The parameter-uncertainty explorer lets you **Draw one dataset** (a single $\hat
 - The MLE is unique (concave $\ell$, negative-definite Hessian), unbiased ($\mathbb{E}[\hat{\mathbf{w}}]=\mathbf{w}$), and quantifiably uncertain.
 - $\mathrm{Cov}[\hat{\mathbf{w}}] = \sigma^2(\mathbf{X}^{\top}\mathbf{X})^{-1} = \mathcal{I}^{-1}$ — the inverse Fisher information.
 - Unbiasedness is about the center of the estimate-cloud, not any single fit.
-- The closed-book checkpoint gates on reproducing the uniqueness and unbiasedness arguments.
+- Checkpoint quiz 1.2 (Week 3, D2L) gates milestone 1.2 on the uniqueness and unbiasedness arguments; the MLE == OLS numerical check is in Homework Unit 3.
 
 ## Through-lines
 

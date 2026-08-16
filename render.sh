@@ -75,7 +75,12 @@ src, dst = sys.argv[1], sys.argv[2]
 h = open(src, encoding="utf-8").read()
 inject = (
     '<style id="pdf-force-light">'
-    'html,body,.reveal-viewport,.reveal,.reveal .slides section'
+    # NOTE: do NOT whiten `.reveal .slides section` here. Sections are
+    # transparent by design and sit ABOVE reveal's .slide-background layer, so
+    # painting them white erases any slide background-image (e.g. the portrait
+    # on intro/gc-intro.qmd's title slide) wherever the section box overlaps it.
+    # Whitening the viewport is sufficient — the PDF still comes out fully light.
+    'html,body,.reveal-viewport,.reveal'
     '{background:#fff !important;background-color:#fff !important;}'
     '#info521-theme-toggle{display:none !important;}'
     '</style>'

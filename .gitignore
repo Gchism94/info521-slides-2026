@@ -20,3 +20,6 @@ __pycache__/
 
 /.quarto/
 **/*.quarto_ipynb
+
+# Retired material staged for manual deletion; never commit
+_to_delete/

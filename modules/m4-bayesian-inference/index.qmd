@@ -13,10 +13,11 @@ Parameters stop being fixed unknowns and become beliefs: prior → likelihood �
 posterior. Conjugacy makes the update exact — Beta-Binomial for the hypertension
 proportion, then the Gaussian posterior over the regression weights
 $\mathcal{N}(\mathbf{w}\mid\mathbf{m}_N, \mathbf{S}_N)$, the closed form where
-**Project 1 ends**. Ridge regression returns as MAP with a Gaussian prior.
+**Part 1 ends**. Ridge regression returns as MAP with a Gaussian prior.
 
 | Deck | Link |
 |------|------|
+| Module 4 Overview (about 3 min) | [m4-overview](m4-overview.html) |
 | Lecture A — Priors, Posteriors & the Beta-Binomial | [m4a-bayes-beta-binomial](m4a-bayes-beta-binomial.html) |
 | Lecture B — The Conjugate Gaussian Posterior | [m4b-gaussian-posterior](m4b-gaussian-posterior.html) |
 

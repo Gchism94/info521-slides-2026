@@ -1,0 +1,55 @@
+---
+title: "Module 2: Generalization"
+subtitle: "INFO 521 · Module 2 · Overview"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### Your model fits the data you have. Will it work on data you do not?
+
+Module 1 gave you a fit and a number that says how good it is on the points you trained on. That number can be made as good as you like, which is exactly why it cannot be trusted. This module is about measuring the thing you actually care about, and then about buying it deliberately.
+
+
+## What the lectures do {.smaller}
+
+**Lecture A: Evaluation and Cross-Validation**
+
+: Training error always drops. Holding out a test set, the generalization gap, k-fold cross-validation, and selecting a model with it.
+
+**Lecture B: Bias-Variance and Regularization**
+
+: Where the U-shape comes from, the decomposition behind it, ridge regression and its closed form, the coefficient path, and choosing lambda by cross-validation.
+
+**Appendix: The Bias-Variance Decomposition**
+
+: The add-and-subtract trick, and why the cross terms vanish.
+
+
+## Where this sits
+
+Module 1 ended with a polynomial that fit the training data beautifully and was obviously wrong. This module explains that picture and gives you the tools to avoid it. It also sets up a debt: cross-validation tells you which model generalises, but not why squared error was the right loss to begin with. Module 3 pays that debt.
+
+
+## Week 2 at a glance {.smaller}
+
+- Homework Units 2a and 2b, probability and estimation foundations.
+- Checkpoint quiz 1.1 on the normal equations. Passing it opens Milestone 1.1, which is due next week.
+- Activity loop: the week02 bias-variance explorer.
+- Discussion: the tradeoff in your own words.
+- Reading: PML section 4.7 and section 11.3; MML Chapter 5 as review.
+
+
+## Watch out for {.smaller}
+
+**Leakage hides in preprocessing.** Scaling or imputing on the full dataset before you split leaks test information into training. The fold is the unit, not the dataset.
+
+**Do not choose lambda on the test set.** Cross-validate within training data. The test set is spent the first time you look at it.

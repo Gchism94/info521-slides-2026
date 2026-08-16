@@ -34,7 +34,7 @@ Bayes' rule, and you should be able to label all four pieces cold. On the left, 
 
 ## The running question: hypertension prevalence
 
-Let's make it concrete. We screen adults one at a time and record whether each is hypertensive, using the clinical rule — systolic at least 130, or diastolic at least 80. And notice that rule uses measured blood pressure only: it's the leakage-safe label Project 2 goes on to predict, the same discipline we set back in Module 1. Each patient is a coin flip — hypertensive is a one, not is a zero — a Bernoulli draw with unknown rate theta. After N patients with n-one positives, the likelihood takes the binomial shape: theta to the number of positives, times one-minus-theta to the number of negatives. The full NHANES answer, across all five thousand adults, is about thirty-nine percent. Today we watch belief climb toward that, one patient at a time.
+Let's make it concrete. We screen adults one at a time and record whether each is hypertensive, using the clinical rule — systolic at least 130, or diastolic at least 80. And notice that rule uses measured blood pressure only: it's the leakage-safe label Part 2 goes on to predict, the same discipline we set back in Module 1. Each patient is a coin flip — hypertensive is a one, not is a zero — a Bernoulli draw with unknown rate theta. After N patients with n-one positives, the likelihood takes the binomial shape: theta to the number of positives, times one-minus-theta to the number of negatives. The full NHANES answer, across all five thousand adults, is about thirty-nine percent. Today we watch belief climb toward that, one patient at a time.
 
 ## The Beta prior
 
@@ -74,4 +74,4 @@ One more thing the posterior gives us — an honest prediction for the next pati
 
 ## Recap & bridge
 
-Quick recap. Bayes: posterior proportional to likelihood times prior — belief, updated. Beta-Binomial conjugacy: the update is just addition, Beta-a-b to Beta a-plus-n-one, b-plus-n-zero. And the posterior is one object that answers everything — point estimates, intervals, predictions. Everything today was deliberately one-dimensional, a single proportion. In Lecture B we run the very same conjugate trick on the regression weights — a Gaussian prior meets a Gaussian likelihood and gives a Gaussian posterior for w. That closed form is where Project 1 ends.
+Quick recap. Bayes: posterior proportional to likelihood times prior — belief, updated. Beta-Binomial conjugacy: the update is just addition, Beta-a-b to Beta a-plus-n-one, b-plus-n-zero. And the posterior is one object that answers everything — point estimates, intervals, predictions. Everything today was deliberately one-dimensional, a single proportion. In Lecture B we run the very same conjugate trick on the regression weights — a Gaussian prior meets a Gaussian likelihood and gives a Gaussian posterior for w. That closed form is where Part 1 ends.

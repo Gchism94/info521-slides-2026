@@ -2,7 +2,7 @@
 title: "Likelihood & Maximum Likelihood"
 subtitle: "INFO 521 · Module 3 · Lecture A — From Loss to Likelihood"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -289,7 +289,7 @@ plt.show()
 ::: {.notes}
 Speaker note: honest data moment — the Gaussian is decent in the bulk but the
 right tail (hypertensive spikes) is heavier. The assumption is *useful*, not
-*true*; binarizing that tail is exactly what Project 2 / Module 5 does.
+*true*; binarizing that tail is exactly what Part 2 / Module 5 does.
 :::
 
 ## Dividend 2 — with a catch: $\hat{\sigma}^2$ is biased {.smaller}

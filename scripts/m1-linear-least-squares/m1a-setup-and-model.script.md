@@ -46,11 +46,11 @@ Let's fix notation, because this is the spine for the whole term. One patient is
 
 ## The data — NHANES 2021–2022
 
-Now the data itself. This is NHANES, 2021–22 — about five thousand one hundred U.S. adults, and the target is systolic blood pressure in millimeters of mercury. We're working with six leakage-safe features: age — our primary predictor for Project 1 — body-mass index, waist circumference, total cholesterol, HDL cholesterol, and HbA1c, a measure of blood sugar. Those six names aren't arbitrary; they're the loader's contract, the columns the data actually ships with. And notice one measurement that's deliberately missing from that list — diastolic blood pressure. That omission is the whole next slide.
+Now the data itself. This is NHANES, 2021–22 — about five thousand one hundred U.S. adults, and the target is systolic blood pressure in millimeters of mercury. We're working with six leakage-safe features: age — our primary predictor for Part 1 — body-mass index, waist circumference, total cholesterol, HDL cholesterol, and HbA1c, a measure of blood sugar. Those six names aren't arbitrary; they're the loader's contract, the columns the data actually ships with. And notice one measurement that's deliberately missing from that list — diastolic blood pressure. That omission is the whole next slide.
 
 ## The leakage rule
 
-Here's why diastolic isn't in the feature list — the leakage rule. Exclude any predictor that is itself a blood-pressure measurement, or that would trivially hand you the label. Diastolic BP co-measures the very same physiology as systolic — it's basically a peek at the answer — so we reserve it, and it's never a feature. And the key thing: this is a modeling choice we make by design, before we ever fit a line. It is not something the algorithm discovers for us. Flag this one now — it comes back in Project 2's cluster-versus-label reveal, and I want it to feel familiar when it does.
+Here's why diastolic isn't in the feature list — the leakage rule. Exclude any predictor that is itself a blood-pressure measurement, or that would trivially hand you the label. Diastolic BP co-measures the very same physiology as systolic — it's basically a peek at the answer — so we reserve it, and it's never a feature. And the key thing: this is a modeling choice we make by design, before we ever fit a line. It is not something the algorithm discovers for us. Flag this one now — it comes back in Part 2's cluster-versus-label reveal, and I want it to feel familiar when it does.
 
 ## A first look at the data
 

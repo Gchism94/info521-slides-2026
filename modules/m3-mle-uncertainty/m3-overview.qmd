@@ -1,0 +1,56 @@
+---
+title: "Module 3: Maximum Likelihood and Parameter Uncertainty"
+subtitle: "INFO 521 · Module 3 · Overview"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### Why squared error, and how sure are we about the numbers we got?
+
+Squared error has been the loss for two modules without a reason. This module gives one: assume a noise model, write down the probability of the data, and maximise it. Least squares falls out. Then the same machinery answers a question least squares never could, which is how much your estimated weights would move if you collected the data again.
+
+
+## What the lectures do {.smaller}
+
+**Lecture A: From Loss to Likelihood**
+
+: The Gaussian noise model, the likelihood and log-likelihood of a dataset, the MLE for the weights turning out to be the least-squares solution, and the noise variance getting estimated too.
+
+**Lecture B: Properties of the MLE**
+
+: Uniqueness, unbiasedness and what it does not promise, the covariance of the estimator, and Fisher information as the curvature that sets it.
+
+**Appendix: The Full Covariance Derivation**
+
+: The second moment, term by term.
+
+
+## Where this sits
+
+This is the hinge of the course. Before it, you minimise a loss because it seems reasonable. After it, you write down a probability model and derive the loss. Every module that follows is built on likelihoods, so the derivation here is worth doing until it is automatic.
+
+
+## Week 3 at a glance {.smaller}
+
+- Homework Unit 3, Monte Carlo and estimators.
+- Checkpoint quiz 1.2 on maximum likelihood. Passing it opens Milestone 1.2.
+- Milestone 1.1, least squares, is due this week.
+- No activity loop this week. The parameter-uncertainty demo is used in lecture rather than as a peer loop, so the discussion carries the week on its own.
+- Discussion: what likelihood buys us.
+- Reading: PML Chapters 2 and 3, sections 4.1 to 4.2 and 4.7; MML Chapter 6 as review.
+
+
+## Watch out for {.smaller}
+
+**Unbiased does not mean close.** An unbiased estimator is centred on the truth across imaginary repeat experiments. Your one estimate can still be far off. The covariance is what tells you how far.
+
+**The variance MLE is biased, and knowably so.** It divides by N where the unbiased estimator divides by N minus the number of parameters. Lecture A shows the bias rather than hiding it.

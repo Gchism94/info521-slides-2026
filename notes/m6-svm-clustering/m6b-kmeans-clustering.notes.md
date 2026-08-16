@@ -31,7 +31,7 @@ The **Gaussian mixture model** is the soft upgrade, fit by **EM** — the same a
 
 ## Clusters are not diagnoses
 
-Colouring the three adiposity clusters (which never saw blood pressure) by the held-back hypertension label, the rate climbs ≈ 30% → 40% → 48% against 39% overall. Two things hold at once: the **enrichment is real** (and the clusters obeyed the leakage rule), yet **no cluster is remotely pure**. Pretending clusters are labels manufactures diagnoses the data never made — Project 2's honesty requirement in one figure. Descriptive tools describe; they do not diagnose.
+Colouring the three adiposity clusters (which never saw blood pressure) by the held-back hypertension label, the rate climbs ≈ 30% → 40% → 48% against 39% overall. Two things hold at once: the **enrichment is real** (and the clusters obeyed the leakage rule), yet **no cluster is remotely pure**. Pretending clusters are labels manufactures diagnoses the data never made — Part 2's honesty requirement in one figure. Descriptive tools describe; they do not diagnose.
 
 The k-means explorer (BMI vs fasting glucose, no labels) lets you set $k$, drag the centroids to seed them, **Step** through assign/update or **Run to convergence**, and use **New centroids** to escape a bad local optimum.
 

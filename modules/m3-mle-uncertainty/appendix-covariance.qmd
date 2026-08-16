@@ -2,7 +2,7 @@
 title: "Appendix: Full Cov[ŵ] derivation"
 subtitle: "INFO 521 · Module 3 — supplement"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---

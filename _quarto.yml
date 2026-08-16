@@ -8,6 +8,7 @@ project:
   execute-dir: project
   render:
     - index.qmd
+    - intro/*.qmd
     - modules/**/*.qmd
 
 # ---------------------------------------------------------------------------

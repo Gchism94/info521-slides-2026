@@ -2,7 +2,7 @@
 title: "Linear Models & Least Squares"
 subtitle: "INFO 521 · Module 1 · Lecture B — Normal Equations & Geometry"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -170,7 +170,7 @@ These are the **normal equations** — a $D{\times}D$ linear system for $\hat{\m
 
 ::: {.notes}
 Speaker note: this $\nabla\mathcal{L}=0 \Rightarrow \mathbf{X}^{\!\top}\mathbf{X}\hat{\mathbf{w}}=\mathbf{X}^{\!\top}\mathbf{y}$
-step is exactly what the P1-M1 checkpoint asks you to reproduce.
+step is exactly what Checkpoint 1.1 asks you to reproduce.
 :::
 
 ## The solution {.smaller}
@@ -373,8 +373,9 @@ Least squares, closed form:
 2. **Projection** — $\hat{\mathbf{y}}$ is the orthogonal projection of $\mathbf{y}$ onto $\mathrm{col}(\mathbf{X})$; $\mathbf{X}^{\!\top}\mathbf{r}=\mathbf{0}$.
 3. **Uniqueness** — full column rank ⇔ invertible $\mathbf{X}^{\!\top}\mathbf{X}$.
 
-The **P1-M1 closed-book checkpoint** gates on reproducing the
-$\nabla\mathcal{L}=0 \Rightarrow \hat{\mathbf{w}}$ derivation.
+**Checkpoint quiz 1.1** (Week 2, D2L) gates milestone 1.1 on reproducing the
+$\nabla\mathcal{L}=0 \Rightarrow \hat{\mathbf{w}}$ derivation; the numerical
+check lives in Homework Unit 1.
 
 ::: {.notes}
 Speaker note: bridge to the checkpoint and to Module 2 (basis functions →

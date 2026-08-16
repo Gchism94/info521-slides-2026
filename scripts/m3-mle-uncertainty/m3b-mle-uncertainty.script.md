@@ -14,7 +14,7 @@ Welcome back to Module 3 — this is Lecture B, Properties of the MLE. In Lectur
 
 ## Learning outcomes
 
-Three things by the end of this lecture, one per property. First, show the MLE is unique — that the log-likelihood has a single maximum, which comes down to its Hessian being negative definite everywhere. Second, state precisely what unbiasedness of w-hat does and doesn't mean — there are a few tempting claims it is not. And third, quantify the uncertainty in w-hat, using its covariance and the Fisher information. One heads-up worth flagging now: the closed-book checkpoint gates on reproducing the first two of these — uniqueness and unbiasedness — from scratch. So those two arguments are the ones to really own.
+Three things by the end of this lecture, one per property. First, show the MLE is unique — that the log-likelihood has a single maximum, which comes down to its Hessian being negative definite everywhere. Second, state precisely what unbiasedness of w-hat does and doesn't mean — there are a few tempting claims it is not. And third, quantify the uncertainty in w-hat, using its covariance and the Fisher information. One heads-up worth flagging now: the Checkpoint 1.2 quiz, this week on D2L, gates milestone 1.2 on the first two of these — uniqueness and unbiasedness. So those two arguments are the ones to really own.
 
 ## Recap: likelihood and the MLE
 
@@ -98,4 +98,4 @@ Step back and watch one object do three jobs, three modules apart. In this lectu
 
 ## Recap + checkpoint preview
 
-To recap — three properties of the linear-Gaussian MLE. It's unique, because the Hessian, minus one over sigma-squared times X-transpose-X, is negative definite. It's unbiased — the expectation of w-hat is the true w. And it's uncertain, but quantifiably so — the covariance of w-hat is sigma-squared times X-transpose-X inverse, which is the inverse Fisher information. And one last thing, because it matters: the closed-book checkpoint for this part of the course gates on the first two. You should be able to reproduce the Hessian-sign argument for uniqueness, and the three-line unbiasedness derivation, completely unaided. Drill those two until they're automatic.
+To recap — three properties of the linear-Gaussian MLE. It's unique, because the Hessian, minus one over sigma-squared times X-transpose-X, is negative definite. It's unbiased — the expectation of w-hat is the true w. And it's uncertain, but quantifiably so — the covariance of w-hat is sigma-squared times X-transpose-X inverse, which is the inverse Fisher information. And one last thing, because it matters: the Checkpoint 1.2 quiz gates on the first two. You should be able to reproduce the Hessian-sign argument for uniqueness, and the three-line unbiasedness derivation, and explain what each one rests on. Drill those two until they're automatic.

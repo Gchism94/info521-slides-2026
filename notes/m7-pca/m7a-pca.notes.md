@@ -33,7 +33,7 @@ One dataset, five ways of seeing, each module's answer becoming the next one's q
 |---|---|
 | **Loss** (M1–M2) | $\hat{\mathbf{w}} = (\mathbf{X}^{\top}\mathbf{X})^{-1}\mathbf{X}^{\top}\mathbf{y}$; flexibility controlled |
 | **Likelihood** (M3) | same $\hat{\mathbf{w}}$ + $\hat\sigma^2$ + $\mathrm{Cov}[\hat{\mathbf{w}}]$ |
-| **Posterior** (M4) | $\mathcal{N}(\mathbf{m}_N,\mathbf{S}_N)$ — Project 1's endpoint |
+| **Posterior** (M4) | $\mathcal{N}(\mathbf{m}_N,\mathbf{S}_N)$ — Part 1's endpoint |
 | **Approximation** (M5) | Laplace $\mathbf{A}^{-1}$; Metropolis draws |
 | **Discovery** (M6–M7) | clusters; principal axes — described, not diagnosed |
 

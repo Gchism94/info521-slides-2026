@@ -56,7 +56,7 @@ If we have a minute, the three practical knobs. Burn-in: the early draws still r
 
 ## Choosing your approximation
 
-So which do you reach for? A scoreboard. Laplace costs one Newton run; Metropolis costs thousands of evaluations. Laplace hands you a Gaussian and formulas; Metropolis hands you draws, and you compute averages and quantiles. Laplace's error shrinks with more data; Metropolis's shrinks with more compute. Laplace fails on skew and multimodality; Metropolis fails on bad tuning and slow mixing. The practical rule: reach for Laplace first — it's the fast workhorse — and pull out sampling when the answer matters out in the tails. And when the two agree, that agreement is itself evidence you can trust the result. Project 2 accepts either; what's graded is knowing which regime you're in, and saying why.
+So which do you reach for? A scoreboard. Laplace costs one Newton run; Metropolis costs thousands of evaluations. Laplace hands you a Gaussian and formulas; Metropolis hands you draws, and you compute averages and quantiles. Laplace's error shrinks with more data; Metropolis's shrinks with more compute. Laplace fails on skew and multimodality; Metropolis fails on bad tuning and slow mixing. The practical rule: reach for Laplace first — it's the fast workhorse — and pull out sampling when the answer matters out in the tails. And when the two agree, that agreement is itself evidence you can trust the result. Part 2 accepts either; what's graded is knowing which regime you're in, and saying why.
 
 ## Recap & bridge
 

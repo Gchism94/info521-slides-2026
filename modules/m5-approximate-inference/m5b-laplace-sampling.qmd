@@ -2,7 +2,7 @@
 title: "Approximate Inference & Bayesian Classification"
 subtitle: "INFO 521 · Module 5 · Lecture B — Laplace Approximation & a Taste of Sampling"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -340,7 +340,7 @@ In practice: **Laplace first**; sample when the answer matters in the tails —
 the two agreeing is itself evidence.
 
 ::: {.notes}
-Speaker note: (Clay 20/21 synthesis). Project 2's inference step accepts either —
+Speaker note: (Clay 20/21 synthesis). Part 2's inference step accepts either —
 what's graded is *knowing which regime you're in* and saying why.
 :::
 

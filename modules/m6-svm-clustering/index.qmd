@@ -18,6 +18,7 @@ enrich risk, but **clusters are not diagnoses**.
 
 | Deck | Link |
 |------|------|
+| Module 6 Overview (about 3 min) | [m6-overview](m6-overview.html) |
 | Lecture A — Maximum-Margin Classification | [m6a-svm](m6a-svm.html) |
 | Lecture B — k-means & the Unsupervised Turn | [m6b-kmeans-clustering](m6b-kmeans-clustering.html) |
 

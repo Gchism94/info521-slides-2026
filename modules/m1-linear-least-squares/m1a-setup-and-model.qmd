@@ -2,7 +2,7 @@
 title: "Linear Models & Least Squares"
 subtitle: "INFO 521 · Module 1 · Lecture A — Setup, Data, and the Linear Model"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -155,7 +155,7 @@ would trivially determine the label.
 
 ::: {.notes}
 Speaker note: leakage = letting the answer sneak into the inputs. This exact
-choice returns in Project 2's cluster-vs-label reveal — flag it now.
+choice returns in Part 2's cluster-vs-label reveal — flag it now.
 :::
 
 ## A first look at the data

@@ -61,7 +61,7 @@ Here's the first payoff. The loss treated the scatter around the line as a nuisa
 
 ## Model check: are the residuals Gaussian-ish?
 
-We assumed Gaussian noise — so let's actually check that assumption. This is a histogram of the NHANES residuals, with the fitted Gaussian, mean zero and sigma about sixteen, laid over the top as the dashed curve. Through the bulk it's a decent match — roughly bell-shaped, centered where it should be. But look hard at the right tail: it's heavier than the Gaussian predicts. Those are the hypertensive spikes — patients running far above the line. So the assumption is useful, not true — and that phrase is going to follow us all term. Models are assumptions; you check them. And that heavy right tail? Binarizing it — normal versus high — is exactly what Project 2 and Module 5 go and do.
+We assumed Gaussian noise — so let's actually check that assumption. This is a histogram of the NHANES residuals, with the fitted Gaussian, mean zero and sigma about sixteen, laid over the top as the dashed curve. Through the bulk it's a decent match — roughly bell-shaped, centered where it should be. But look hard at the right tail: it's heavier than the Gaussian predicts. Those are the hypertensive spikes — patients running far above the line. So the assumption is useful, not true — and that phrase is going to follow us all term. Models are assumptions; you check them. And that heavy right tail? Binarizing it — normal versus high — is exactly what Part 2 and Module 5 go and do.
 
 ## Dividend 2 — with a catch: σ̂² is biased
 

@@ -46,4 +46,4 @@ Collect those and factor, and you get exactly the gradient the lecture used — 
 
 > [cue: second fragment reveals]
 
-Set it to zero, the minus-two-over-N drops out as a nonzero scalar, and you're left with the normal equations — X-transpose-X w-hat equals X-transpose y — and solving gives w-hat equals X-transpose-X inverse, X-transpose y. That gradient-to-normal-equations step is the one the Project-1 checkpoint asks you to reproduce cold.
+Set it to zero, the minus-two-over-N drops out as a nonzero scalar, and you're left with the normal equations — X-transpose-X w-hat equals X-transpose y — and solving gives w-hat equals X-transpose-X inverse, X-transpose y. That gradient-to-normal-equations step is the one the Checkpoint 1.1 quiz asks you to reproduce, and it is worth owning cold.

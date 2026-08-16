@@ -60,7 +60,7 @@ The gradient comes out minus two over N, times X-transpose, times the residual y
 
 ## The normal equations
 
-Now set that gradient to zero. The minus-two-over-N is just a nonzero scalar out front, so it drops away, and you're left with X-transpose times the residual equals zero — which rearranges to X-transpose-X, w-hat, equals X-transpose y. These are the normal equations: a D-by-D linear system whose solution is the best weights. Worth burning in — reproducing this exact move, gradient to zero to normal equations, is what the Project-1 checkpoint asks of you, closed-book.
+Now set that gradient to zero. The minus-two-over-N is just a nonzero scalar out front, so it drops away, and you're left with X-transpose times the residual equals zero — which rearranges to X-transpose-X, w-hat, equals X-transpose y. These are the normal equations: a D-by-D linear system whose solution is the best weights. Worth burning in — reproducing this exact move, gradient to zero to normal equations, is what the Checkpoint 1.1 quiz asks of you this week.
 
 ## The solution
 
@@ -104,4 +104,4 @@ Last piece — is the answer even unique? The clean statement: w-hat is unique e
 
 ## Recap & checkpoint preview
 
-To recap — least squares in closed form, three beats. One: the normal equations, X-transpose-X w-hat equals X-transpose y, straight from setting the gradient to zero. Two: geometrically, y-hat is the orthogonal projection of y onto the column space, and the residual is perpendicular to it. Three: the solution is unique when X has full column rank. And the checkpoint flag — the closed-book Project-1 checkpoint gates on you reproducing that gradient-to-w-hat derivation with no notes, so practice it cold. Next up is Module 2: we just watched flexibility turn into overfitting — now we learn to measure it and control it.
+To recap — least squares in closed form, three beats. One: the normal equations, X-transpose-X w-hat equals X-transpose y, straight from setting the gradient to zero. Two: geometrically, y-hat is the orthogonal projection of y onto the column space, and the residual is perpendicular to it. Three: the solution is unique when X has full column rank. And the checkpoint flag: the Checkpoint 1.1 quiz, this week on D2L, gates milestone 1.1 on reproducing that gradient-to-w-hat derivation and explaining what it rests on; the code verification is in Homework Unit 1. Practice it until it is yours. Next up is Module 2: we just watched flexibility turn into overfitting — now we learn to measure it and control it.

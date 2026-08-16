@@ -7,7 +7,7 @@ reading_time_min: 7
 
 # Module 5 · Lecture A — Breaking Conjugacy
 
-Module 4 ended with everything Gaussian and every formula closed-form. Asking the clinical question — *is this patient hypertensive?* — binarizes the outcome and breaks that machinery. This is the second act of the course, and where Project 2 opens.
+Module 4 ended with everything Gaussian and every formula closed-form. Asking the clinical question — *is this patient hypertensive?* — binarizes the outcome and breaks that machinery. This is the second act of the course, and where Part 2 opens.
 
 ## The conjugacy break
 

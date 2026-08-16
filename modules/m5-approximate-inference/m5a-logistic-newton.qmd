@@ -2,7 +2,7 @@
 title: "Approximate Inference & Bayesian Classification"
 subtitle: "INFO 521 · Module 5 · Lecture A — Breaking Conjugacy: Logistic Regression & Newton's Method"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -72,10 +72,10 @@ By the end of Lecture A you should be able to:
 
 ::: {.notes}
 Speaker note: (Clay 22 framed discriminative per the module arc, + Clay 19).
-Project 2 opens on this exact move: same patients, binarized label.
+Part 2 opens on this exact move: same patients, binarized label.
 :::
 
-## Project 2 opens here: binarize the outcome {.smaller}
+## Part 2 opens here: binarize the outcome {.smaller}
 
 Module 4 closed with everything Gaussian and every formula closed-form. Now ask
 the *clinical* question instead:
@@ -325,7 +325,7 @@ knowing the *mass around it* is the hard part. That's the entire agenda of m5b.
 ## Recap & bridge {.smaller}
 
 - **Binarize → conjugacy breaks**: Bernoulli likelihood + Gaussian prior has no
-  closed-form posterior — Project 2's opening move.
+  closed-form posterior — Part 2's opening move.
 - **Logistic regression**: $p(y{=}1\mid\mathbf{x}) = \sigma(\mathbf{w}^{\!\top}\mathbf{x})$;
   concave $\ell(\mathbf{w})$; gradient $\mathbf{X}^{\!\top}(\mathbf{y}-\boldsymbol{\mu})$.
 - **Newton–Raphson**: $\mathbf{w} \leftarrow \mathbf{w} - \mathbf{H}^{-1}\nabla\ell$

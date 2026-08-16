@@ -1,0 +1,87 @@
+---
+title: "Module 7: Principal Component Analysis, and the Course in One Arc"
+subtitle: "INFO 521 · Module 7 · Overview and Course Wrap-Up"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### Which directions in the data actually matter?
+
+Six features, and not six independent stories. PCA finds the directions along which the cohort actually varies, which turns out to be the same as finding the directions that reconstruct it best. Two questions, one eigendecomposition.
+
+
+## What the lectures do {.smaller}
+
+**Lecture: PCA and Course Synthesis**
+
+: Centring, the covariance matrix, the two equivalent views, the scree plot across all six features, what a component means and when it means nothing, and how to choose how many to keep.
+
+
+## Where this sits
+
+The last method of the course, and the one that closes the unsupervised turn Module 6 started. It is also where the arc gets named out loud, because by this point you have the whole thing and can see it.
+
+
+## Week 7 at a glance {.smaller}
+
+- Milestones 2.3 and 2.4 are due this week, which is Gate B.
+- No new homework unit and no checkpoint quiz this week.
+- Activity loop: the week06 PCA explorer.
+- Discussion: the course arc.
+- Reading: MML section 4.2 and Chapter 10; PML section 20.1 as secondary.
+
+
+## Watch out for {.smaller}
+
+**PCA never looked at your outcome.** It maximises variance, and variance is not relevance. The top component can be the least useful predictor in the set.
+
+**A component is a direction, not a concept.** Loadings sometimes read cleanly and sometimes do not. Interpreting one is a claim about your data, and it needs the same evidence as any other claim.
+
+
+## The course, in one arc {.smaller}
+
+| | |
+|---|---|
+| Modules 1 and 2 | Write down a loss, solve it exactly, and then find out whether the answer generalises. |
+| Module 3 | Stop assuming the loss. Derive it from a noise model, and get parameter uncertainty for free. |
+| Module 4 | Replace the estimate with a distribution, and update it in closed form while conjugacy holds. |
+| Module 5 | Conjugacy breaks. Approximate the posterior at its mode, or sample from it. |
+| Module 6 | Drop probability for the margin, then drop the labels entirely. |
+| Module 7 | Ask what structure the features have on their own. |
+
+Read down that list and it is one idea getting progressively less convenient and more honest. Every step was taken because the previous tool could not answer the next question.
+
+
+## What you can do now {.smaller}
+
+You can write down a model and a loss, derive the estimator, say how uncertain it is, update it as evidence arrives, approximate it when the algebra runs out, and check whether any of it generalises. That is the whole of the course stated as a capability, and it is what the outcomes below were asking for.
+
+::: {.smaller}
+- **CLO1.** Identify and evaluate machine-learning approaches appropriate for regression, classification, clustering, and dimensionality-reduction problems.
+- **CLO2.** Implement machine-learning algorithms in Python using industry-standard tools and workflows.
+- **CLO3.** Compare and interpret model performance using appropriate evaluation metrics, validation techniques, and statistical reasoning.
+- **CLO4.** Apply machine-learning methods to real-world datasets to develop predictive and descriptive models.
+- **CLO5.** Communicate machine-learning results, limitations, and recommendations through written, visual, and technical presentations.
+:::
+
+
+## What is left {.smaller}
+
+- Week 7.5 is the course close: Milestone 2.5 and the Part 2 report are due.
+- Homework: your best five core units count, and Unit 0 is required, so one core unit can be dropped. If you are carrying a Not-Yet you want to convert, this is the week.
+- Any revision tokens you have left expire with the term. Spend them.
+- The discussion this week is the course arc, which is a good place to work out what you want the final report to say.
+
+
+## Where next
+
+Neural networks are the obvious next thing and they are deliberately not in this course. There are optional readings on the schedule from Understanding Deep Learning, and INFO 557 picks the thread up properly. Nothing there replaces what you built here: a network is still a model with a loss, fitted by an optimiser, and evaluated on data it has not seen.

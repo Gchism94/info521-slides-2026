@@ -41,4 +41,4 @@ The Beta–Binomial explorer lets you set the prior $(a,b)$, add "positive" and 
 
 ## Through-lines
 
-Everything here is one-dimensional by design. Lecture B runs the same conjugate trick on the *regression weights* — a Gaussian prior meets a Gaussian likelihood — and that closed form is where Project 1 ends.
+Everything here is one-dimensional by design. Lecture B runs the same conjugate trick on the *regression weights* — a Gaussian prior meets a Gaussian likelihood — and that closed form is where Part 1 ends.

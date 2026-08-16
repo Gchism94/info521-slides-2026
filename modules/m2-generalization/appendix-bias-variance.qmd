@@ -2,7 +2,7 @@
 title: "Appendix: The Bias–Variance Decomposition"
 subtitle: "INFO 521 · Module 2 · Lecture B — supplement"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---

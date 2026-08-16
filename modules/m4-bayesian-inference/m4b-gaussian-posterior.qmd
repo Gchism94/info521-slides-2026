@@ -2,7 +2,7 @@
 title: "Bayesian Inference"
 subtitle: "INFO 521 · Module 4 · Lecture B — The Conjugate Gaussian Posterior"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -76,10 +76,13 @@ Lecture A put a distribution on a *proportion*. Now put one on the **regression
 weights** of the Module-1 model:
 
 $$
-\text{prior:}\quad p(\mathbf{w}) = \mathcal{N}(\mathbf{w} \mid \mathbf{m}_0,\ \mathbf{S}_0)
-\qquad\quad
-\text{likelihood:}\quad p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
-= \prod_{n=1}^{N}\mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right)
+\begin{aligned}
+\text{prior:}\quad
+  p(\mathbf{w}) &= \mathcal{N}(\mathbf{w} \mid \mathbf{m}_0,\ \mathbf{S}_0) \\[6pt]
+\text{likelihood:}\quad
+  p(\mathbf{y}\mid\mathbf{X},\mathbf{w},\sigma^2)
+  &= \prod_{n=1}^{N}\mathcal{N}\!\left(y_n \,\middle|\, \mathbf{w}^{\!\top}\mathbf{x}_n,\ \sigma^2\right)
+\end{aligned}
 $$
 
 - $\mathbf{m}_0$ — where belief starts (e.g., "SBP near 120, no age effect").
@@ -97,21 +100,24 @@ version of Beta × Binomial: same in-family closure, now with matrices.
 Gaussian prior × Gaussian likelihood → **Gaussian posterior**, in closed form:
 
 $$
-p(\mathbf{w} \mid \mathcal{D}) = \mathcal{N}(\mathbf{w} \mid \mathbf{m}_N,\ \mathbf{S}_N),
-\qquad
+p(\mathbf{w} \mid \mathcal{D}) = \mathcal{N}(\mathbf{w} \mid \mathbf{m}_N,\ \mathbf{S}_N)
+$$
+
+$$
 \boxed{\;
-\mathbf{S}_N = \left(\mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1},
-\quad
-\mathbf{m}_N = \mathbf{S}_N\left(\mathbf{S}_0^{-1}\mathbf{m}_0 + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{y}\right)
+\begin{aligned}
+\mathbf{S}_N &= \left(\mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}\right)^{-1} \\[6pt]
+\mathbf{m}_N &= \mathbf{S}_N\left(\mathbf{S}_0^{-1}\mathbf{m}_0 + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{y}\right)
+\end{aligned}
 \;}
 $$
 
-[**Project 1 ends exactly here.** The full pipeline — data → model → loss →
+[**Part 1 ends exactly here.** The full pipeline — data → model → loss →
 likelihood → posterior — closes on this pair of formulas.]{style="color: var(--accent)"}
 
 ::: {.notes}
 Speaker note: the course keystone, stated plainly. Students should recognize every
-ingredient: XᵀX (M1), 1/σ² (M3), prior (m4a). The P1-M3 checkpoint gates on
+ingredient: XᵀX (M1), 1/σ² (M3), prior (m4a). Checkpoint 1.3 gates on
 walking this update.
 :::
 
@@ -308,7 +314,7 @@ teaser). One breath: the normalizer is secretly a model-selection tool. Cross-va
 - **Conjugate Gaussian posterior**:
   $\mathbf{S}_N^{-1} = \mathbf{S}_0^{-1} + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{X}$,
   $\ \mathbf{m}_N = \mathbf{S}_N(\mathbf{S}_0^{-1}\mathbf{m}_0 + \tfrac{1}{\sigma^2}\mathbf{X}^{\!\top}\mathbf{y})$
-  — **Project 1's endpoint**.
+  — **Part 1's endpoint**.
 - **Ridge = MAP** with $\mathbf{S}_0 = \tau^2\mathbf{I}$: $\lambda = \sigma^2/\tau^2$.
 - **Predictive variance** $= \sigma^2 + \mathbf{x}_\ast^{\!\top}\mathbf{S}_N\mathbf{x}_\ast$
   — noise + ignorance, separately visible.

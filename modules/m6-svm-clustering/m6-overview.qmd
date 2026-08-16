@@ -1,0 +1,54 @@
+---
+title: "Module 6: Support Vector Machines and Clustering"
+subtitle: "INFO 521 · Module 6 · Overview"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### What if you optimise the boundary directly, and what if there are no labels at all?
+
+Two shifts in one module. First, a classifier that ignores probability entirely and maximises the margin instead, which puts three philosophies of the same boundary side by side. Then the labels come off altogether and the question becomes what structure the data has on its own.
+
+
+## What the lectures do {.smaller}
+
+**Lecture A: Maximum-Margin Classification**
+
+: The margin idea, the hinge loss for data that is not separable, what hinge and logistic each care about, kernels at concept level, and evaluating a classifier when the positive class is 38.8% of the cohort.
+
+**Lecture B: k-means and the Unsupervised Turn**
+
+: The k-means objective, why standardising comes first, why restarts are not optional, choosing K honestly, and the bridge from hard assignments to mixtures.
+
+
+## Where this sits
+
+Everything up to here has been supervised and probabilistic. Lecture A keeps the labels and drops the probability; Lecture B keeps neither. Module 7 stays unsupervised and asks about directions rather than groups.
+
+
+## Week 6 at a glance {.smaller}
+
+- Checkpoint quiz 2.3 on the k-means objective and PCA. Passing it opens Milestone 2.3 and Gate B.
+- Milestones 2.1 and 2.2 are due this week, which is Gate A.
+- No new homework unit this week.
+- Activity loop: the week05 k-means explorer.
+- Discussion: when clusters match labels.
+- Reading: PML sections 21.3 to 21.4; MML Chapter 11 for the SVM material.
+
+
+## Watch out for {.smaller}
+
+**Accuracy is a weak claim at 38.8% prevalence.** Always predicting the majority class gets you 61.2%. Lecture A covers what to report instead.
+
+**Distances have units.** k-means on unstandardised features clusters on whichever variable happens to have the largest numbers. Standardise first, every time.
+
+**Clusters are not diagnoses.** A cluster is a region of feature space. Naming it after a condition is a claim you have not earned.

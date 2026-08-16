@@ -2,7 +2,7 @@
 title: "Appendix: Matrix Calculus for the Normal Equations"
 subtitle: "INFO 521 · Module 1 · Lecture B — supplement"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -91,5 +91,5 @@ $$
 
 ::: {.notes}
 Speaker note: this is the gradient Lecture B used, now earned. The "$\nabla=0 \Rightarrow$
-normal equations" step is the P1-M1 checkpoint target.
+normal equations" step is the Checkpoint 1.1 target.
 :::

@@ -17,6 +17,7 @@ throughout the term.
 
 | Deck | Link |
 |------|------|
+| Module 1 Overview (about 3 min) | [m1-overview](m1-overview.html) |
 | Lecture A — Setup, Data, and the Linear Model | [m1a-setup-and-model](m1a-setup-and-model.html) |
 | Lecture B — Normal Equations & Geometry | [m1b-normal-equations](m1b-normal-equations.html) |
 | Appendix — Matrix Calculus for the Normal Equations | [appendix-matrix-calculus](appendix-matrix-calculus.html) |

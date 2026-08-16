@@ -1,0 +1,52 @@
+---
+title: "Module 4: Bayesian Inference"
+subtitle: "INFO 521 · Module 4 · Overview"
+author: "Greg Chism"
+institute: "College of Information Science · University of Arizona"
+date: last-modified
+date-format: "MMMM YYYY"
+# GENERATED FILE. Source: overviews/module_spec.py.
+# Run `python overviews/build_decks.py` after editing the spec.
+# Hand edits here are lost on the next build and will desynchronise the
+# recording script, which is generated from the same spec.
+---
+
+
+## The question
+
+### What should we believe about a parameter, before and after seeing data?
+
+Module 3 gave you a single best estimate and an error bar around it. This module replaces the point estimate with a distribution you can update. When the prior and the likelihood are a conjugate pair, that update is closed form: no optimisation, no simulation, just arithmetic on the parameters.
+
+
+## What the lectures do {.smaller}
+
+**Lecture A: Priors, Posteriors, and the Beta-Binomial**
+
+: Bayes' rule term by term, hypertension prevalence as the running question, the Beta prior, conjugacy as addition, and how quickly the prior stops mattering.
+
+**Lecture B: The Conjugate Gaussian Posterior**
+
+: The same idea for the regression weights, the posterior contracting as data arrives, ridge reappearing as a particular prior, and the predictive band for a new patient.
+
+
+## Where this sits
+
+Ridge regression showed up in Module 2 as a penalty you add because it works. Here it reappears as the consequence of a Gaussian prior, which is the sort of thing that happens repeatedly once you take the probability model seriously. Module 5 then breaks the conjugacy that makes all of this easy.
+
+
+## Week 4 at a glance {.smaller}
+
+- Homework Unit 4, exact and conjugate Bayesian inference.
+- Checkpoint quiz 1.3 on the conjugate posterior. Passing it opens Milestone 1.3.
+- Milestone 1.2, maximum likelihood, is due this week.
+- Activity loop: the week03 Bayesian-updating explorer.
+- Discussion: how the posterior contracts.
+- Reading: PML sections 4.6 and 11.7; Think Bayes Chapters 2 and 4.
+
+
+## Watch out for {.smaller}
+
+**The MAP is not the posterior.** It is the single highest point of it. Reporting the MAP alone throws away the spread, which was the reason for going Bayesian in the first place.
+
+**Conjugacy is a convenience, not a law.** It holds for the pairs in this module and fails as soon as the likelihood changes shape. Module 5 is what happens next.

@@ -14,9 +14,9 @@ Welcome to Module 5 — Approximate Inference and Bayesian Classification, Lectu
 
 ## Learning outcomes
 
-Four outcomes. First, explain why binarizing the outcome breaks conjugacy — and exactly what dies with it. Second, state the logistic regression model and its log-likelihood. Third, show there's no closed form for the fit — and that this is structural, not just harder algebra. And fourth, run Newton–Raphson: gradient, Hessian, update, and read its convergence. This is where Project 2 begins — same patients, same NHANES, but a yes-or-no label.
+Four outcomes. First, explain why binarizing the outcome breaks conjugacy — and exactly what dies with it. Second, state the logistic regression model and its log-likelihood. Third, show there's no closed form for the fit — and that this is structural, not just harder algebra. And fourth, run Newton–Raphson: gradient, Hessian, update, and read its convergence. This is where Part 2 begins — same patients, same NHANES, but a yes-or-no label.
 
-## Project 2 opens here: binarize the outcome
+## Part 2 opens here: binarize the outcome
 
 Module 4 closed with everything Gaussian and every formula closed-form. Now we ask the clinical question instead: is this patient hypertensive? — a zero or a one, by the same rule as last week, systolic at least 130 or diastolic at least 80, measured blood pressure only.
 
@@ -70,4 +70,4 @@ Let's take honest stock — what survived binarizing, and what didn't. On the pl
 
 ## Recap & bridge
 
-Quick recap. Binarize the outcome and conjugacy breaks: a Bernoulli likelihood with a Gaussian prior has no closed-form posterior — that's Project 2's opening move. Logistic regression squashes the linear score through a sigmoid, its log-likelihood is concave, and its gradient is X-transpose times the label residual. Newton–Raphson climbs it in about five steps by using the curvature. And here's the bridge, in the accent color: that Hessian Newton computed at the peak is about to become the covariance of a Gaussian approximation to the posterior. Lecture B starts by reusing exactly what we just built — approximating the posterior we can't normalize, first with a Gaussian at the peak, then with samples.
+Quick recap. Binarize the outcome and conjugacy breaks: a Bernoulli likelihood with a Gaussian prior has no closed-form posterior — that's Part 2's opening move. Logistic regression squashes the linear score through a sigmoid, its log-likelihood is concave, and its gradient is X-transpose times the label residual. Newton–Raphson climbs it in about five steps by using the curvature. And here's the bridge, in the accent color: that Hessian Newton computed at the peak is about to become the covariance of a Gaussian approximation to the posterior. Lecture B starts by reusing exactly what we just built — approximating the posterior we can't normalize, first with a Gaussian at the peak, then with samples.

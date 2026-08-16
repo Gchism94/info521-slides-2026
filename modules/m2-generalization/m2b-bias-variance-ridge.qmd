@@ -2,7 +2,7 @@
 title: "Generalization"
 subtitle: "INFO 521 · Module 2 · Lecture B — Bias-Variance & Regularization"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -346,7 +346,7 @@ a posterior whose mode is exactly ŵ_ridge with λ = σ²/τ². Regularization =
 - **Tune $\lambda$ by CV** — the knob that balances the tradeoff.
 
 Module 2 has no standalone checkpoint; generalization discipline is assessed through
-your modeling choices in **Project 1**.
+your modeling choices in **Part 1**.
 
 ::: {.notes}
 Speaker note: bias-variance is the *why*, ridge is the *control*, CV is the *tuner*.

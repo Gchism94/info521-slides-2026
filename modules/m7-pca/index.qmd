@@ -18,6 +18,7 @@ synthesis: loss → likelihood → posterior → approximation → discovery.
 
 | Deck | Link |
 |------|------|
+| Module 7 Overview & Course Wrap-Up (about 6 min) | [m7-overview](m7-overview.html) |
 | Lecture — PCA & Course Synthesis | [m7a-pca](m7a-pca.html) |
 
 Companion activity: [week06 PCA explorer](https://gchism94.github.io/info521-activities-2026/week06-pca/)

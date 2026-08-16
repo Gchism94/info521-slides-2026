@@ -23,7 +23,7 @@ The data is **NHANES 2021–22**: about 5,102 U.S. adults, target SBP in mmHg, w
 
 ## The leakage rule
 
-Diastolic BP is held out because of the **leakage rule**: exclude any predictor that is itself a blood-pressure measurement, or that would trivially determine the label. This is a modelling choice made *by design, before fitting* — not something the algorithm discovers. The same discipline returns in Module 2 (cross-validation) and in Project 2's cluster-versus-label reveal.
+Diastolic BP is held out because of the **leakage rule**: exclude any predictor that is itself a blood-pressure measurement, or that would trivially determine the label. This is a modelling choice made *by design, before fitting* — not something the algorithm discovers. The same discipline returns in Module 2 (cross-validation) and in Part 2's cluster-versus-label reveal.
 
 ## Model and loss
 

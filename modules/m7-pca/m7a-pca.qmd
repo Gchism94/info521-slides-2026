@@ -2,7 +2,7 @@
 title: "PCA"
 subtitle: "INFO 521 · Module 7 — Principal Component Analysis & Course Synthesis"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -271,7 +271,7 @@ discipline — Gate B synthesis in one bullet.
 
 ::: {.notes}
 Speaker note: the "variance ≠ usefulness" bullet is the one students must carry
-into Project 2 — a PCA that "explains 90%" can still discard the diagnostic 10%.
+into Part 2 — a PCA that "explains 90%" can still discard the diagnostic 10%.
 :::
 
 ## Live demo: the PCA explorer {background-iframe="https://gchism94.github.io/info521-activities-2026/week06-pca/" background-interactive="true"}
@@ -317,7 +317,7 @@ question:
 |---|---|---|
 | **Loss** (M1–M2) | minimize $\mathcal{L}$; control flexibility | $\hat{\mathbf{w}} = (\mathbf{X}^{\!\top}\mathbf{X})^{-1}\mathbf{X}^{\!\top}\mathbf{y}$ |
 | **Likelihood** (M3) | model the noise; maximize $\ell$ | same $\hat{\mathbf{w}}$ + $\hat{\sigma}^2$ + $\mathrm{Cov}[\hat{\mathbf{w}}]$ |
-| **Posterior** (M4) | believe, then update | $\mathcal{N}(\mathbf{m}_N, \mathbf{S}_N)$ — Project 1's endpoint |
+| **Posterior** (M4) | believe, then update | $\mathcal{N}(\mathbf{m}_N, \mathbf{S}_N)$ — Part 1's endpoint |
 | **Approximation** (M5) | when conjugacy breaks, approximate | Laplace $\mathbf{A}^{-1}$; Metropolis draws |
 | **Discovery** (M6–M7) | drop the labels | clusters; principal axes — described, not diagnosed |
 
@@ -328,6 +328,6 @@ covariance. **That's the course.**]{style="color: var(--accent)"}
 ::: {.notes}
 Speaker note: (Gate B synthesis). Land the arc slowly — five rows, one dataset,
 one recurring matrix. Every row is something they derived by hand at least once.
-Close by pointing students to Project 2's reflection prompt, which asks for this
+Close by pointing students to Part 2's reflection prompt, which asks for this
 table in their own words.
 :::

@@ -2,7 +2,7 @@
 title: "SVM & Clustering"
 subtitle: "INFO 521 · Module 6 · Lecture B — k-means & the Unsupervised Turn"
 author: "Greg Chism"
-institute: "School of Information · University of Arizona"
+institute: "College of Information Science · University of Arizona"
 date: last-modified
 date-format: "MMMM YYYY"
 ---
@@ -293,7 +293,7 @@ plt.show()
 - The clusters **never saw** blood pressure (leakage rule, m1a) — yet risk
   climbs across them: unsupervised structure is *related* to the outcome…
 - …but no cluster is remotely pure. [**Pretending clusters are labels
-  manufactures diagnoses the data never made.** Project 2's honesty
+  manufactures diagnoses the data never made.** Part 2's honesty
   requirement, in one figure.]{style="color: var(--accent)"}
 
 ::: {.notes}

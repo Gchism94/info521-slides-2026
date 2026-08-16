@@ -27,7 +27,7 @@ This is the Module 1 answer, letter for letter. What is new is the interpretatio
 
 **Noise gets estimated.** Maximizing over $\sigma$ gives $\hat\sigma^2$ as the average squared residual — about 16 mmHg on standardized age. That is the model's honest give-or-take for a single patient: age explains the population trend, not the individual.
 
-Checking the assumption, the NHANES residuals are roughly Gaussian through the bulk but have a **heavy right tail** — the hypertensive patients. The model is *useful, not true*; binarizing that tail (normal vs high) is exactly what Module 5 and Project 2 do.
+Checking the assumption, the NHANES residuals are roughly Gaussian through the bulk but have a **heavy right tail** — the hypertensive patients. The model is *useful, not true*; binarizing that tail (normal vs high) is exactly what Module 5 and Part 2 do.
 
 **But $\hat\sigma^2$ is biased.** Averaged over datasets it equals $\tfrac{N-D}{N}\sigma^2$ — a little too small, because the fit chases the sample and each fitted parameter eats one degree of freedom. The classic repair divides by $N-D$. The lesson: maximum likelihood does not hand you unbiasedness for free; properties are checked, estimator by estimator. A subsampling experiment on real NHANES data shows $\hat\sigma^2$ climbing toward the truth along the theoretical $\tfrac{N-D}{N}\sigma^2$ curve.
 
