@@ -1,5 +1,11 @@
 # INFO 521 Slides (2026)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21971094.svg)](https://doi.org/10.5281/zenodo.21971094) [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
+If using these materials, cite the following: 
+>Chism, G. (2026). INFO 521: Machine Learning Foundations — Lecture Slides (Version v1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21971094
+
+
 Quarto + reveal.js lecture decks for INFO 521, plus everything recorded or posted
 alongside them: per-module overview decks, recording scripts, student note pages for
 D2L, and rendered PDFs. Styling matches `info521-activities-2026` (Okabe-Ito palette
